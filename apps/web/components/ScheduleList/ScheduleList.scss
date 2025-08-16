@@ -1,0 +1,93 @@
+@use 'mixins' as *;
+
+.schedule-list {
+  flex: 1 1 auto;
+  height: 100%;
+  overflow-y: auto;
+
+  .schedule-item {
+    display: flex;
+    align-items: center;
+    position: relative;
+    font-size: 14px;
+    font-weight: 540;
+    color: var(--medium-dark-gray);
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-bottom: 1px;
+    width: 100%;
+    margin-bottom: 1px;
+    border-radius: 5px;
+    padding: 9px;
+    line-height: 1;
+    transition: background-color 0.2s, color 0.2s;
+    
+    a {
+      color: var(--medium-dark-gray);
+      border-bottom: none;
+      @include link-hover($hide:true);
+    }
+    
+    .actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+
+      button {        
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 8px;
+        color: var(--medium-gray);
+        width:  14px;
+        height: 14px;
+
+        svg {
+          flex-shrink: 0;
+        }
+  
+        &:hover, &.active {
+          color: var(--dark-gray);
+        }
+      }
+    }
+
+    &:hover,
+    &.active {
+      background-color: var(--extra-light-gray);
+      color: var(--dark-gray);
+    }
+  }
+}
+
+.schedule-item-menu {
+  position: absolute;
+  padding: 5px;
+  z-index: 1000;
+  background: #ffffff;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+
+  li {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    
+    @include menuItemText;
+
+    span {
+      padding-left: 6px;
+    }
+
+    &:hover,
+    &.active {
+      background-color: var(--extra-light-gray);
+      color: var(--dark-gray);
+    }
+  }
+}

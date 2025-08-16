@@ -1,0 +1,9 @@
+.time-range-selector {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  .time-range-selector-control-wrapper {
+    flex: 1;
+  }
+}

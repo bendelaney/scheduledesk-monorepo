@@ -1,0 +1,46 @@
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(1.5px) grayscale(1);
+  z-index: 9999;
+}
+
+.modal {
+  position: fixed;
+  padding: 20px;
+  z-index: 10000;
+  box-shadow: 0 0px 40px 0 rgba(0, 0, 0, 0.4);
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+
+  .close-x {
+    position: absolute;
+    top:   0;
+    right: 0;
+    border-radius: 0 5px 0 20px;
+    background: transparent;
+    padding: 18px 18px 12px 12px;
+    cursor: pointer;
+    color: #999999;
+    transition: color 0.2s;
+    z-index: 10001;
+    font-size: 20px;
+    line-height: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    &:hover {
+      color: #666666;
+    }
+
+    @media (max-width: 390px) {
+      left: 0;
+    }
+  }
+}

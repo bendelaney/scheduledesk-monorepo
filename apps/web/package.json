@@ -11,10 +11,19 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@react-spring/web": "^10.0.1",
     "@repo/ui": "*",
+    "@types/luxon": "^3.7.1",
+    "@types/react-datepicker": "^7.0.0",
+    "framer-motion": "^12.23.12",
+    "luxon": "^3.7.1",
     "next": "^15.3.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-datepicker": "^8.5.0",
+    "react-dom": "^19.1.0",
+    "react-select": "^5.10.2",
+    "react-spring": "^10.0.1"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",
@@ -23,6 +32,7 @@
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",
     "eslint": "^9.30.0",
+    "sass": "^1.90.0",
     "typescript": "5.8.2"
   }
 }

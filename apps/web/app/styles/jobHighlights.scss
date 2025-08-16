@@ -1,0 +1,15 @@
+// Job Highlights
+// { id: "1", name: "High Priority / Important" },
+// { id: "2", name: "Extra Lg Job (5+ people, whole day)" },
+// { id: "3", name: "Large Job (4-5 people, whole day)" },
+// { id: "4", name: "Medium Job (2-3 people, up to whole day)" },
+// { id: "5", name: "Small/Med Job (1-2 people, partial day)" },
+// { id: "6", name: "Small Job (1 person, partial day)" },
+$jobHighlights: (
+  1: linear-gradient(90deg, #faf369 0%, #faf369 100%),
+  2: linear-gradient(90deg, #29b5bd 0%, #3847d8 100%),
+  3: linear-gradient(90deg, #2e48f8 0%, #b54ab3 100%),
+  4: linear-gradient(90deg, #ff6700 0%, #f03297 100%),
+  5: linear-gradient(90deg, #f1a502 0%, #e54e25 100%),
+  6: linear-gradient(90deg, #b16d4c 0%, #d09e3c 100%),
+);

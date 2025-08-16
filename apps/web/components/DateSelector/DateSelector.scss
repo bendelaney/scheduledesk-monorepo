@@ -1,0 +1,138 @@
+// Overriding the default styles for the React Datepicker (ReactDatePicker.com)
+
+.react-datepicker__tab-loop {
+  margin-left: -10px;
+}
+
+.date-selector-trigger {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1px solid #f5f5f5;
+  border-radius: 5px;
+  background-color: #f5f5f5;
+  padding: 10px 8px;
+  white-space: nowrap;
+  box-sizing: border-box;
+  width: 100%;
+
+  &:focus {
+    box-shadow: 0 0 0 1px #0087FF;
+  }
+  
+  .text {
+    padding-left: 8px;
+  }
+  
+  .icon {
+    display: flex;
+    margin-left: auto;
+    align-items: center;
+    font-size: 16px;
+    color: #999999 !important;
+  }
+
+  &.inactive {
+    color: #999999;
+  }
+  
+  &.active {
+    color: #333;
+  }
+}
+
+.react-datepicker__close-icon {
+  cursor: pointer;
+  background-color: transparent;
+  border: 0;
+  outline: 0;
+  padding: 0 6px 0 0;
+  position: absolute;
+  top: 0;
+  right: 21px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.react-datepicker__close-icon::after {
+  cursor: pointer;
+  background-color: transparent;
+  color: #999999;
+  border-radius: 0;
+  height: 20px;
+  width:  20px;
+  padding: 2px;
+  font-size: 20px;
+  line-height: 0.9;
+  text-align: center;
+  content: "×";
+}
+
+.react-datepicker__close-icon--disabled {
+  cursor: default;
+}
+
+.react-datepicker__close-icon--disabled::after {
+  cursor: default;
+  background-color: #ccc;
+}
+
+.react-datepicker__day--selected, 
+.react-datepicker__day--in-selecting-range, 
+.react-datepicker__day--in-range,
+.react-datepicker__month-text--selected,
+.react-datepicker__month-text--in-selecting-range,
+.react-datepicker__month-text--in-range,
+.react-datepicker__quarter-text--selected,
+.react-datepicker__quarter-text--in-selecting-range,
+.react-datepicker__quarter-text--in-range,
+.react-datepicker__year-text--selected,
+.react-datepicker__year-text--in-selecting-range,
+.react-datepicker__year-text--in-range {
+  border-radius: 0.3rem;
+  background-color: #0087FF;
+  color: #fff;
+}
+
+.react-datepicker__day--in-selecting-range:not(
+  .react-datepicker__day--in-range,
+  .react-datepicker__month-text--in-range,
+  .react-datepicker__quarter-text--in-range,
+  .react-datepicker__year-text--in-range
+),
+.react-datepicker__month-text--in-selecting-range:not(.react-datepicker__day--in-range,
+.react-datepicker__month-text--in-range,
+.react-datepicker__quarter-text--in-range,
+.react-datepicker__year-text--in-range),
+.react-datepicker__quarter-text--in-selecting-range:not(.react-datepicker__day--in-range,
+.react-datepicker__month-text--in-range,
+.react-datepicker__quarter-text--in-range,
+.react-datepicker__year-text--in-range),
+.react-datepicker__year-text--in-selecting-range:not(.react-datepicker__day--in-range,
+.react-datepicker__month-text--in-range,
+.react-datepicker__quarter-text--in-range,
+.react-datepicker__year-text--in-range) {
+  background-color: rgba(0, 135, 255, 0.5);
+}
+
+.react-datepicker__day--keyboard-selected:hover,
+.react-datepicker__month-text--keyboard-selected:hover,
+.react-datepicker__quarter-text--keyboard-selected:hover,
+.react-datepicker__year-text--keyboard-selected:hover {
+  background-color: #0066CC;
+  color: #ffffff;
+}
+
+.react-datepicker {
+  border-color: #999999;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.react-datepicker__day--selecting-range-start,
+.react-datepicker__day--selecting-range-end {
+  background-color: #0087FF !important;
+  color: #fff;
+}

@@ -1,0 +1,10 @@
+.monthly-recurrence-detail-selector {
+  .week-day-selectors {
+    display: flex;
+    gap: 8px;
+    
+    & > div {
+      flex: 1;
+    }
+  }
+}

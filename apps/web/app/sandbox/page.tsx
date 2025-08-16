@@ -1,0 +1,29 @@
+'use client';
+
+import React, { useState } from 'react';
+import EventEditor from '@/components/EventEditor';
+import DataViewer from '@/components/DataViewer';
+import DateRangeSelector from '@/components/DateRangeSelector';
+import { AvailabilityEvent } from '@/types';
+import './page.scss';
+
+export default function Sandbox() {
+  const [eventData, setEventData] = useState<Partial<AvailabilityEvent> | undefined>(undefined);
+
+  const handleEventChange = (data: any) => {
+    console.log('Event data changed:', data);
+    setEventData(data);
+  };
+
+  return (
+    <div className="sandbox-container">
+      <div style={{ width: '400px' }}>
+        <EventEditor 
+          values={eventData}
+          onChange={handleEventChange}
+        />
+        <DataViewer data={eventData || {}} log={false}/>
+      </div>
+    </div>
+  );
+}

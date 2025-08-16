@@ -1,0 +1,1 @@
+export { SlideSwitch as default } from './SlideSwitch';

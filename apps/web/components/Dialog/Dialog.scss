@@ -1,0 +1,54 @@
+.dialog {
+  width: 300px;
+  z-index: 1000;
+
+  h2 {
+    font-size: 18px;
+    margin: 0 0 20px;
+    font-weight: bold;    
+    white-space: nowrap;
+  }
+  
+  p {
+    font-size: 14px;
+    margin: 0 0 20px;
+    line-height: 1.5;
+  }
+
+  &.add-note-confirmation span {
+    display: block;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    background-color: #f5f5f5;
+  }
+
+  .button-group {
+    text-align: right;
+    
+    button {
+      padding: 8px 12px;
+      margin-left: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      background-color: #f5f5f5; 
+      transition: background-color 0.2s;
+      font-weight: 600;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #999999;
+      }
+      
+      &.primary {
+        background-color: #0087FF;
+        color: white;
+        border-color: #0066CC;
+
+        &:hover {
+          background-color: #0066CC;
+        } 
+      }
+    }
+  }
+}

@@ -1,24 +1,32 @@
 {
   "name": "scheduledesk-monorepo",
   "private": true,
+  "version": "1.0.0",
+  "description": "ScheduleDesk monorepo - scheduling and project management platform",
+  "packageManager": "pnpm@8.15.0",
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "dev": "turbo dev",
+    "dev:web": "turbo dev --filter=web",
+    "dev:docs": "turbo dev --filter=docs",
+    "build": "turbo build",
+    "build:web": "turbo build --filter=web",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint -- --fix",
+    "type-check": "turbo type-check",
+    "clean": "turbo clean",
+    "test": "turbo test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo build && changeset publish"
   },
   "devDependencies": {
-    "prettier": "^3.6.0",
-    "turbo": "^2.5.4",
-    "typescript": "5.8.2"
+    "@changesets/cli": "^2.27.1",
+    "prettier": "^3.2.5",
+    "turbo": "^2.0.0"
   },
   "engines": {
-    "node": ">=18"
-  },
-  "packageManager": "npm@10.9.2",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+    "node": ">=18",
+    "pnpm": ">=8"
+  }
 }

@@ -1,0 +1,50 @@
+@mixin menuItemText {
+  font-size: 14px;
+  color: var(--text-default);
+  letter-spacing: -0.2px;
+  font-weight: 540;
+}
+@mixin svgIcon {
+  width: 100%;
+  height: 100%;
+  display: block;
+  flex-shrink: 0;
+}
+@mixin activeBlock {
+  z-index: var(--active-block-zindex);
+  background-color: rgb(198, 198, 191);
+  // background-color: rgb(164, 164, 14);
+
+}
+@mixin hoverBlock {
+  z-index: var(--active-block-zindex);
+  background-color: rgb(238, 238, 232);
+}
+@mixin selectedBlock {
+  z-index: var(--active-block-zindex+10);
+  background-color: rgb(240, 240, 237);
+}
+
+@mixin link-styles($color: var(--primary-blue)) {
+  text-decoration: none;
+  color: $color;
+  cursor: pointer;
+  border-bottom-style: solid;
+  border-bottom-width: 1.7px;
+  border-bottom-color: var(--light-gray);
+  transition: border-bottom-color 140ms, box-shadow 140ms;
+}
+@mixin link-hover($color: var(--primary-blue), $hide: false) {
+  @if $hide != true {
+    &:hover {
+      border-bottom-color: $color;
+      box-shadow: 0 1.3px 0 0 $color;
+      color: $color;
+    }
+  } @else if $hide == true {
+    &:hover {
+      border-bottom-color: transparent;
+      box-shadow: none;
+    }
+  }
+}
