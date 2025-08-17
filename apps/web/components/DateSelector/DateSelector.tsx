@@ -84,4 +84,4 @@ const DateSelector: React.FC<DateSelectorProps> = ({
   );
 };
 
-export { DateSelector };
+export default DateSelector;

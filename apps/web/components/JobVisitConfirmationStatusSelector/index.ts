@@ -1,1 +1,1 @@
-export { default } from './JobVisitConfirmationStatusSelector';
+export * from './JobVisitConfirmationStatusSelector';
