@@ -20,7 +20,7 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "_temp-migration/**/*",
+    "_temp-migration",
     "node_modules"
   ]
 }
