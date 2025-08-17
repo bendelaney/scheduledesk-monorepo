@@ -23,7 +23,7 @@ const ScheduleItemMenu: React.FC<ScheduleItemMenuProps> = ({
   trigger,
   onClose
 }) => {
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLUListElement>(null);
   useClickOutside(menuRef as React.RefObject<HTMLElement>, onClose, trigger);
 
   const handleShareSchedule = () => {

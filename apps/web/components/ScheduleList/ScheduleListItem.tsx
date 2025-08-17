@@ -66,7 +66,7 @@ const ScheduleListItem: React.FC<ScheduleListItemProps> = ({ schedule }) => {
           <ScheduleItemMenu
             schedule={schedule}
             position={{top: menuPosition.top, left: menuPosition.left-22 }}
-            trigger={menuButtonRef}
+            trigger={menuButtonRef as React.RefObject<HTMLElement>}
             onClose={() => setShowScheduleItemMenu(false)}
           />
         </Portal>

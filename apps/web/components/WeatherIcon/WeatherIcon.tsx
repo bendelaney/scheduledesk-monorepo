@@ -71,7 +71,7 @@ const WeatherIcon: React.FC<WeatherIconProps> = ({
 
   if (!weatherDayData) return null;
 
-  let weatherLink;
+  let weatherLink = "";
   if (linkOut) {
     const city = forecastData?.location?.name;
     const stateAbbreviations = {

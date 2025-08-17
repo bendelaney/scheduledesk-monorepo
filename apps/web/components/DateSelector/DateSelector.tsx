@@ -2,8 +2,8 @@
 
 import React, { useState, forwardRef, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
-import { AngleDownIcon } from './angle-down-icon';
-import { RotatingIcon } from './rotating-icon';
+import { AngleDown } from '@/components/Icons';
+import RotatingIcon from '@/components/RotatingIcon';
 import "react-datepicker/dist/react-datepicker.css";
 
 interface DateSelectorProps {
@@ -24,6 +24,9 @@ const DateSelector: React.FC<DateSelectorProps> = ({
   onChange
 }) => {
   const [theDate, setTheDate] = useState<Date | null>(date || null);
+  const [theMinDate, setTheMinDate] = useState<Date | null>(minDate || null);
+  const [theEndDate, setTheEndDate] = useState<Date | null>(maxDate || null);
+
   const [calendarIsOpen, setCalendarIsOpen] = useState(false);
 
   const handleDateChange = (date: Date | null) => {
@@ -52,7 +55,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({
     ({ value, onClick }, ref) => (
       <button className={`date-selector-trigger start-date ${theDate ? 'active' : 'inactive'}`} onClick={onClick} ref={ref}>
         <span className="text">{value ? value : "Start Date"}</span>
-        <RotatingIcon className="icon" rotate={calendarIsOpen} degrees={180} icon={<AngleDownIcon/>} />
+        <RotatingIcon className="icon" rotate={calendarIsOpen} degrees={180} icon={<AngleDown />} />
       </button>
     )
   );
@@ -67,10 +70,10 @@ const DateSelector: React.FC<DateSelectorProps> = ({
           value={value || ''}
           onChange={handleDateChange}
           startDate={theDate}
-          minDate={minDate}
-          maxDate={maxDate}
+          minDate={theMinDate || undefined}
+          maxDate={theEndDate || undefined}
           customInput={<DateSelectorButton />}
-          popperPlacement='auto-end'
+          popperPlacement='top-start'
           onCalendarClose={() => handleCalendarOpenState(false)}
           onCalendarOpen={() => handleCalendarOpenState(true)}
           dateFormat="M/d/yy"

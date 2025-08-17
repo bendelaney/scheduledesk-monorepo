@@ -2,7 +2,7 @@
 
 import React, {FC, useEffect, useState} from 'react';
 import SelectMenu, { getSelectMenuOption } from './SelectMenu';
-import { MonthlyRecurrenceType } from '../EventEditor/types';
+import { MonthlyRecurrenceType } from '@/types';
 
 const monthlyRecurrenceOptions = [
   {value: "Exact Date", label: "Exact Date"},

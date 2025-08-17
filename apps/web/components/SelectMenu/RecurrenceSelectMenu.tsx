@@ -2,7 +2,7 @@
 
 import React, {FC, useState} from 'react';
 import SelectMenu, { SelectMenuOption, getSelectMenuOption } from './SelectMenu';
-import { RecurrenceType } from '../EventEditor/types';
+import { RecurrenceType } from '@/types';
 
 const recurrenceOptions = [
   {value: "Every Week", label: "Every Week"},

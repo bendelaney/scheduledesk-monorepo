@@ -6,7 +6,7 @@ import {
   MonthlyDateType, 
   MonthlyWeekType, 
   MonthlyDayOfWeekType 
-} from '../EventEditor/types';
+} from '@/types';
 import SelectMenu from './SelectMenu';
 import './MonthlyRecurrenceDetailSelector.scss';
 

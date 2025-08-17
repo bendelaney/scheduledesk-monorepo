@@ -2,8 +2,8 @@
 
 import React, { useEffect, useCallback, useRef, useState } from "react";
 import { DateTime } from 'luxon';
-import { DateSelector } from "./date-selector";
-import { LinkOutIcon } from "./link-out-icon";
+import DateSelector from "@/components/DateSelector"
+import { LinkOut } from "@/components/Icons";
 
 // Basic type definitions (simplified from the original complex types)
 export interface JobVisit {
@@ -114,7 +114,7 @@ const JobDetailsView: React.FC<JobDetailsViewProps> = ({
       <header>
         <div className={`job-title highlight-${job.highlightId}`}>{job.title}</div>
         <a className="job-number jobber-link" href={job.webUri} target="_blank" title={`Open job #${job.jobNumber} on getjobber.com`}>
-          Job #{job.jobNumber}<LinkOutIcon />
+          Job #{job.jobNumber}<LinkOut />
         </a>
       </header>
 
