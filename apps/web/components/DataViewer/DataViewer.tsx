@@ -29,7 +29,7 @@ const DataViewer: React.FC<DataViewerProps> = ({
     background: '#444',
     color: 'lime',
     padding: '10px',
-    margin: '20px 0',
+    margin: '0',
     borderRadius: '8px',
     fontFamily: 'monospace',
     lineHeight: '1.4',
