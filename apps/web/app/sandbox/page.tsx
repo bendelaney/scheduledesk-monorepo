@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import EventEditor from '@/components/EventEditor';
 import DataViewer from '@/components/DataViewer';
 import DateRangeSelector from '@/components/DateRangeSelector';
-import CalendarInfiniteScroll from '@/components/CalendarInfiniteScroll/CalendarInfiniteScroll';
+import CalendarGrid from '@/components/CalendarGrid';
 import { AvailabilityEvent } from '@/types';
 import './page.scss';
 
@@ -18,7 +18,7 @@ export default function Sandbox() {
 
   return (
     <div className="sandbox-container">
-      <CalendarInfiniteScroll/>
+      <CalendarGrid/>
 
 
       {/* <div className="left">
