@@ -2,39 +2,36 @@
 
 import React, { useState } from 'react';
 import AppFrame from '@/components/AppFrame';
-import EventEditor from '@/components/EventEditor';
-import DataViewer from '@/components/DataViewer';
-import DateRangeSelector from '@/components/DateRangeSelector';
-import CalendarGrid from '@/components/CalendarGrid';
+import { TeamCalendar, TeamMemberFilter } from '@/components/TeamCalendar';
+import TeamMembersData from '@/data/teamMembersData';
 import { AvailabilityEvent } from '@/types';
 import './page.scss';
 
 export default function Sandbox() {
-  const [eventData, setEventData] = useState<Partial<AvailabilityEvent> | undefined>(undefined);
+  const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>(
+    TeamMembersData.map(m => m.displayName || `${m.firstName} ${m.lastName || ''}`.trim())
+  );
 
-  const handleEventChange = (data: any) => {
-    console.log('Event data changed:', data);
-    setEventData(data);
+  const handleSelectionChange = (selected: string[]) => {
+    console.log('Team member selection changed:', selected);
+    setSelectedTeamMembers(selected);
   };
 
   return (
-    <AppFrame>
-      <CalendarGrid/>
+    <AppFrame 
+      sidebar={
+        <TeamMemberFilter 
+          teamMembers={TeamMembersData}
+          selectedMembers={selectedTeamMembers}
+          onSelectionChange={handleSelectionChange}
+        />
+      }
+      sidebarWidth="280px"
+    >
+      <TeamCalendar 
+        selectedTeamMembers={selectedTeamMembers}
+        onSelectionChange={handleSelectionChange}
+      />
     </AppFrame>
-    // <div className="sandbox-container">
-      
-    //   <CalendarGrid/>
-
-
-    //   <div className="left">
-    //     <EventEditor 
-    //       values={eventData}
-    //       onChange={handleEventChange}
-    //     />
-    //   </div>
-    //   <div className="right">
-    //     <DataViewer data={eventData || {}} log={false}/>
-    //   </div>
-    // </div>
   );
 }

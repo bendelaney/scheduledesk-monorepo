@@ -24,7 +24,7 @@ interface CalendarMonth {
 export interface CalendarGridProps {
   events?: AvailabilityEvent[];
   teamMembers?: TeamMember[];
-  onEventClick?: (event: AvailabilityEvent) => void;
+  onEventClick?: (event: AvailabilityEvent, targetElement?: HTMLElement) => void;
   onDayClick?: (date: string) => void;
   monthsToLoad?: number;
   className?: string;
@@ -268,9 +268,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     scrollDirectionRef.current = currentScrollDirection;
     lastScrollTopRef.current = scrollTop;
     
-    console.log('Scroll values:', { scrollTop, scrollHeight, clientHeight, direction: currentScrollDirection });
-    console.log('Bottom distance:', scrollHeight - scrollTop - clientHeight);
-    console.log('Top distance:', scrollTop);
+    // console.log('Scroll values:', { scrollTop, scrollHeight, clientHeight, direction: currentScrollDirection });
+    // console.log('Bottom distance:', scrollHeight - scrollTop - clientHeight);
+    // console.log('Top distance:', scrollTop);
     
     // Load more months when near bottom (within 300px)
     if (scrollHeight - scrollTop - clientHeight < 300) {
@@ -307,7 +307,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   
   const handleEventClick = useCallback((event: AvailabilityEvent, e: React.MouseEvent) => {
     e.stopPropagation();
-    onEventClick?.(event);
+    const targetElement = e.currentTarget as HTMLElement;
+    onEventClick?.(event, targetElement);
   }, [onEventClick]);
   
   const renderEvent = (event: AvailabilityEvent) => (

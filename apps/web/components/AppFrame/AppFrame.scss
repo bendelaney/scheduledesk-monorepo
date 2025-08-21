@@ -12,6 +12,15 @@
     padding-right: 6px;
     overflow: hidden;
 
+    .sidebar-container {
+      transition: width 0.3s ease;
+      overflow: hidden;
+      
+      &.closed {
+        width: 0 !important;
+      }
+    }
+
     .main-content {
       flex: 1;
       background: #ffffff;

@@ -6,7 +6,17 @@ import Sidebar from "../Sidebar";
 import { PopoverProvider } from "../Popover";
 import "./AppFrame.scss";
 
-const AppFrame: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface AppFrameProps {
+  children: React.ReactNode;
+  sidebar?: React.ReactNode;
+  sidebarWidth?: string;
+}
+
+const AppFrame: React.FC<AppFrameProps> = ({ 
+  children, 
+  sidebar, 
+  sidebarWidth = "300px"
+}) => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
@@ -31,7 +41,16 @@ const AppFrame: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       />
       
       <div className="content-wrapper">
-        <Sidebar isSidebarOpen={isSidebarOpen} />
+        {sidebar ? (
+          <div 
+            className={`sidebar-container ${isSidebarOpen ? 'open' : 'closed'}`}
+            style={{ width: isSidebarOpen ? sidebarWidth : '0' }}
+          >
+            {sidebar}
+          </div>
+        ) : (
+          <Sidebar isSidebarOpen={isSidebarOpen} />
+        )}
 
         <PopoverProvider scrollContainerRef={scrollContainerRef}>
           <div className="main-content" ref={scrollContainerRef}>

@@ -1,0 +1,118 @@
+.team-member-filter {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+  background: #ffffff;
+  border-right: 1px solid #cacac7;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  &__title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    color: #333;
+  }
+
+  &__toggle-all {
+    background: none;
+    border: 1px solid #cacac7;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #f5f5f5;
+      border-color: #999;
+    }
+
+    &:active {
+      background: #e5e5e5;
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+
+    &:hover {
+      background: #f8f8f8;
+      border-color: #e0e0e0;
+    }
+
+    &--selected {
+      background: #f0f9ff;
+      border-color: #45B7D1;
+    }
+  }
+
+  &__item-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+
+  &__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  &__name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  &__checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cacac7;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background: white;
+
+    &--checked {
+      background: #45B7D1;
+      border-color: #45B7D1;
+      color: white;
+    }
+  }
+}
