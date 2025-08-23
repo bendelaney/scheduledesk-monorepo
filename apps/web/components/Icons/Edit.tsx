@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 const SvgEdit = (props: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={12} height={12} {...props}>
     <g transform="translate(6.400000, 25.385000)">

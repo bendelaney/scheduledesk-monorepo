@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 const SvgRename = (props: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" width={11} height={11} {...props}>
     <path d="M4.976 1.049v1.177H1.563a.386.386 0 0 0-.386.386v6.825c0 .213.173.386.386.386h6.825a.386.386 0 0 0 .386-.386V6.024h1.177v3.413c0 .863-.7 1.563-1.563 1.563H1.563C.7 11 0 10.3 0 9.437V2.612C0 1.75.7 1.05 1.563 1.05z" />

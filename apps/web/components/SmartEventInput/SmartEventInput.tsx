@@ -2,6 +2,7 @@
 
 import React, { FC, useState, useEffect } from 'react';
 import { AvailabilityEvent } from '@/types';
+import { getTodayInLocalTimezone } from '@/utils/dateUtils';
 import { X } from "@/components/Icons";
 import './SmartEventInput.scss';
 
@@ -28,7 +29,7 @@ const SmartEventInput: FC<SmartEventInputProps> = ({
     }
   }, [parsedEvents]);
 
-  const today = currentDate ?? new Date().toISOString().split('T')[0];
+  const today = currentDate ?? getTodayInLocalTimezone();
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -42,21 +43,26 @@ const SmartEventInput: FC<SmartEventInputProps> = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          inputText,
+          inputText: prevText,
           today,
-          additionalRules
-        })
+          additionalRules: additionalRules || ''
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('API request failed');
+        const errorData = await response.json();
+        throw new Error(errorData.error || `API request failed: ${response.status}`);
       }
 
-      const result = await response.json();
-      setParsedEvents(result.events);
+      const data = await response.json();
+      if (data.events) {
+        setParsedEvents(data.events);
+      } else {
+        console.error('No events in API response');
+        alert('Error processing AI response. Please try again.');
+      }
     } catch (error) {
-      console.error('Error calling AI API:', error);
-      // For now, just show an alert - you might want better error handling
+      console.error('Error calling API:', error);
       alert('Error processing your request. Please try again.');
     } finally {
       setInputText(prevText);

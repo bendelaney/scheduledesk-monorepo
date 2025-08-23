@@ -81,6 +81,9 @@ importers:
       next:
         specifier: ^15.3.0
         version: 15.4.6(@babel/core@7.28.3)(react-dom@19.1.1)(react@19.1.1)(sass@1.90.0)
+      openai:
+        specifier: ^5.15.0
+        version: 5.15.0
       react:
         specifier: ^19.1.0
         version: 19.1.1
@@ -6085,6 +6088,19 @@ packages:
     dependencies:
       is-docker: 2.2.1
       is-wsl: 2.2.0
+    dev: false
+
+  /openai@5.15.0:
+    resolution: {integrity: sha512-kcUdws8K/A8m02I+IqFBwO51gS+87GP89yWEufGbzEi8anBz4FB/bti2QxaJdGwwY4mwJGzx85XO7TuL/Tpu1w==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.23.8
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
     dev: false
 
   /optionator@0.9.4:

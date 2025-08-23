@@ -1,7 +1,20 @@
-import * as React from "react";
-const SvgAngleUp = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" width="1em" height="1em" {...props}>
-    <path d="M201.4 137.4c12.5-12.5 32.8-12.5 45.3 0l160 160c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L224 205.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l160-160z"></path>
+import React from "react";
+
+const AngleUpIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width="1em"
+    height="1em"
+    viewBox="0 0 50 50"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path 
+      d="M22.0584407,11.2553002 C23.6854093,9.58156661 26.3276064,9.58156661 27.954575,11.2553002 L48.7797735,32.6790895 C50.4067422,34.352823 50.4067422,37.0709663 48.7797735,38.7446998 C47.1528049,40.4184334 44.5106078,40.4184334 42.8836392,38.7446998 L25,20.3470208 L7.1163608,38.73131 C5.48939216,40.4050435 2.84719511,40.4050435 1.22022647,38.73131 C-0.406742158,37.0575764 -0.406742158,34.3394332 1.22022647,32.6656996 L22.045425,11.2419103 L22.0584407,11.2553002 Z"
+      fill="currentColor"
+      fillRule="nonzero"
+    />
   </svg>
 );
-export default SvgAngleUp;
+
+export default AngleUpIcon;

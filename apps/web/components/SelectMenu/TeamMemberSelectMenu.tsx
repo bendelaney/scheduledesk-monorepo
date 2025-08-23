@@ -5,7 +5,10 @@ import SelectMenu, { SelectMenuProps } from './SelectMenu';
 import { TeamMember } from '../../types';
 
 interface TeamMemberOption {
-  value: string;           // The string representation of the name
+  value: {
+    firstName: string;
+    lastName?: string;
+  };                       // The team member object with firstName/lastName
   label: string;           // The display text
   id: string | number;     // The TeamMember ID
 }
@@ -17,7 +20,10 @@ interface TeamMemberSelectProps extends Omit<SelectMenuProps, 'onChange'> {
 
 interface TeamMemberSelectMenuProps {
   teamMembers?: TeamMember[];
-  selected?: string;
+  selected?: {
+    firstName: string;
+    lastName?: string;
+  };
   selectMenuProps?: SelectMenuProps;
 }
 
@@ -32,12 +38,17 @@ const TeamMemberSelectMenu: FC<TeamMemberSelectMenuProps> = ({
   };
 
   const teamMemberOptions = teamMembers.map((teamMember) => ({
-    value: teamMember.firstName + ' ' + teamMember.lastName,
+    value: {
+      firstName: teamMember.firstName,
+      lastName: teamMember.lastName
+    },
     label: teamMember.firstName + ' ' + teamMember.lastName,
     id: teamMember.id,
   }));
 
-  const selectedOption = selected ? teamMemberOptions.find(option => option.value === selected) || null : undefined;
+  const selectedOption = selected ? teamMemberOptions.find(option => 
+    option.value.firstName === selected.firstName && option.value.lastName === selected.lastName
+  ) || null : undefined;
   
   return (
     <SelectMenu 

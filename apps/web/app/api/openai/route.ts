@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function POST(request: NextRequest) {
+  // Check for API key
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OpenAI API key not configured');
+  }
+
   try {
     const { inputText, today, additionalRules } = await request.json();
     
@@ -17,30 +27,14 @@ export async function POST(request: NextRequest) {
     // ];
 
     // return NextResponse.json({ events: mockResponse });
-    // Check for API key
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error('OpenAI API key not configured');
-    }
 
-    // Real OpenAI API call - uncomment when ready to use
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini-2024-07-18',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a scheduling assistant.
+    const instructions = `You are a scheduling assistant.
 Given natural language input from a user, extract structured event data for a team availability calendar.
 Return a JSON object. The expected structure of this object is exactly as follows:
 
 [
   {
-    teamMember: string (FirstName LastName, e.g. "Krystn Parmley"),
+    teamMember: object with firstName and lastName properties (e.g. { firstName: "Krystn", lastName: "Parmley" }),
     eventType: one of ["Ends Early", "Starts Late", "Personal Appointment", "Not Working", "On Vacation"],
     startDate: string in ISO 8601 format (e.g. "2025-04-02T00:00:00Z"),
     endDate: string in ISO 8601 format (e.g. "2025-04-02T00:00:00Z"),
@@ -88,29 +82,52 @@ Time rules:
 - Time fields should be separate from date fields. Store times in the format "HH:mm:ss" (24-hour format).
 
 Additional rules:
-${additionalRules}`
-          },
-          {
-            role: 'user',
-            content: inputText
-          }
-        ],
-        temperature: 0.2
-      }),
+${additionalRules}`;
+
+// Real OpenAI API call - uncomment when ready to use
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1-nano",
+      messages: [
+        {
+          role: 'system',
+          content: [
+            {
+              "type": "text",
+              "text": instructions
+            }
+          ]
+        },
+        {
+          role: 'user',
+          content: [
+            {
+              "type": "text",
+              "text": inputText
+            }
+          ]
+        }
+      ],
+        
+      response_format: {
+        "type": "text"
+      },
+      temperature: 1,
+      max_completion_tokens: 2048,
+      top_p: 1,
+      frequency_penalty: 0,
+      presence_penalty: 0
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('OpenAI API error:', errorText);
-      throw new Error(`OpenAI API request failed: ${response.status}`);
-    }
-
-    const result = await response.json();
-    const resultText = result.choices[0].message.content;
+    console.log('response:', response);
+    const resultText = response.choices[0].message.content;
     
     try {
-      const events = JSON.parse(resultText);
-      return NextResponse.json({ events });
+      if (resultText) {
+        const events = JSON.parse(resultText);
+        return NextResponse.json({ events });
+      } else {
+        throw new Error('OpenAI response is null or empty');
+      }
     } catch (parseError) {
       console.error('Failed to parse OpenAI response:', resultText);
       throw new Error('Invalid JSON response from OpenAI');

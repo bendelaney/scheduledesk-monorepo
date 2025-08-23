@@ -1,9 +1,11 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { AvailabilityEvent, TeamMember } from '../../types';
-import AvailabilityEventsData from '../../data/availabilityEventsData';
-import TeamMembersData from '../../data/teamMembersData';
+import { AvailabilityEvent, TeamMember } from '@/types';
+import AvailabilityEventsData from '@/data/availabilityEventsData';
+import TeamMembersData from '@/data/teamMembersData';
+import AngleUp from '@/components/Icons/AngleUp';
+import AngleDown from '@/components/Icons/AngleDown';
 import './CalendarGrid.scss';
 
 // Calendar-specific types
@@ -40,6 +42,12 @@ const isSameDay = (date1: Date, date2: Date): boolean => {
   return formatDate(date1) === formatDate(date2);
 };
 
+const getTodayInLocalTimezone = (): Date => {
+  const now = new Date();
+  // Create a new date using local date components to avoid timezone issues
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+};
+
 const getMonthName = (month: number): string => {
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -59,7 +67,7 @@ const getFirstDayOfMonth = (year: number, month: number): number => {
 // Calendar utilities
 class CalendarUtils {
   static generateCalendarMonth(year: number, month: number, events: AvailabilityEvent[]): CalendarMonth {
-    const today = new Date();
+    const today = getTodayInLocalTimezone();
     const daysInMonth = getDaysInMonth(year, month);
     const firstDayOfMonth = getFirstDayOfMonth(year, month);
     
@@ -141,7 +149,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [months, setMonths] = useState<CalendarMonth[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentDate] = useState(new Date());
+  const [currentDate] = useState(getTodayInLocalTimezone());
   const lastScrollTopRef = useRef<number>(0);
   const scrollDirectionRef = useRef<'up' | 'down' | 'none'>('none');
   const [currentMonthIndex, setCurrentMonthIndex] = useState(0);
@@ -208,13 +216,14 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           newMonths.unshift(CalendarUtils.generateCalendarMonth(prevYear, prevMonth, events));
           
           // Maintain scroll position when adding content to the top
-          setTimeout(() => {
+          // Use requestAnimationFrame for more reliable timing
+          requestAnimationFrame(() => {
             if (containerRef.current) {
               const newScrollHeight = containerRef.current.scrollHeight;
               const heightDifference = newScrollHeight - currentScrollHeight;
               containerRef.current.scrollTop = currentScrollTop + heightDifference;
             }
-          }, 0);
+          });
         }
         
         return newMonths;
@@ -255,6 +264,119 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   
   const goToPreviousMonth = useCallback(() => navigateToMonth('prev'), [navigateToMonth]);
   const goToNextMonth = useCallback(() => navigateToMonth('next'), [navigateToMonth]);
+  
+  // Smooth scrolling to specific month
+  const fastSmoothScroll = (element: HTMLElement, targetScrollTop: number, duration: number = 300) => {
+    const startScrollTop = element.scrollTop;
+    const distance = targetScrollTop - startScrollTop;
+    const startTime = performance.now();
+
+    const animateScroll = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Use easeOutCubic for snappy feel
+      const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+      
+      element.scrollTop = startScrollTop + (distance * easeOutCubic);
+      
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll);
+      }
+    };
+    
+    requestAnimationFrame(animateScroll);
+  };
+
+  const scrollToMonth = useCallback((targetYear: number, targetMonth: number) => {
+    if (!containerRef.current || !infiniteScroll) return;
+    
+    const monthElements = containerRef.current.querySelectorAll('.calendar-month');
+    const targetElement = Array.from(monthElements).find(element => {
+      const key = element.getAttribute('data-month-key');
+      return key === `${targetYear}-${targetMonth}`;
+    });
+    
+    if (targetElement) {
+      // Calculate offset to prevent header cutoff
+      const containerTop = containerRef.current.getBoundingClientRect().top;
+      const elementTop = targetElement.getBoundingClientRect().top;
+      const offset = 20; // Add 20px padding from top
+      
+      const targetScrollTop = containerRef.current.scrollTop + (elementTop - containerTop - offset);
+      
+      // Use custom fast scrolling (200ms instead of default ~500ms)
+      fastSmoothScroll(containerRef.current, targetScrollTop, 200);
+    }
+  }, [infiniteScroll]);
+  
+  // Navigate to previous month with smooth scrolling
+  const scrollToPreviousMonth = useCallback((currentYear: number, currentMonth: number) => {
+    let prevMonth = currentMonth - 1;
+    let prevYear = currentYear;
+    
+    if (prevMonth < 0) {
+      prevMonth = 11;
+      prevYear -= 1;
+    }
+    
+    // Check if previous month exists in current months array
+    const prevMonthExists = months.some(m => m.year === prevYear && m.month === prevMonth);
+    
+    if (prevMonthExists) {
+      scrollToMonth(prevYear, prevMonth);
+    } else {
+      // Load previous month if not exists
+      loadMoreMonths('before');
+      // Use a longer delay and retry logic for upward scrolling
+      const attemptScroll = (attempts = 0) => {
+        if (attempts > 10) return; // Give up after 10 attempts
+        
+        const monthNowExists = containerRef.current?.querySelector(`[data-month-key="${prevYear}-${prevMonth}"]`);
+        if (monthNowExists) {
+          scrollToMonth(prevYear, prevMonth);
+        } else {
+          setTimeout(() => attemptScroll(attempts + 1), 50);
+        }
+      };
+      
+      setTimeout(() => attemptScroll(), 100);
+    }
+  }, [months, scrollToMonth, loadMoreMonths]);
+  
+  // Navigate to next month with smooth scrolling  
+  const scrollToNextMonth = useCallback((currentYear: number, currentMonth: number) => {
+    let nextMonth = currentMonth + 1;
+    let nextYear = currentYear;
+    
+    if (nextMonth > 11) {
+      nextMonth = 0;
+      nextYear += 1;
+    }
+    
+    // Check if next month exists in current months array
+    const nextMonthExists = months.some(m => m.year === nextYear && m.month === nextMonth);
+    
+    if (nextMonthExists) {
+      scrollToMonth(nextYear, nextMonth);
+    } else {
+      // Load next month if not exists
+      loadMoreMonths('after');
+      // Use retry logic for consistent behavior
+      const attemptScroll = (attempts = 0) => {
+        if (attempts > 10) return; // Give up after 10 attempts
+        
+        const monthNowExists = containerRef.current?.querySelector(`[data-month-key="${nextYear}-${nextMonth}"]`);
+        if (monthNowExists) {
+          scrollToMonth(nextYear, nextMonth);
+        } else {
+          setTimeout(() => attemptScroll(attempts + 1), 50);
+        }
+      };
+      
+      setTimeout(() => attemptScroll(), 100);
+    }
+  }, [months, scrollToMonth, loadMoreMonths]);
   
   // Handle scroll for infinite loading
   const handleScroll = useCallback(() => {
@@ -316,10 +438,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       key={event.id}
       className={`calendar-event calendar-event--${event.eventType.toLowerCase().replace(/\s+/g, '-')}`}
       onClick={(e) => handleEventClick(event, e)}
-      title={`${event.teamMember}: ${event.eventType}${event.allDay ? '' : ` (${event.startTime} - ${event.endTime})`}`}
+      title={`${event.teamMember.firstName} ${event.teamMember.lastName || ''}: ${event.eventType}${event.allDay ? '' : ` (${event.startTime} - ${event.endTime})`}`}
     >
+      <span className="calendar-event__member">{event.teamMember.firstName} {event.teamMember.lastName || ''}</span>
       <span className="calendar-event__type">{event.eventType}</span>
-      <span className="calendar-event__member">{event.teamMember}</span>
     </div>
   );
   
@@ -349,10 +471,24 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     }
     
     return (
-      <div key={`${month.year}-${month.month}`} className="calendar-month">
+      <div key={`${month.year}-${month.month}`} className="calendar-month" data-month-key={`${month.year}-${month.month}`}>
         <div className="calendar-month__header">
           <h2 className="calendar-month__title">
+            <button
+              className="calendar-month__nav-button calendar-month__nav-button--prev"
+              onClick={() => infiniteScroll ? scrollToPreviousMonth(month.year, month.month) : goToPreviousMonth()}
+              aria-label="Previous month"
+            >
+              <AngleUp />
+            </button>
             {getMonthName(month.month)} {month.year}
+            <button
+              className="calendar-month__nav-button calendar-month__nav-button--next"
+              onClick={() => infiniteScroll ? scrollToNextMonth(month.year, month.month) : goToNextMonth()}
+              aria-label="Next month"
+            >
+              <AngleDown />
+            </button>
           </h2>
         </div>
         <div className="calendar-month__grid">
@@ -394,9 +530,6 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
             ›
           </button>
         </div>
-      )}
-      {isLoading && (
-        <div className="calendar-loading">Loading...</div>
       )}
       <div className="calendar-months">
         {months.map(renderMonth)}

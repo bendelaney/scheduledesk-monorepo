@@ -36,9 +36,10 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
   const selectedTeamMembers = externalSelectedMembers || internalSelectedMembers;
 
   const filteredEvents = useMemo(() => {
-    return AvailabilityEventsData.filter(event => 
-      selectedTeamMembers.includes(event.teamMember)
-    );
+    return AvailabilityEventsData.filter(event => {
+      const fullName = `${event.teamMember.firstName} ${event.teamMember.lastName || ''}`.trim();
+      return selectedTeamMembers.includes(fullName);
+    });
   }, [selectedTeamMembers]);
 
   useEffect(() => {

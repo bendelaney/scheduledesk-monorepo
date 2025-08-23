@@ -358,30 +358,30 @@ const EventEditor: FC<EventEditorProps> = ({
           console.log('SmartEventInput onParse prompt:', prompt);
           console.log('SmartEventInput onParse data:', data);
         
-        // Only process if we have data
-        if (data && data.length > 0) {
-          const normalizedData = data.map(event => ({
-            ...event,
-            // we might need this... ? 
-            // or other normalizations..? 
-            // startDate: event.startDate,
-            // endDate: event.endDate
-          }))[0]; // Take the first event
-          
-          // Set as form state directly
-          setFormState(prev => ({
-            ...normalizedData
-          }));
-        }
-      }}
-      additionalRules={`When a name is mentioned, check it against this list: ${TeamMembersData.map(member => 
-        member.firstName + " " + member.lastName).join(", ")}. If the first name is found, use the full name.`}
+          // Only process if we have data
+          if (data && data.length > 0) {
+            const normalizedData = data.map(event => ({
+              ...event,
+              // we might need this... ? 
+              // or other normalizations..? 
+              // startDate: event.startDate,
+              // endDate: event.endDate
+            }))[0]; // Take the first event
+            
+            // Set as form state directly
+            setFormState(prev => ({
+              ...normalizedData
+            }));
+          }
+        }}
+        additionalRules={`When a name is mentioned, check it against this list: ${TeamMembersData.map(member => 
+        member.firstName + " " + member.lastName).join(", ")}. If only the first name is found, return an object with firstName and lastName properties.`}
       />
     ),
     teamMember: () => (
       <TeamMemberSelectMenu
-        key={`team-member-${formState.teamMember || 'none'}`}
-        selected={formState.teamMember}
+        key={`team-member-${formState.teamMember ? formState.teamMember.firstName + formState.teamMember.lastName : 'none'}`}
+        selected={formState.teamMember ? formState.teamMember : undefined}
         teamMembers={TeamMembersData}
         selectMenuProps={{
           placeholder: "Team Member", 
@@ -526,3 +526,22 @@ const EventEditor: FC<EventEditorProps> = ({
 };
 
 export default EventEditor;
+
+
+/* Example usage:
+<EventEditor
+  formConfig={[
+    'smartEventInput',
+    'teamMember',
+    'eventType',
+    'dateRange',
+    'allDaySwitch',
+    'timeRange',
+    'recurrence',
+    'monthlyRecurrence',
+  ]}
+  values={eventEditorValues}
+  onChange={updateEventData}
+/>
+<DataViewer data={eventEditorOutput} log={false}/>
+*/

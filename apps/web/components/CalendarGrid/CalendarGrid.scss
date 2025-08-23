@@ -65,23 +65,56 @@
   
   .calendar-month {
     margin-bottom: 2rem;
+    border-bottom: 1px solid var(--extra-light-gray);
     
     &__header {
-      padding: 1rem 0;
-      border-bottom: 1px solid #e5e7eb;
-      margin-bottom: 1rem;
+      padding: 0.5rem 0;
+      // border-bottom: 1px solid #e5e7eb;
+      // margin-bottom: 1rem;
     }
     
     &__title {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 600;
-      color: #111827;
+      color: var(--medium-dark-grey);
       text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      position: relative;
+    }
+    
+    &__nav-button {
+      background: transparent;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--medium-dark-gray);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      
+      &:hover {
+        transform: scale(1.1);
+      }
+      
+      &:active {
+        transform: scale(0.95);
+      }
+            
+      svg {
+        width: 1rem;
+        height: 1rem;
+      }
     }
     
     &__grid {
       background: #fff;
-      border: 1px solid #e5e7eb;
       border-radius: 0.375rem;
       overflow: hidden;
     }
@@ -90,17 +123,15 @@
   .calendar-weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    background: #f9fafb;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--extra-light-gray);
   }
   
   .calendar-weekday {
     padding: 0.75rem 0.5rem;
     text-align: center;
     font-size: 0.875rem;
-    font-weight: 500;
-    color: #6b7280;
-    border-right: 1px solid #e5e7eb;
+    font-weight: 700;
+    color: var(--medium-dark-gray);
     
     &:last-child {
       border-right: none;
@@ -114,7 +145,7 @@
   
   .calendar-week {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(70px, 1fr));
     border-bottom: 1px solid #e5e7eb;
     
     &:last-child {
@@ -143,36 +174,31 @@
     }
     
     &--other-month {
-      background-color: #f8fafc;
+      // background-color: var(--extra-light-gray);
       .calendar-day__number {
-        color: #9ca3af;
-      }
-    }
-    
-    &--today {
-      background-color: #eff6ff;
-      .calendar-day__number {
-        color: #2563eb;
-        font-weight: 600;
-        background-color: #2563eb;
-        color: white;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.75rem;
+        color: var(--light-gray);
       }
     }
     
     &__number {
       font-size: 0.875rem;
-      font-weight: 500;
+      font-weight: 700;
       margin-bottom: 0.5rem;
-      color: #111827;
+      color: var(--medium-dark-gray);
+      text-align: right;
     }
-    
+
+    &--today {
+      background-color: var(--extra-light-gray);
+      .calendar-day__number {
+        font-size: 0.875rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--primary-blue);
+        text-align: right;
+      }
+    }
+
     &__events {
       display: flex;
       flex-direction: column;

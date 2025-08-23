@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 const SvgSplitFrameActive = (props: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 16" fill="currentColor" width="1em" height="1em" {...props}>
     <path

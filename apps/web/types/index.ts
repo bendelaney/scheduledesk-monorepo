@@ -157,7 +157,10 @@ export type MonthlyRecurrenceDataType = {
 
 export interface AvailabilityEvent {
   id?: string;
-  teamMember: string;
+  teamMember: {
+    firstName: string;
+    lastName?: string;
+  };
   eventType: EventTypeType;
   startDate?: string;
   endDate?: string;

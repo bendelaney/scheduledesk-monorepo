@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 const LinkOutIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" {...props}>

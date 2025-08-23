@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="6 4.5 10 13" width="1em" height="1em" {...props}>

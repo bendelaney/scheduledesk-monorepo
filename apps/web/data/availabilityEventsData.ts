@@ -3,7 +3,7 @@ import { AvailabilityEvent } from "../types";
 const AvailabilityEventsData: AvailabilityEvent[] = [
   {
     id: "1",
-    teamMember: "Ben Delaney",
+    teamMember: { firstName: "Ben", lastName: "Delaney" },
     eventType: "Personal Appointment",
     startDate: "2025-08-20",
     endDate: "2025-08-20",
@@ -13,7 +13,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "2",
-    teamMember: "Isaiah Crandall",
+    teamMember: { firstName: "Isaiah", lastName: "Crandall" },
     eventType: "Vacation",
     startDate: "2025-08-25",
     endDate: "2025-08-29",
@@ -21,7 +21,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "3",
-    teamMember: "Kelly Chadwick",
+    teamMember: { firstName: "Kelly", lastName: "Chadwick" },
     eventType: "Arrives Late",
     startDate: "2025-08-22",
     endDate: "2025-08-22",
@@ -31,7 +31,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "4",
-    teamMember: "Krystn Parmley",
+    teamMember: { firstName: "Krystn", lastName: "Parmley" },
     eventType: "Not Working",
     startDate: "2025-08-23",
     endDate: "2025-08-23",
@@ -39,7 +39,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "5",
-    teamMember: "Ben Delaney",
+    teamMember: { firstName: "Ben", lastName: "Delaney" },
     eventType: "Leaves Early",
     startDate: "2025-08-26",
     endDate: "2025-08-26",
@@ -49,7 +49,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "6",
-    teamMember: "Isaiah Crandall",
+    teamMember: { firstName: "Isaiah", lastName: "Crandall" },
     eventType: "Personal Appointment",
     startDate: "2025-09-02",
     endDate: "2025-09-02",
@@ -59,7 +59,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "7",
-    teamMember: "Kelly Chadwick",
+    teamMember: { firstName: "Kelly", lastName: "Chadwick" },
     eventType: "Vacation",
     startDate: "2025-09-15",
     endDate: "2025-09-19",

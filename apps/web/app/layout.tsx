@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import AppFrame from "../components/AppFrame";
+import "./styles/fonts.scss";
 import "./styles/baseStyles.scss";
 
 ////////////////////////////
