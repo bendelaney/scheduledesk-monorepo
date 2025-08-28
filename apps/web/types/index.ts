@@ -112,12 +112,13 @@ export interface StatusIconMapping {
 export interface TeamMember {
   id: string;
   firstName: string;
-  lastName?: string;
+  lastName: string;
   displayName?: string;
   email?: string;
   highlightId?: string;
   phone?: string;
   assignedJobId?: string;
+  avatarUri?: string;
 }
 
 export interface TeamMemberInstance {
@@ -129,8 +130,8 @@ export interface TeamMemberInstance {
 }
 
 export type EventTypeType = 
-  | "Arrives Late" 
-  | "Leaves Early" 
+  | "Starts Late" 
+  | "Ends Early" 
   | "Personal Appointment" 
   | "Not Working" 
   | "Vacation";
@@ -157,10 +158,7 @@ export type MonthlyRecurrenceDataType = {
 
 export interface AvailabilityEvent {
   id?: string;
-  teamMember: {
-    firstName: string;
-    lastName?: string;
-  };
+  teamMember: Partial<TeamMember>;
   eventType: EventTypeType;
   startDate?: string;
   endDate?: string;

@@ -1,8 +1,8 @@
 // Base Styles for SchedulePad
 // by Ben Delaney
 
-@use 'variables' as *;
 @use 'mixins' as *;
+@import 'variables';
 
 * {
   box-sizing: border-box;

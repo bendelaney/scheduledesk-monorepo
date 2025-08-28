@@ -1,0 +1,138 @@
+.team-member-toggle-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 12px 12px 0 0;
+  min-width: 0; // Allow container to shrink
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    justify-content: flex-end;
+    min-width: 0; // Allow header to shrink
+  }
+
+  &__title {
+    font-size: 18px;
+    font-weight: 900;
+    margin: 0;
+    color: #333;
+    white-space: nowrap; // Prevent title wrapping
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__toggle-all {
+    background: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dark-gray);
+    transition: all 0.2s ease;
+    white-space: nowrap; // Prevent button text wrapping
+    flex-shrink: 0; // Button doesn't shrink
+
+    &:hover {
+      background: #f5f5f5;
+      border-color: #999;
+    }
+
+    &:active {
+      background: #e5e5e5;
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    overflow-y: auto;
+    min-width: 0; // Allow list to shrink
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    opacity: 0.3;
+    transition: all 0.2s ease;
+    min-width: 0; // Allow items to shrink
+
+    &:hover {
+      background: #f8f8f8;
+    }
+  }
+
+  &__item-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0; // Critical for proper shrinking
+    overflow: hidden; // Hide overflow content
+  }
+
+  &__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    flex-shrink: 0; // Avatar never shrinks - maintains fixed size
+    position: relative; // For proper image positioning
+  }
+
+  &__avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; // Maintain aspect ratio, crop if needed
+    object-position: center; // Center the image
+    border-radius: 50%;
+    position: absolute; // Prevent any stretching
+    top: 0;
+    left: 0;
+  }
+
+  &__name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dark-gray);
+    white-space: nowrap; // Prevent text wrapping
+    overflow: hidden; // Hide overflow text
+    text-overflow: ellipsis; // Show ellipsis for long names
+    flex: 1; // Take remaining space
+    min-width: 0; // Allow shrinking
+  }
+
+  &__item--selected {
+    opacity: 1;
+    color: var(--dark-gray);
+  }
+
+  // Hide names completely when sidebar gets very narrow
+  // Uncomment if you want names to disappear instead of ellipsis
+  /*
+  @media (max-width: 350px) {
+    &__name {
+      display: none;
+    }
+    
+    &__item-content {
+      justify-content: center;
+    }
+  }
+  */
+}

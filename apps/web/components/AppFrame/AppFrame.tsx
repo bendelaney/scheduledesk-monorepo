@@ -9,15 +9,17 @@ import "./AppFrame.scss";
 interface AppFrameProps {
   children: React.ReactNode;
   sidebar?: React.ReactNode;
+  sidebarOpen?: boolean;
   sidebarWidth?: string;
 }
 
 const AppFrame: React.FC<AppFrameProps> = ({ 
   children, 
-  sidebar, 
+  sidebar,
+  sidebarOpen,
   sidebarWidth = "300px"
 }) => {
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isSidebarOpen, setSidebarOpen] = useState(sidebarOpen ?? true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {

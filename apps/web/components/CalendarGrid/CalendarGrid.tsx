@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { AvailabilityEvent, TeamMember } from '@/types';
+import { AvailabilityEvent, TeamMember, EventTypeType } from '@/types';
 import AvailabilityEventsData from '@/data/availabilityEventsData';
 import TeamMembersData from '@/data/teamMembersData';
 import AngleUp from '@/components/Icons/AngleUp';
@@ -31,6 +31,7 @@ export interface CalendarGridProps {
   monthsToLoad?: number;
   className?: string;
   infiniteScroll?: boolean;
+  activeEvent?: AvailabilityEvent | null;
 }
 
 // Helper functions
@@ -62,6 +63,42 @@ const getDaysInMonth = (year: number, month: number): number => {
 
 const getFirstDayOfMonth = (year: number, month: number): number => {
   return new Date(year, month, 1).getDay();
+};
+
+export const getEventDisplayText = (event: AvailabilityEvent): string => {
+  const { eventType, startTime, endTime } = event;
+  
+  // Format time helper (remove seconds, convert to 12hr format)
+  const formatTime = (time: string): string => {
+    if (!time) return '';
+    const [hours, minutes] = time.split(':');
+    const hour12 = parseInt(hours) === 0 ? 12 : parseInt(hours) > 12 ? parseInt(hours) - 12 : parseInt(hours);
+    const ampm = parseInt(hours) < 12 ? 'AM' : 'PM';
+    return `${hour12}:${minutes}`;
+  };
+  
+  switch (eventType) {
+    case "Starts Late":
+      return startTime ? `start: ${formatTime(startTime)}` : 'starts late';
+      
+    case "Ends Early":
+      return endTime ? `end: ${formatTime(endTime)}` : 'ends early';
+      
+    case "Not Working":
+      return 'off';
+      
+    case "Vacation":
+      return 'vacation';
+      
+    case "Personal Appointment":
+      if (startTime && endTime) {
+        return `${formatTime(startTime)}-${formatTime(endTime)}`;
+      }
+      return 'personal appointment';
+      
+    default:
+      return eventType;
+  }
 };
 
 // Calendar utilities
@@ -144,7 +181,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   onDayClick,
   monthsToLoad = 6,
   className = '',
-  infiniteScroll = true
+  infiniteScroll = true,
+  activeEvent = null
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [months, setMonths] = useState<CalendarMonth[]>([]);
@@ -433,17 +471,24 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     onEventClick?.(event, targetElement);
   }, [onEventClick]);
   
-  const renderEvent = (event: AvailabilityEvent) => (
-    <div
-      key={event.id}
-      className={`calendar-event calendar-event--${event.eventType.toLowerCase().replace(/\s+/g, '-')}`}
-      onClick={(e) => handleEventClick(event, e)}
-      title={`${event.teamMember.firstName} ${event.teamMember.lastName || ''}: ${event.eventType}${event.allDay ? '' : ` (${event.startTime} - ${event.endTime})`}`}
-    >
-      <span className="calendar-event__member">{event.teamMember.firstName} {event.teamMember.lastName || ''}</span>
-      <span className="calendar-event__type">{event.eventType}</span>
-    </div>
-  );
+  const renderEvent = (event: AvailabilityEvent) => {
+    const isActive = activeEvent && activeEvent.id === event.id;
+    
+    return (
+      <div
+        key={event.id}
+        className={`calendar-event calendar-event--${event.eventType.toLowerCase().replace(/\s+/g, '-')} ${isActive ? 'calendar-event--active' : ''}`}
+        onClick={(e) => handleEventClick(event, e)}
+        title={`${event.teamMember.firstName} ${event.teamMember.lastName || ''}: ${event.eventType}${event.allDay ? '' : ` (${event.startTime} - ${event.endTime})`}`}
+      >
+        <span className="calendar-event__member">{event.teamMember.firstName} {/*{event.teamMember.lastName || ''}*/}</span>
+        {/* <span className="calendar-event__type">{event.eventType}</span> */}
+        <span className="calendar-event__info">
+          {getEventDisplayText(event)}
+        </span>
+      </div>
+    );
+  };
   
   const renderDay = (day: CalendarDay) => (
     <div

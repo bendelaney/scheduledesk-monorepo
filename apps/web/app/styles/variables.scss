@@ -1,38 +1,68 @@
+// SCSS Variables (for use with @use)
+$sidebar-width: 220px;
+$modal-padding: 20px;
+
+// Color SCSS Variables
+$app-bg: #e7e6e3;
+$primary-blue: #0087ff;
+$primary-blue-half: rgba(0, 135, 255, 0.5);
+$primary-blue-darker: #005cad;
+$jobber-green: #32821c;
+$jobber-green-darker: #2c7319;
+$dark-gray: #333333;
+$darker-gray: #222222;
+$medium-dark-gray: #5e5c5c;
+$medium-gray: #bdbdbd;
+$light-gray: #d8d8d8;
+$extra-light-gray: #efefef;
+$person-blue: #63A2FC;
+$person-brown: #A87360;
+$person-green: #2BAA2E;
+$person-orange: #FF7F00;
+$person-pink: #E141D9;
+$person-purple: #9D4DF2;
+$person-red: #FB3A25;
+
+// Z-index variables
+$active-block-zindex: 1000;
+$menu-zindex: 5000;
+$modal-zindex: 10000;
+
+// CSS Custom Properties (will be output to browser)
 :root {
   /////////////////////////////////
   // Dimensions
-  --sidebar-width: 220px;
-  --modal-padding: 20px;
+  --sidebar-width: #{$sidebar-width};
+  --modal-padding: #{$modal-padding};
 
   /////////////////////////////////
   // Colors
-  --app-bg: #e7e6e3;
-  --primary-blue: #0087ff;
-  --primary-blue-half: rgba(0, 135, 255, 0.5);
-  --primary-blue-darker: #005cad;
-  --jobber-green: #32821c;
-  --jobber-green-darker: #2c7319;
-  --dark-gray: #333333;
-  --darker-gray: #222222;
-  --medium-dark-gray: #5e5c5c;
-  --medium-gray: #bdbdbd;
-  --light-gray: #d8d8d8;
-  --extra-light-gray: #efefef;
-  --role-blue: #63A2FC;
-  --role-brown: #A87360;
-  --role-green: #2BAA2E;
-  --role-orange: #FF7F00;
-  --role-pink: #E141D9;
-  --role-purple: #9D4DF2;
-  --role-red: #FB3A25;
+  --app-bg: #{$app-bg};
+  --primary-blue: #{$primary-blue};
+  --primary-blue-half: #{$primary-blue-half};
+  --primary-blue-darker: #{$primary-blue-darker};
+  --jobber-green: #{$jobber-green};
+  --jobber-green-darker: #{$jobber-green-darker};
+  --dark-gray: #{$dark-gray};
+  --darker-gray: #{$darker-gray};
+  --medium-dark-gray: #{$medium-dark-gray};
+  --medium-gray: #{$medium-gray};
+  --light-gray: #{$light-gray};
+  --extra-light-gray: #{$extra-light-gray};
+  --person-blue: #{$person-blue};
+  --person-brown: #{$person-brown};
+  --person-green: #{$person-green};
+  --person-orange: #{$person-orange};
+  --person-pink: #{$person-pink};
+  --person-purple: #{$person-purple};
+  --person-red: #{$person-red};
 
   --text-default: var(--dark-gray);
 
   /////////////////////////////////
   // Layering
-  --active-block-zindex: 1000;
-  --menu-zindex: 5000;
-  --modal-zindex: 10000;
+  --active-block-zindex: #{$active-block-zindex};
+  --menu-zindex: #{$menu-zindex};
+  --modal-zindex: #{$modal-zindex};
   --box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.4);
 }
-$jobber-green: #32821c;

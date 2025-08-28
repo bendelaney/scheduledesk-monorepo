@@ -28,8 +28,14 @@ import './EventEditor.scss';
 // Team member data
 import TeamMembersData from '@/data/teamMembersData';
 
+// Form config types
+type FormConfigItem = string | {
+  component: string;
+  props?: Record<string, any>;
+};
+
 interface EventEditorProps {
-  formConfig?: string[];
+  formConfig?: FormConfigItem[];
   values?: Partial<AvailabilityEvent>;
   onChange?: (data: Partial<AvailabilityEvent>) => void; 
 }
@@ -351,12 +357,12 @@ const EventEditor: FC<EventEditorProps> = ({
   };
   
   // Form control renderers
-  const formControlRenderers: { [key: string]: () => React.ReactElement | null } = {
-    smartEventInput: () => (
+  const formControlRenderers: { [key: string]: (customProps?: Record<string, any>) => React.ReactElement | null } = {
+    smartEventInput: (customProps = {}) => (
       <SmartEventInput 
         onParse={(data: AvailabilityEvent[], prompt: string) => {
-          console.log('SmartEventInput onParse prompt:', prompt);
-          console.log('SmartEventInput onParse data:', data);
+          // console.log('SmartEventInput onParse prompt:', prompt);
+          // console.log('SmartEventInput onParse data:', data);
         
           // Only process if we have data
           if (data && data.length > 0) {
@@ -376,22 +382,25 @@ const EventEditor: FC<EventEditorProps> = ({
         }}
         additionalRules={`When a name is mentioned, check it against this list: ${TeamMembersData.map(member => 
         member.firstName + " " + member.lastName).join(", ")}. If only the first name is found, return an object with firstName and lastName properties.`}
+        {...customProps}
       />
     ),
-    teamMember: () => (
+    teamMember: (customProps = {}) => (
       <TeamMemberSelectMenu
-        key={`team-member-${formState.teamMember ? formState.teamMember.firstName + formState.teamMember.lastName : 'none'}`}
-        selected={formState.teamMember ? formState.teamMember : undefined}
+        key={`team-member-${formState.teamMember ? (formState.teamMember.firstName || '') + (formState.teamMember.lastName || '') : 'none'}`}
+        selected={formState.teamMember && formState.teamMember.firstName ? formState.teamMember as { firstName: string; lastName?: string } : undefined}
         teamMembers={TeamMembersData}
         selectMenuProps={{
           placeholder: "Team Member", 
           styles: SelectMenuStylePresets.Large,
           instanceId: "event-editor-team-member",
-          onChange: (selected) => updateField('teamMember', selected?.value)
+          onChange: (selected) => updateField('teamMember', selected?.value),
+          ...customProps.selectMenuProps
         }}
+        {...customProps}
       />
     ),
-    eventType: () => (
+    eventType: (customProps = {}) => (
       <EventTypeSelectMenu
         key={`event-type-${formState.eventType || 'none'}`}
         selected={formState.eventType}
@@ -399,10 +408,12 @@ const EventEditor: FC<EventEditorProps> = ({
         selectMenuProps={{
           styles: SelectMenuStylePresets.Large,
           instanceId: "event-editor-event-type",
+          ...customProps.selectMenuProps
         }}
+        {...customProps}
       />
     ),
-    dateRange: () => {
+    dateRange: (customProps = {}) => {
       // Parse dates safely, stripping any time components
       const parseDate = (dateString?: string) => {
         if (!dateString) return null;
@@ -449,18 +460,20 @@ const EventEditor: FC<EventEditorProps> = ({
               endDate: endDateString
             }));
           }}
+          {...customProps}
         />
       );
     },
-    allDaySwitch: () => (
+    allDaySwitch: (customProps = {}) => (
       <SlideSwitch
         key={`all-day-switch-${formState.allDay}`}
         isOn={formState.allDay}
         labelText="All Day"
         onToggle={handleAllDay}
+        {...customProps}
       />
     ),
-    timeRange: () =>
+    timeRange: (customProps = {}) =>
       (formState.allDay === false || formState.allDay === undefined) ? (
         <TimeRangeSelectMenu
           key={`time-range-${formState.startTime || formState.endTime || 'none'}`}
@@ -471,10 +484,12 @@ const EventEditor: FC<EventEditorProps> = ({
           selectMenuProps={{
             styles: SelectMenuStylePresets.Large,
             instanceId: "event-editor-time-range",
+            ...customProps.selectMenuProps
           }}
+          {...customProps}
         />
       ) : null,
-    recurrence: () => (
+    recurrence: (customProps = {}) => (
       <RecurrenceSelectMenu
         key={`recurrence-${formState.recurrence || 'none'}`}
         selected={formState.recurrence}
@@ -482,10 +497,12 @@ const EventEditor: FC<EventEditorProps> = ({
         selectMenuProps={{
           styles: SelectMenuStylePresets.Large,
           instanceId: "event-editor-recurrence",
+          ...customProps.selectMenuProps
         }}
+        {...customProps}
       />
     ),
-    monthlyRecurrence: () =>
+    monthlyRecurrence: (customProps = {}) =>
       formState.recurrence === "Every Month" ? (
         <>
           <MonthlyRecurrenceSelectMenu
@@ -495,7 +512,9 @@ const EventEditor: FC<EventEditorProps> = ({
             selectMenuProps={{
               styles: SelectMenuStylePresets.Large,
               instanceId: "event-editor-monthly-recurrence",
+              ...customProps.selectMenuProps
             }}
+            {...customProps}
           />
           <MonthlyRecurrenceDetailSelector
             key={`monthly-recurrence-detail-${formState.monthlyRecurrence?.type || 'none'}`}
@@ -509,7 +528,9 @@ const EventEditor: FC<EventEditorProps> = ({
             selectMenuProps={{
               styles: SelectMenuStylePresets.Large,
               instanceId: "event-editor-monthly-recurrence-detail",
+              ...customProps.detailSelectorProps?.selectMenuProps
             }}
+            {...customProps.detailSelectorProps}
           />
         </>
       ) : null,
@@ -518,8 +539,12 @@ const EventEditor: FC<EventEditorProps> = ({
   return (
     <div className="event-editor">
       {formConfig?.map((configItem, index) => {
-        const renderFunction = formControlRenderers[configItem];
-        return renderFunction ? <React.Fragment key={index}>{renderFunction()}</React.Fragment> : null;
+        // Handle both string and object format
+        const componentName = typeof configItem === 'string' ? configItem : configItem.component;
+        const customProps = typeof configItem === 'object' ? configItem.props || {} : {};
+        
+        const renderFunction = formControlRenderers[componentName];
+        return renderFunction ? <React.Fragment key={index}>{renderFunction(customProps)}</React.Fragment> : null;
       })}
     </div>
   );

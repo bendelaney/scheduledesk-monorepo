@@ -3,7 +3,7 @@ import { AvailabilityEvent } from "../types";
 const AvailabilityEventsData: AvailabilityEvent[] = [
   {
     id: "1",
-    teamMember: { firstName: "Ben", lastName: "Delaney" },
+    teamMember: {id: "1", firstName: "Ben", lastName: "Delaney" },
     eventType: "Personal Appointment",
     startDate: "2025-08-20",
     endDate: "2025-08-20",
@@ -13,7 +13,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "2",
-    teamMember: { firstName: "Isaiah", lastName: "Crandall" },
+    teamMember: {id: "2", firstName: "Isaiah", lastName: "Crandall" },
     eventType: "Vacation",
     startDate: "2025-08-25",
     endDate: "2025-08-29",
@@ -21,8 +21,8 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "3",
-    teamMember: { firstName: "Kelly", lastName: "Chadwick" },
-    eventType: "Arrives Late",
+    teamMember: {id: "3", firstName: "Kelly", lastName: "Chadwick" },
+    eventType: "Starts Late",
     startDate: "2025-08-22",
     endDate: "2025-08-22",
     startTime: "10:00:00",
@@ -31,7 +31,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "4",
-    teamMember: { firstName: "Krystn", lastName: "Parmley" },
+    teamMember: {id: "4", firstName: "Krystn", lastName: "Parmley" },
     eventType: "Not Working",
     startDate: "2025-08-23",
     endDate: "2025-08-23",
@@ -39,8 +39,8 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "5",
-    teamMember: { firstName: "Ben", lastName: "Delaney" },
-    eventType: "Leaves Early",
+    teamMember: {id: "1", firstName: "Ben", lastName: "Delaney" },
+    eventType: "Ends Early",
     startDate: "2025-08-26",
     endDate: "2025-08-26",
     startTime: "08:00:00",
@@ -49,7 +49,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "6",
-    teamMember: { firstName: "Isaiah", lastName: "Crandall" },
+    teamMember: {id: "2", firstName: "Isaiah", lastName: "Crandall" },
     eventType: "Personal Appointment",
     startDate: "2025-09-02",
     endDate: "2025-09-02",
@@ -59,7 +59,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "7",
-    teamMember: { firstName: "Kelly", lastName: "Chadwick" },
+    teamMember: {id: "3", firstName: "Kelly", lastName: "Chadwick" },
     eventType: "Vacation",
     startDate: "2025-09-15",
     endDate: "2025-09-19",

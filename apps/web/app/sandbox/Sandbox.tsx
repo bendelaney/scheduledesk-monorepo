@@ -2,7 +2,8 @@
 
 import React, { useState, useCallback } from 'react';
 import AppFrame from '@/components/AppFrame';
-import { TeamCalendar, TeamMemberFilter } from '@/components/TeamCalendar';
+import TeamCalendar from '@/components/TeamCalendar';
+import TeamMemberToggleList from '@/components/TeamMemberToggleList';
 import TeamMembersData from '@/data/teamMembersData';
 import { AvailabilityEvent, RecurrenceType, EventTypeType } from '@/types';
 import EventEditor from '@/components/EventEditor';
@@ -49,7 +50,7 @@ export default function Sandbox() {
   return (
     // <AppFrame 
     //   sidebar={
-    //     <TeamMemberFilter 
+    //     <TeamMemberToggleList 
     //       teamMembers={TeamMembersData}
     //       selectedMembers={selectedTeamMembers}
     //       onSelectionChange={handleSelectionChange}
@@ -75,13 +76,14 @@ export default function Sandbox() {
     // </AppFrame>
     <AppFrame 
       sidebar={
-        <TeamMemberFilter 
+        <TeamMemberToggleList 
           teamMembers={TeamMembersData}
           selectedMembers={selectedTeamMembers}
           onSelectionChange={handleSelectionChange}
         />
       }
-      sidebarWidth="280px"
+      sidebarOpen={false}
+      sidebarWidth="260px"
     >
       <TeamCalendar 
         selectedTeamMembers={selectedTeamMembers}

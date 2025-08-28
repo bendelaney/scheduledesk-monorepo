@@ -3,6 +3,7 @@
 import React, { forwardRef, useImperativeHandle, useState, useEffect, useRef, useContext, createContext, ReactNode } from 'react';
 import Portal from "../Portal";
 import { useClickOutside } from 'hooks/useClickOutside';
+import './Popover.scss';
 
 interface MaskOptions {
   color: string;
@@ -167,7 +168,8 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
       hideAll();
     }
     setIsVisible(true);
-    positionPopover();
+    // Position after next tick to ensure DOM has updated
+    setTimeout(() => positionPopover(), 0);
   };
 
   const hide = () => {
@@ -176,6 +178,9 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
   };
    
   const positionPopover = () => {
+    console.log('positionPopover called');
+    console.log('Target:', targetRef?.current);
+    console.log('Popover:', popoverRef?.current);
     if (!targetRef || !popoverRef.current) return;
   
     const targetElement = targetRef.current;
@@ -260,6 +265,31 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
       top = resolvePosition(pos.y, 'y') - resolveEdge(edgePos.y, 'y') + posOffset.y;
       left = resolvePosition(pos.x, 'x') - resolveEdge(edgePos.x, 'x') + posOffset.x;
   
+      // Viewport boundary detection and adjustment
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 10; // Minimum distance from viewport edges
+
+      // Adjust if going off right edge
+      if (left + popoverRect.width > viewportWidth) {
+        left = viewportWidth - popoverRect.width - padding;
+      }
+
+      // Adjust if going off left edge  
+      if (left < 0) {
+        left = padding;
+      }
+
+      // Adjust if going off bottom
+      if (top + popoverRect.height > viewportHeight) {
+        top = viewportHeight - popoverRect.height - padding;
+      }
+
+      // Adjust if going off top
+      if (top < 0) {
+        top = padding;
+      }
+
       popoverElement.style.top = '0px';
       popoverElement.style.left = '0px';
       setPositionStyle({ x: left, y: top });
@@ -283,7 +313,12 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
         }}>
         {closeButton && (
           <button className="BDPopover-CloseButton" onClick={hide}>
-            Close
+            <svg width="1em" height="1em" viewBox="0 0 22 22" version="1.1" xmlns="http://www.w3.org/2000/svg">
+              <g fill="currentColor" fillRule="nonzero">
+                <path d="M11,22 C17.0445545,22 22,17.0336634 22,11 C22,4.95544554 17.0445545,0 11,0 C4.95544554,0 0,4.95544554 0,11 C0,17.0336634 4.95544554,22 11,22 Z M7.83069307,15.4435644 C7.1009901,15.4435644 6.54554455,14.8772277 6.54554455,14.1475248 C6.54554455,13.8316832 6.68712871,13.5049505 6.93762376,13.2653465 L9.18118812,11.0108911 L6.93762376,8.75643564 C6.68712871,8.51683168 6.54554455,8.19009901 6.54554455,7.87425743 C6.54554455,7.13366337 7.1009901,6.57821782 7.83069307,6.57821782 C8.22277228,6.57821782 8.51683168,6.70891089 8.76732673,6.95940594 L11,9.18118812 L13.2544554,6.94851485 C13.5158416,6.6980198 13.809901,6.57821782 14.1910891,6.57821782 C14.9207921,6.57821782 15.4762376,7.13366337 15.4762376,7.86336634 C15.4762376,8.19009901 15.3455446,8.50594059 15.0841584,8.74554455 L12.8405941,11.0108911 L15.0841584,13.2653465 C15.3346535,13.5049505 15.4653465,13.8207921 15.4653465,14.1475248 C15.4653465,14.8772277 14.909901,15.4435644 14.1910891,15.4435644 C13.7990099,15.4435644 13.4831683,15.3237624 13.2326733,15.0623762 L11,12.8514851 L8.78910891,15.0623762 C8.52772277,15.3237624 8.22277228,15.4435644 7.83069307,15.4435644 Z" id="Shape"></path>
+              </g>
+            </svg>
+            {/* Close */}
           </button>
         )}
         <div className="BDPopover-Content" ref={containerRef} style={{ height, width }}>

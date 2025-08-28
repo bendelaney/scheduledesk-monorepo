@@ -3,18 +3,11 @@
 import React, {FC, useState} from 'react';
 import SelectMenu from './SelectMenu';
 import { EventTypeType } from "@/types";
+import { EVENT_TYPES } from '@/config/EventTypes';
 
-const eventTypes: any[] = [
-  {name: "Starts Late", color: "#FF7F00"},
-  {name: "Ends Early", color: "#FF7F00"},
-  {name: "Personal Appointment", color: "#9D4DF2"},
-  {name: "Not Working", color: "#A87360"},
-  {name: "On Vacation", color: "#2BAA2E"},
-];
-
-const eventTypeOptions = eventTypes.map((eventType) => ({
+const eventTypeOptions = EVENT_TYPES.map((eventType) => ({
   value: eventType.name,
-  label: eventType.name,
+  label: eventType.displayName,
   color: eventType.color,
 }));
 

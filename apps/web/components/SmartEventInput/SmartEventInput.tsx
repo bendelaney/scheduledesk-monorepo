@@ -9,6 +9,7 @@ import './SmartEventInput.scss';
 interface SmartEventInputProps {
   currentDate?: string;
   additionalRules?: string;
+  placeholderText?: string;
   onParse: (events: AvailabilityEvent[], inputText: string) => void;
   onClear?: () => void;
 }
@@ -16,7 +17,8 @@ interface SmartEventInputProps {
 const SmartEventInput: FC<SmartEventInputProps> = ({ 
   currentDate, 
   additionalRules,
-  onParse, 
+  placeholderText = "✨ Describe your event...",
+  onParse,
   onClear
 }) => {
   const [inputText, setInputText] = useState('');
@@ -91,7 +93,7 @@ const SmartEventInput: FC<SmartEventInputProps> = ({
     <div className="smart-event-input-wrapper">
       <input 
         className={`smart-event-input-input ${loading ? 'loading' : ''}`}
-        placeholder="✨ Describe your event..."
+        placeholder={placeholderText}
         value={inputText}
         disabled={loading}
         onChange={(e) => setInputText(e.target.value)}
