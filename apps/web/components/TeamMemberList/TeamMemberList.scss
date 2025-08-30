@@ -1,4 +1,4 @@
-.team-member-toggle-list {
+.team-member-list {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -10,8 +10,109 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
-    justify-content: flex-end;
+    gap: 8px;
     min-width: 0; // Allow header to shrink
+  }
+
+  &__filter {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__filter-input {
+    width: 100%;
+    padding: 8px 32px 8px 28px;
+    border: 1px solid $medium-gray;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+    
+    &:focus {
+      outline: none;
+      background: white;
+      border-color: #999;;
+    }
+    
+    &::placeholder {
+      color: #999;
+    }
+  }
+
+  &__filter-icon {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: $medium-dark-gray;
+    cursor: pointer;
+    padding: 0px;
+    width:  18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: #f5f5f5;
+      color: $medium-dark-gray;
+    }
+  }
+
+  &__filter-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #999;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: #f5f5f5;
+      color: #666;
+    }
+  }
+
+  &__filter-key-tip {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: $light-gray;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: .5px 1px 0px rgba(0, 0, 0, 0.3);
+    color: $medium-dark-gray;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: #f5f5f5;
+      color: #666;
+    }
   }
 
   &__title {
@@ -26,14 +127,16 @@
 
   &__toggle-all {
     background: none;
+    border: 1px solid transparent;
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
-    color: var(--dark-gray);
+    color: var(--medium-dark-gray);
     transition: all 0.2s ease;
     white-space: nowrap; // Prevent button text wrapping
     flex-shrink: 0; // Button doesn't shrink
+    padding: 8px 12px;
 
     &:hover {
       background: #f5f5f5;
@@ -48,7 +151,7 @@
   &__list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0px;
     flex: 1;
     overflow-y: auto;
     min-width: 0; // Allow list to shrink
@@ -58,15 +161,18 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px;
+    padding: 8px 0;
     border-radius: 10px;
-    cursor: pointer;
     opacity: 0.3;
     transition: all 0.2s ease;
     min-width: 0; // Allow items to shrink
 
-    &:hover {
-      background: #f8f8f8;
+    &--toggleable {
+      cursor: pointer;
+      
+      &:hover {
+        background: #f8f8f8;
+      }
     }
   }
 

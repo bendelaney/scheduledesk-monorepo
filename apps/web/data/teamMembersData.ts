@@ -485,7 +485,7 @@ let nonJobberData = [
       "last": "",
       "full": "Floater"
     },
-    "avatarUri": "/data/teamMemberAvatars/abc.png",
+    "avatarUri": "",
     "highlightId": "99"
   },
   {
@@ -545,7 +545,7 @@ let nonJobberData = [
       "last": "Vida 1",
       "full": "Pura Vida 1"
     },
-    "avatarUri": "/data/teamMemberAvatars/abc.png",
+    "avatarUri": "",
     "highlightId": "5"
   },
   {
@@ -555,7 +555,7 @@ let nonJobberData = [
       "last": "Vida 2",
       "full": "Pura Vida 2"
     },
-    "avatarUri": "/data/teamMemberAvatars/abc.png",
+    "avatarUri": "",
     "highlightId": "5"
   },
   {
@@ -565,7 +565,7 @@ let nonJobberData = [
       "last": "Vida 3",
       "full": "Pura Vida 3"
     },
-    "avatarUri": "/data/teamMemberAvatars/abc.png",
+    "avatarUri": "",
     "highlightId": "5"
   },
   {
@@ -585,7 +585,7 @@ let nonJobberData = [
       "last": "Burrows",
       "full": "Wakan Burrows"
     },
-    "avatarUri": "/data/teamMemberAvatars/wakan.png",
+    "avatarUri": "",
     "highlightId": "1"
   },
   {
@@ -608,7 +608,7 @@ const convertAndMergeData = (jobberData: any, nonJobberData: any): TeamMember[] 
     .filter((edge: any) => !excludeList.find((m: any) => m.id === edge.node.id))
     .map((edge: any) => {
       const { id, name, email, phone } = edge.node;
-      const nonJobber = nonJobberData.find((nj: any) => nj.id === id);
+      const nonJobber = nonJobberData.find((nj: any) => nj.jobberId === id);
       return {
         id: id,
         firstName: nonJobber?.name?.first || name.first,

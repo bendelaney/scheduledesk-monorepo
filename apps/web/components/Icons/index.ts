@@ -14,6 +14,7 @@ export { default as InfoIcon } from "./InfoIcon";
 export { default as LinkOut } from "./LinkOut";
 export { default as PlusCircle } from "./PlusCircle";
 export { default as Rename } from "./Rename";
+export { default as SearchIcon } from "./Search";
 export { default as Share } from "./Share";
 export { default as SidebarClosed } from "./SidebarClosed";
 export { default as SidebarOpen } from "./SidebarOpen";

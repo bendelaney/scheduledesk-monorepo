@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { TeamMember } from '@/types';
-import TeamMembersData from '@/data/teamMembersData';
+// import TeamMembersData from '@/data/teamMembersData';
 import './TeamMemberId.scss';
 
 interface TeamMemberIdProps {
