@@ -1,12 +1,12 @@
-import { EventTypeType } from '@/types';
+import { EventTypeName } from '@/types';
 
 export interface EventTypeConfig {
-  name: EventTypeType;
+  name: EventTypeName;
   color: string;
   displayName: string;
 }
 
-export const EVENT_TYPES: EventTypeConfig[] = [
+export const EventTypes: EventTypeConfig[] = [
   {
     name: "Starts Late",
     displayName: "Starts Late", 
@@ -35,14 +35,14 @@ export const EVENT_TYPES: EventTypeConfig[] = [
 ];
 
 // Utility functions
-export const getEventTypeConfig = (eventType: EventTypeType): EventTypeConfig | undefined => {
-  return EVENT_TYPES.find(config => config.name === eventType);
+export const getEventTypeConfig = (eventType: EventTypeName): EventTypeConfig | undefined => {
+  return EventTypes.find(config => config.name === eventType);
 };
 
-export const getEventTypeColor = (eventType: EventTypeType): string => {
+export const getEventTypeColor = (eventType: EventTypeName): string => {
   return getEventTypeConfig(eventType)?.color || '#666666';
 };
 
-export const getEventTypeDisplayName = (eventType: EventTypeType): string => {
+export const getEventTypeDisplayName = (eventType: EventTypeName): string => {
   return getEventTypeConfig(eventType)?.displayName || eventType;
 };

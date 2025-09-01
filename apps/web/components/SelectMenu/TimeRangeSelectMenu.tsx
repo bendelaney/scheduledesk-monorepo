@@ -1,7 +1,7 @@
 'use client'
 
 import React, { FC, useEffect, useState } from 'react';
-import SelectMenu from './SelectMenu';
+import SelectMenu, { SelectMenuStylePresets } from '@/components/SelectMenu';
 import './TimeRangeSelectMenu.scss';
 
 interface TimeOption {

@@ -1,5 +1,5 @@
 // SCSS Variables (for use with @use)
-$sidebar-width: 220px;
+$sidebar-width: 240px;
 $modal-padding: 20px;
 
 // Color SCSS Variables
@@ -12,7 +12,8 @@ $jobber-green-darker: #2c7319;
 $dark-gray: #333333;
 $darker-gray: #222222;
 $medium-dark-gray: #5e5c5c;
-$medium-gray: #bdbdbd;
+$medium-gray: #989797;
+$gray: #bdbdbd;
 $light-gray: #d8d8d8;
 $extra-light-gray: #efefef;
 $person-blue: #63A2FC;
@@ -22,6 +23,7 @@ $person-orange: #FF7F00;
 $person-pink: #E141D9;
 $person-purple: #9D4DF2;
 $person-red: #FB3A25;
+$text-default: #333333;
 
 // Z-index variables
 $active-block-zindex: 1000;
@@ -47,6 +49,7 @@ $modal-zindex: 10000;
   --darker-gray: #{$darker-gray};
   --medium-dark-gray: #{$medium-dark-gray};
   --medium-gray: #{$medium-gray};
+  --gray: #{$gray};
   --light-gray: #{$light-gray};
   --extra-light-gray: #{$extra-light-gray};
   --person-blue: #{$person-blue};
@@ -56,8 +59,7 @@ $modal-zindex: 10000;
   --person-pink: #{$person-pink};
   --person-purple: #{$person-purple};
   --person-red: #{$person-red};
-
-  --text-default: var(--dark-gray);
+  --text-default: #{$dark-gray};
 
   /////////////////////////////////
   // Layering

@@ -11,7 +11,7 @@
     position: relative;
     font-size: 14px;
     font-weight: 540;
-    color: var(--medium-dark-gray);
+    color: $medium-dark-gray;
     letter-spacing: -0.2px;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -24,7 +24,7 @@
     transition: background-color 0.2s, color 0.2s;
     
     a {
-      color: var(--medium-dark-gray);
+      color: $medium-dark-gray;
       border-bottom: none;
       @include link-hover($hide:true);
     }
@@ -40,7 +40,7 @@
         align-items: center;
         justify-content: center;
         margin-left: 8px;
-        color: var(--medium-gray);
+        color: $gray;
         width:  14px;
         height: 14px;
 
@@ -49,15 +49,15 @@
         }
   
         &:hover, &.active {
-          color: var(--dark-gray);
+          color: $dark-gray;
         }
       }
     }
 
     &:hover,
     &.active {
-      background-color: var(--extra-light-gray);
-      color: var(--dark-gray);
+      background-color: $extra-light-gray;
+      color: $dark-gray;
     }
   }
 }
@@ -86,8 +86,8 @@
 
     &:hover,
     &.active {
-      background-color: var(--extra-light-gray);
-      color: var(--dark-gray);
+      background-color: $extra-light-gray;
+      color: $dark-gray;
     }
   }
 }

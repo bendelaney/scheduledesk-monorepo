@@ -2,13 +2,14 @@
 
 import React, { useState, useCallback, useMemo, useEffect, useRef, useContext } from 'react';
 import { AvailabilityEvent, TeamMember } from '@/types';
-import Popover, { PopoverContext } from '@/components/Popover';
+import Popover, { PopoverProvider, PopoverContext } from '@/components/Popover';
 import CalendarGrid from '@/components/CalendarGrid';
 import EventEditor from '@/components/EventEditor';
 import TeamMemberId from '@/components/TeamMemberId';
 import TeamMembersData from '@/data/teamMembersData';
 import AvailabilityEventsData from '@/data/availabilityEventsData';
 import './TeamCalendar.scss';
+import { c } from 'framer-motion/dist/types.d-Cjd591yU';
 
 interface TeamCalendarProps {
   className?: string;
@@ -98,53 +99,62 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
   }, [eventEditorValues]);
 
   return (
-    <div className={`team-calendar ${className}`}>
-      <CalendarGrid 
-        events={filteredEvents}
-        onEventClick={handleEventClickFromGrid}
-        onDayClick={handleDayClick}
-        activeEvent={activeEvent}
-        className="team-calendar__grid"
-      />
-      
-      {/* Conditional popover rendering */}
-      {showPopover && popoverTarget.current && (
-        <Popover
-          className="team-calendar__event-popover"
-          targetRef={popoverTarget as React.RefObject<HTMLElement>}
-          scrollContainerRef={scrollContainerRef as React.RefObject<HTMLDivElement>}
-          position={'topLeft'}
-          edge={'bottomLeft'}
-          offset={{ x: 0, y: -10 }}
-          onHide={handleClosePopover}
-          closeButton={true}
-          // noStyles={true}
-        >
-          {activeEvent && (
-            <TeamMemberId teamMember={activeEvent.teamMember as TeamMember} />
-          )}
-          <EventEditor
-            formConfig={[
-              {
-                component: 'smartEventInput',
-                props: {
-                  placeholderText: '✨ Edit event details...'
-                }
-              },
-              // 'teamMember',
-              'eventType',
-              'dateRange',
-              'allDaySwitch',
-              'timeRange',
-              'recurrence',
-              'monthlyRecurrence',
-            ]}
-            values={eventEditorValues}
-            onChange={updateEventData}
+    <>
+      <PopoverProvider scrollContainerRef={scrollContainerRef}>
+        <div className={`team-calendar ${className}`}>
+          <CalendarGrid 
+            events={filteredEvents}
+            onEventClick={handleEventClickFromGrid}
+            onDayClick={handleDayClick}
+            activeEvent={activeEvent}
+            className="team-calendar__grid"
+            showWeekends={false}
           />
-        </Popover>
-      )}
-    </div>
+          
+          {/* Conditional popover rendering */}
+          {showPopover && popoverTarget.current && (
+            <Popover
+              className="team-calendar__event-popover"
+              targetRef={popoverTarget as React.RefObject<HTMLElement>}
+              scrollContainerRef={scrollContainerRef as React.RefObject<HTMLDivElement>}
+              position={'topLeft'}
+              edge={'bottomLeft'}
+              offset={{ x: 0, y: -20 }}
+              onHide={handleClosePopover}
+              closeButton={true}
+              // noStyles={true}
+            >
+              {activeEvent && (
+                <TeamMemberId 
+                  teamMember={activeEvent.teamMember as TeamMember} 
+                  avatarPlacement={'right'}
+                />
+              )}
+              <EventEditor
+                formConfig={[
+                  // Hiding the Smart Event Editor for now. May put back, but would need some modding.
+                  // {
+                  //   component: 'smartEventInput',
+                  //   props: {
+                  //     placeholderText: '✨ Edit event details...'
+                  //   }
+                  // },
+                  // 'teamMember',
+                  'eventType',
+                  'dateRange',
+                  'allDaySwitch',
+                  'timeRange',
+                  'recurrence',
+                  'monthlyRecurrence',
+                ]}
+                values={eventEditorValues}
+                onChange={updateEventData}
+              />
+            </Popover>
+          )}
+        </div>
+      </PopoverProvider>
+    </>
   );
 };
 

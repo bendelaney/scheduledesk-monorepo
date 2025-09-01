@@ -3,6 +3,7 @@
 import React, { useState, useEffect, CSSProperties } from 'react';
 
 interface SlideSwitchProps {
+  className?: string;
   labelText?: string;
   isOn?: boolean;
   height?: string;
@@ -15,6 +16,7 @@ interface SlideSwitchProps {
 }
 
 const SlideSwitch: React.FC<SlideSwitchProps> = ({
+  className = '',
   labelText = '',
   isOn = false,
   height = '1em',
@@ -107,7 +109,7 @@ const SlideSwitch: React.FC<SlideSwitchProps> = ({
   };
 
   return (
-    <div className='slide-switch' style={wrapperStyles} onClick={handleClick}>
+    <div className={'slide-switch ' + className} style={wrapperStyles} onClick={handleClick}>
       <div className={`switch ${isAffirmative? "on" : "off"}`} style={switchStyle}>
         <span className="Knob" style={knobStyle}></span>
       </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { AvailabilityEvent, TeamMember, EventTypeType } from '@/types';
+import { AvailabilityEvent, TeamMember, EventTypeName } from '@/types';
 import AvailabilityEventsData from '@/data/availabilityEventsData';
 import TeamMembersData from '@/data/teamMembersData';
 import AngleUp from '@/components/Icons/AngleUp';
@@ -32,6 +32,7 @@ export interface CalendarGridProps {
   className?: string;
   infiniteScroll?: boolean;
   activeEvent?: AvailabilityEvent | null;
+  showWeekends?: boolean;
 }
 
 // Helper functions
@@ -103,7 +104,7 @@ export const getEventDisplayText = (event: AvailabilityEvent): string => {
 
 // Calendar utilities
 class CalendarUtils {
-  static generateCalendarMonth(year: number, month: number, events: AvailabilityEvent[]): CalendarMonth {
+  static generateCalendarMonth(year: number, month: number, events: AvailabilityEvent[], showWeekends: boolean = true): CalendarMonth {
     const today = getTodayInLocalTimezone();
     const daysInMonth = getDaysInMonth(year, month);
     const firstDayOfMonth = getFirstDayOfMonth(year, month);
@@ -111,25 +112,64 @@ class CalendarUtils {
     const days: CalendarDay[] = [];
     
     // Add empty cells for days from previous month
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      const prevMonth = month === 0 ? 11 : month - 1;
-      const prevYear = month === 0 ? year - 1 : year;
-      const prevMonthDays = getDaysInMonth(prevYear, prevMonth);
-      const day = prevMonthDays - firstDayOfMonth + i + 1;
-      const date = new Date(prevYear, prevMonth, day);
-      
-      days.push({
-        date: formatDate(date),
-        day,
-        isCurrentMonth: false,
-        isToday: isSameDay(date, today),
-        events: this.getEventsForDay(date, events)
-      });
+    let adjustedFirstDay = firstDayOfMonth;
+    if (!showWeekends) {
+      // Adjust for weekdays only (Mon=0, Tue=1, Wed=2, Thu=3, Fri=4)
+      // Sunday (0) becomes -1, Saturday (6) becomes 4
+      adjustedFirstDay = firstDayOfMonth === 0 ? -1 : firstDayOfMonth === 6 ? 4 : firstDayOfMonth - 1;
+    }
+    
+    if (showWeekends) {
+      for (let i = 0; i < firstDayOfMonth; i++) {
+        const prevMonth = month === 0 ? 11 : month - 1;
+        const prevYear = month === 0 ? year - 1 : year;
+        const prevMonthDays = getDaysInMonth(prevYear, prevMonth);
+        const day = prevMonthDays - firstDayOfMonth + i + 1;
+        const date = new Date(prevYear, prevMonth, day);
+        
+        days.push({
+          date: formatDate(date),
+          day,
+          isCurrentMonth: false,
+          isToday: isSameDay(date, today),
+          events: this.getEventsForDay(date, events)
+        });
+      }
+    } else {
+      // For weekdays only, add padding days from previous month if needed
+      if (adjustedFirstDay > 0) {
+        const prevMonth = month === 0 ? 11 : month - 1;
+        const prevYear = month === 0 ? year - 1 : year;
+        const prevMonthDays = getDaysInMonth(prevYear, prevMonth);
+        
+        for (let i = 0; i < adjustedFirstDay; i++) {
+          const day = prevMonthDays - adjustedFirstDay + i + 1;
+          const date = new Date(prevYear, prevMonth, day);
+          const dayOfWeek = date.getDay();
+          
+          // Only add weekdays
+          if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+            days.push({
+              date: formatDate(date),
+              day,
+              isCurrentMonth: false,
+              isToday: isSameDay(date, today),
+              events: this.getEventsForDay(date, events)
+            });
+          }
+        }
+      }
     }
     
     // Add days for current month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
+      const dayOfWeek = date.getDay();
+      
+      // Skip weekends if showWeekends is false
+      if (!showWeekends && (dayOfWeek === 0 || dayOfWeek === 6)) {
+        continue;
+      }
       
       days.push({
         date: formatDate(date),
@@ -141,21 +181,49 @@ class CalendarUtils {
     }
     
     // Add days from next month to complete the last week
-    const totalCells = Math.ceil(days.length / 7) * 7;
-    const remainingCells = totalCells - days.length;
-    
-    for (let day = 1; day <= remainingCells; day++) {
-      const nextMonth = month === 11 ? 0 : month + 1;
-      const nextYear = month === 11 ? year + 1 : year;
-      const date = new Date(nextYear, nextMonth, day);
+    if (showWeekends) {
+      const totalCells = Math.ceil(days.length / 7) * 7;
+      const remainingCells = totalCells - days.length;
       
-      days.push({
-        date: formatDate(date),
-        day,
-        isCurrentMonth: false,
-        isToday: isSameDay(date, today),
-        events: this.getEventsForDay(date, events)
-      });
+      for (let day = 1; day <= remainingCells; day++) {
+        const nextMonth = month === 11 ? 0 : month + 1;
+        const nextYear = month === 11 ? year + 1 : year;
+        const date = new Date(nextYear, nextMonth, day);
+        
+        days.push({
+          date: formatDate(date),
+          day,
+          isCurrentMonth: false,
+          isToday: isSameDay(date, today),
+          events: this.getEventsForDay(date, events)
+        });
+      }
+    } else {
+      // For weekdays only, complete to fill a 5-day week if needed
+      const totalCells = Math.ceil(days.length / 5) * 5;
+      const remainingCells = totalCells - days.length;
+      
+      let day = 1;
+      let addedCells = 0;
+      while (addedCells < remainingCells) {
+        const nextMonth = month === 11 ? 0 : month + 1;
+        const nextYear = month === 11 ? year + 1 : year;
+        const date = new Date(nextYear, nextMonth, day);
+        const dayOfWeek = date.getDay();
+        
+        // Only add weekdays
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+          days.push({
+            date: formatDate(date),
+            day,
+            isCurrentMonth: false,
+            isToday: isSameDay(date, today),
+            events: this.getEventsForDay(date, events)
+          });
+          addedCells++;
+        }
+        day++;
+      }
     }
     
     return { year, month, days };
@@ -176,13 +244,13 @@ class CalendarUtils {
 
 const CalendarGrid: React.FC<CalendarGridProps> = ({
   events = AvailabilityEventsData,
-  teamMembers = TeamMembersData,
   onEventClick,
   onDayClick,
   monthsToLoad = 6,
   className = '',
   infiniteScroll = true,
-  activeEvent = null
+  activeEvent = null,
+  showWeekends = true
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [months, setMonths] = useState<CalendarMonth[]>([]);
@@ -210,11 +278,11 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         year += Math.floor((startMonth + i) / 12);
       }
       
-      initialMonths.push(CalendarUtils.generateCalendarMonth(year, month, events));
+      initialMonths.push(CalendarUtils.generateCalendarMonth(year, month, events, showWeekends));
     }
     
     return initialMonths;
-  }, [currentDate, monthsToLoad, events, infiniteScroll]);
+  }, [currentDate, monthsToLoad, events, infiniteScroll, showWeekends]);
   
   // Load more months when scrolling
   const loadMoreMonths = useCallback((direction: 'before' | 'after') => {
@@ -240,7 +308,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
             nextYear += 1;
           }
           
-          newMonths.push(CalendarUtils.generateCalendarMonth(nextYear, nextMonth, events));
+          newMonths.push(CalendarUtils.generateCalendarMonth(nextYear, nextMonth, events, showWeekends));
         } else {
           const firstMonth = newMonths[0];
           let prevMonth = firstMonth.month - 1;
@@ -251,7 +319,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
             prevYear -= 1;
           }
           
-          newMonths.unshift(CalendarUtils.generateCalendarMonth(prevYear, prevMonth, events));
+          newMonths.unshift(CalendarUtils.generateCalendarMonth(prevYear, prevMonth, events, showWeekends));
           
           // Maintain scroll position when adding content to the top
           // Use requestAnimationFrame for more reliable timing
@@ -269,7 +337,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       
       setIsLoading(false);
     }, 100); // Small delay to show loading state
-  }, [isLoading, events]);
+  }, [isLoading, events, showWeekends]);
   
   // Navigation for single month mode
   const navigateToMonth = useCallback((direction: 'prev' | 'next') => {
@@ -296,9 +364,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         }
       }
       
-      return [CalendarUtils.generateCalendarMonth(newYear, newMonth, events)];
+      return [CalendarUtils.generateCalendarMonth(newYear, newMonth, events, showWeekends)];
     });
-  }, [infiniteScroll, events]);
+  }, [infiniteScroll, events, showWeekends]);
   
   const goToPreviousMonth = useCallback(() => navigateToMonth('prev'), [navigateToMonth]);
   const goToNextMonth = useCallback(() => navigateToMonth('next'), [navigateToMonth]);
@@ -511,8 +579,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   
   const renderMonth = (month: CalendarMonth) => {
     const weeks: CalendarDay[][] = [];
-    for (let i = 0; i < month.days.length; i += 7) {
-      weeks.push(month.days.slice(i, i + 7));
+    const daysPerWeek = showWeekends ? 7 : 5;
+    for (let i = 0; i < month.days.length; i += daysPerWeek) {
+      weeks.push(month.days.slice(i, i + daysPerWeek));
     }
     
     return (
@@ -538,7 +607,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         </div>
         <div className="calendar-month__grid">
           <div className="calendar-weekdays">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            {(showWeekends ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']).map(day => (
               <div key={day} className="calendar-weekday">{day}</div>
             ))}
           </div>
@@ -554,6 +623,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     <div 
       ref={containerRef}
       className={`calendar-grid ${infiniteScroll ? 'calendar-grid--infinite' : 'calendar-grid--single'} ${className}`}
+      style={{
+        '--calendar-columns': showWeekends ? '7' : '5'
+      } as React.CSSProperties}
     >
       {!infiniteScroll && months.length > 0 && (
         <div className="calendar-navigation">

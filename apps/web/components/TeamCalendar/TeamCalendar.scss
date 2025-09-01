@@ -8,4 +8,13 @@
     flex: 1;
     height: 100%;
   }
+
+  // The Team Member Event Popover
+  &__event-popover {
+    background-color: $app-bg;
+
+    .team-member-id {
+      margin-bottom: 14px;
+    }
+  }
 }

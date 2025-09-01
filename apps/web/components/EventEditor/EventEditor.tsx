@@ -15,7 +15,7 @@ import {
 } from "@/components/SelectMenu";
 import { SelectMenuStylePresets } from '@/components/SelectMenu/SelectMenu';
 import {
-  EventTypeType,
+  EventTypeName,
   RecurrenceType,
   MonthlyRecurrenceDataType,
   AvailabilityEvent
@@ -206,7 +206,7 @@ const EventEditor: FC<EventEditorProps> = ({
     
     // Only include defined fields with proper typing
     if (formState.teamMember) output.teamMember = formState.teamMember;
-    if (formState.eventType) output.eventType = formState.eventType as EventTypeType;
+    if (formState.eventType) output.eventType = formState.eventType as EventTypeName;
 
     // Store dates as YYYY-MM-DD strings without time components
     if (formState.startDate) {
@@ -467,6 +467,7 @@ const EventEditor: FC<EventEditorProps> = ({
     allDaySwitch: (customProps = {}) => (
       <SlideSwitch
         key={`all-day-switch-${formState.allDay}`}
+        className={'all-day-toggle'}
         isOn={formState.allDay}
         labelText="All Day"
         onToggle={handleAllDay}

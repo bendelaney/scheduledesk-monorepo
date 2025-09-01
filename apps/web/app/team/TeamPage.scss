@@ -1,0 +1,37 @@
+.team-page {
+  .main-content {
+    border-top: none !important;
+  }
+
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.2rem;
+    background-color: $app-bg;
+    padding: 2rem 20% 2rem 20%;
+  }
+
+  .team-member-id {
+
+    &__avatar {
+      width:  88px;
+      height: 88px;
+      border: 2px solid $medium-gray;
+
+
+      &-image {
+        width:  88px;
+        height: 88px;
+      }
+    }
+    &__name {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: $medium-dark-gray;
+
+      &--stacked {
+        gap: 0.5rem;
+      }
+    }
+  }
+}

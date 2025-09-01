@@ -2,22 +2,22 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import TopBar from "../TopBar";
-import Sidebar from "../Sidebar";
-import { PopoverProvider } from "../Popover";
 import "./AppFrame.scss";
 
 interface AppFrameProps {
+  className?: string;
   children: React.ReactNode;
-  sidebar?: React.ReactNode;
+  sidebarContent?: React.ReactNode;
   sidebarOpen?: boolean;
   sidebarWidth?: string;
 }
 
 const AppFrame: React.FC<AppFrameProps> = ({ 
+  className,
   children, 
-  sidebar,
+  sidebarContent,
   sidebarOpen,
-  sidebarWidth = "300px"
+  sidebarWidth = "240px"
 }) => {
   const [isSidebarOpen, setSidebarOpen] = useState(sidebarOpen ?? true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -34,31 +34,43 @@ const AppFrame: React.FC<AppFrameProps> = ({
     localStorage.setItem('sidebarState', JSON.stringify(isSidebarOpen));
   }, [isSidebarOpen]);
 
+  useEffect(() => {
+    if (!sidebarContent) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '\\' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setSidebarOpen(prev => !prev);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
-    <div className="app-frame">
+    <div className={`app-frame ${className}`}>
       <TopBar
+        sidebar={!!sidebarContent}
         toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
         isSidebarOpen={isSidebarOpen}
-        isSplitFrameActive={false}
       />
       
       <div className="content-wrapper">
-        {sidebar ? (
-          <div 
-            className={`sidebar-container ${isSidebarOpen ? 'open' : 'closed'}`}
-            style={{ width: isSidebarOpen ? sidebarWidth : '0' }}
+        {sidebarContent && (
+          <div
+            className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}
+            // style={{ width: isSidebarOpen ? sidebarWidth : '0' }}
           >
-            {sidebar}
+            {sidebarContent}
           </div>
-        ) : (
-          <Sidebar isSidebarOpen={isSidebarOpen} />
         )}
 
-        <PopoverProvider scrollContainerRef={scrollContainerRef}>
+        {/* <PopoverProvider scrollContainerRef={scrollContainerRef}> */}
           <div className="main-content" ref={scrollContainerRef}>
             {children}
           </div>
-        </PopoverProvider>
+        {/* </PopoverProvider> */}
       </div>
     </div>
   );

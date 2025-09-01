@@ -1,6 +1,8 @@
+@use './variables' as *;
+
 @mixin menuItemText {
   font-size: 14px;
-  color: var(--text-default);
+  color: $text-default;
   letter-spacing: -0.2px;
   font-weight: 540;
 }
@@ -11,30 +13,30 @@
   flex-shrink: 0;
 }
 @mixin activeBlock {
-  z-index: var(--active-block-zindex);
+  z-index: $active-block-zindex;
   background-color: rgb(198, 198, 191);
   // background-color: rgb(164, 164, 14);
 
 }
 @mixin hoverBlock {
-  z-index: var(--active-block-zindex);
+  z-index: $active-block-zindex;
   background-color: rgb(238, 238, 232);
 }
 @mixin selectedBlock {
-  z-index: var(--active-block-zindex+10);
+  z-index: ($active-block-zindex + 10);
   background-color: rgb(240, 240, 237);
 }
 
-@mixin link-styles($color: var(--primary-blue)) {
+@mixin link-styles($color: $primary-blue) {
   text-decoration: none;
   color: $color;
   cursor: pointer;
   border-bottom-style: solid;
   border-bottom-width: 1.7px;
-  border-bottom-color: var(--light-gray);
+  border-bottom-color: $light-gray;
   transition: border-bottom-color 140ms, box-shadow 140ms;
 }
-@mixin link-hover($color: var(--primary-blue), $hide: false) {
+@mixin link-hover($color: $primary-blue, $hide: false) {
   @if $hide != true {
     &:hover {
       border-bottom-color: $color;

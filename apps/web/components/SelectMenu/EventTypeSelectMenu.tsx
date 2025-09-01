@@ -2,17 +2,17 @@
 
 import React, {FC, useState} from 'react';
 import SelectMenu from './SelectMenu';
-import { EventTypeType } from "@/types";
-import { EVENT_TYPES } from '@/config/EventTypes';
+import { EventTypeName } from "@/types";
+import { EventTypes } from '@/config/EventTypes';
 
-const eventTypeOptions = EVENT_TYPES.map((eventType) => ({
+const eventTypeOptions = EventTypes.map((eventType) => ({
   value: eventType.name,
   label: eventType.displayName,
   color: eventType.color,
 }));
 
 interface EventTypeSelectMenuProps {
-  selected?: EventTypeType;
+  selected?: EventTypeName;
   onChange: (selectedOption: any) => void;
   selectMenuProps?: any;
 }

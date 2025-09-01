@@ -9,7 +9,7 @@ export const SelectMenuStylePresets = {
   Large: {
     control: (baseStyles: any) => ({
       ...baseStyles,
-      backgroundColor: '#EFEFEF',
+      backgroundColor: '#f5f5f5',
       borderRadius: '5px',
       borderColor: '#D8D8D8',
       fontWeight: '700',
@@ -32,8 +32,12 @@ export const SelectMenuStylePresets = {
     menu: (baseStyles: any) => ({
       ...baseStyles,
       borderRadius: '5px',
-      backgroundColor: '#efefef',
+      backgroundColor: '#f5f5f5',
       boxShadow: '0 0 6px 0 rgba(0,0,0,0.30)',
+    }),
+    menuPortal: (baseStyles: any) => ({
+      ...baseStyles,
+      zIndex: 55555,
     }),
     menuList: (baseStyles: any) => ({
       ...baseStyles,
@@ -64,12 +68,12 @@ export const SelectMenuStylePresets = {
       padding: '0px',
     }),
   },
-  Small: {
+  Medium: {
     control: (baseStyles: any) => ({
       ...baseStyles,
-      backgroundColor: '#EFEFEF',
+      backgroundColor: '#f5f5f5',
       borderRadius: '5px',
-      borderColor: '#efefef',
+      borderColor: '#f5f5f5',
       fontWeight: '640',
       letterSpacing: '-0.5px',
       fontSize: '12px',
@@ -92,12 +96,12 @@ export const SelectMenuStylePresets = {
     menu: (baseStyles: any) => ({
       ...baseStyles,
       borderRadius: '5px',
-      backgroundColor: '#efefef',
+      backgroundColor: '#f5f5f5',
       boxShadow: '0 0 6px 0 rgba(0,0,0,0.30)',
     }),
     menuPortal: (baseStyles: any) => ({
       ...baseStyles,
-      zIndex: 11111,
+      zIndex: 55555,
     }),
     menuList: (baseStyles: any) => ({
       ...baseStyles,

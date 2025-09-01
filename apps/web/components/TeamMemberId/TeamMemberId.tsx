@@ -11,8 +11,10 @@ interface TeamMemberIdProps {
   showName?: boolean;
   showFirstName?: boolean;
   showLastName?: boolean;
+  stackNames?: boolean;
   avatarPlacement?: 'left' | 'right' | 'top' | 'bottom';
   className?: string;
+  onClick?: () => void;
 }
 
 const TeamMemberId: React.FC<TeamMemberIdProps> = ({
@@ -21,8 +23,10 @@ const TeamMemberId: React.FC<TeamMemberIdProps> = ({
   showName = true,
   showFirstName = true,
   showLastName = true,
+  stackNames = false,
   avatarPlacement = 'left',
-  className = ''
+  className = '',
+  onClick
 }) => {
   const getInitials = (member: TeamMember) => {
     if (member.displayName) {
@@ -74,10 +78,19 @@ const TeamMemberId: React.FC<TeamMemberIdProps> = ({
 
   const renderName = () => {
     if (!shouldShowName) return null;
-
-    return (
-      <span className="team-member-id__name">{displayName}</span>
-    );
+    
+    if (stackNames && teamMember.firstName && teamMember.lastName) {
+      return (
+        <div className="team-member-id__name team-member-id__name--stacked">
+          <span className="team-member-id__name-first">{teamMember.firstName}</span>
+          <span className="team-member-id__name-last">{teamMember.lastName}</span>
+        </div>
+      );
+    } else {
+      return (
+        <span className="team-member-id__name">{displayName}</span>
+      );
+    }
   };
 
   const getLayoutClass = () => {
@@ -85,16 +98,10 @@ const TeamMemberId: React.FC<TeamMemberIdProps> = ({
   };
 
   return (
-    <div className={`team-member-id ${getLayoutClass()} ${className}`}>
-      {avatarPlacement === 'top' && renderAvatar()}
-      
-      <div className="team-member-id__content">
-        {avatarPlacement === 'left' && renderAvatar()}
-        {shouldShowName && renderName()}
-        {avatarPlacement === 'right' && renderAvatar()}
-      </div>
-      
-      {avatarPlacement === 'bottom' && renderAvatar()}
+    <div className={`team-member-id ${getLayoutClass()} ${className} ${onClick ? 'clickable' : ''}`} onClick={onClick}>
+      {(avatarPlacement === 'top' || avatarPlacement === 'left') && renderAvatar()}
+      {shouldShowName && renderName()}
+      {(avatarPlacement === 'bottom' || avatarPlacement === 'right') && renderAvatar()}
     </div>
   );
 };

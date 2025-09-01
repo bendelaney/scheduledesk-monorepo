@@ -124,7 +124,8 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
 }, ref) => {
   const { register, unregister, hideAll } = useContext(PopoverContext);
   const [isVisible, setIsVisible] = useState(false);
-  const [positionStyle, setPositionStyle] = useState({ x: 0, y: 0 });
+  const [isAnimating, setIsAnimating] = useState(false);
+  // Remove unused positionStyle state
   const popoverRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollContainerRef } = useContext(PopoverContext);
@@ -168,20 +169,36 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
       hideAll();
     }
     setIsVisible(true);
-    // Position after next tick to ensure DOM has updated
-    setTimeout(() => positionPopover(), 0);
+    
+    // Safari fix: Wait for DOM to be ready, then position and animate
+    setTimeout(() => {
+      positionPopover();
+      // Start animation after positioning
+      setTimeout(() => setIsAnimating(true), 10);
+      
+      // Retry positioning if element wasn't ready
+      if (!popoverRef.current) {
+        setTimeout(() => {
+          positionPopover();
+          setIsAnimating(true);
+        }, 100);
+      }
+    }, 10);
   };
 
   const hide = () => {
-    setIsVisible(false);
-    onHide();
+    setIsAnimating(false);
+    // Wait for animation to complete before hiding
+    setTimeout(() => {
+      setIsVisible(false);
+      onHide();
+    }, 200); // Match CSS transition duration
   };
    
   const positionPopover = () => {
-    console.log('positionPopover called');
-    console.log('Target:', targetRef?.current);
-    console.log('Popover:', popoverRef?.current);
-    if (!targetRef || !popoverRef.current) return;
+    if (!targetRef || !targetRef.current || !popoverRef.current) {
+      return;
+    }
   
     const targetElement = targetRef.current;
     const popoverElement = popoverRef.current;
@@ -213,21 +230,21 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
       };
   
       const resolveEdge = (pos: 'left' | 'right' | 'center' | 'top' | 'bottom', axis: 'x' | 'y') => {
-        switch (pos) {
-          case 'left':
-            return axis === 'x' ? 0 : 0;
-          case 'right':
-            return axis === 'x' ? popoverRect.width : 0;
-          case 'center':
-            return axis === 'x'
-              ? popoverRect.width / 2
-              : popoverRect.height / 2;
-          case 'top':
-            return axis === 'y' ? 0 : 0;
-          case 'bottom':
-            return axis === 'y' ? popoverRect.height : 0;
-          default:
-            return 0;
+        // Returns offset from popover's top-left corner to the desired edge anchor point
+        if (axis === 'x') {
+          switch (pos) {
+            case 'left': return 0;
+            case 'right': return popoverRect.width;
+            case 'center': return popoverRect.width / 2;
+            default: return 0; // top/bottom don't affect x-axis
+          }
+        } else { // axis === 'y'
+          switch (pos) {
+            case 'top': return 0;
+            case 'bottom': return popoverRect.height;
+            case 'center': return popoverRect.height / 2;
+            default: return 0; // left/right don't affect y-axis
+          }
         }
       };
   
@@ -261,9 +278,14 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
       const pos = getPosition(position as PositionType);
       const edgePos = getPosition(edge as PositionType);
       const posOffset = offset || { x: 0, y: 0 };
-  
-      top = resolvePosition(pos.y, 'y') - resolveEdge(edgePos.y, 'y') + posOffset.y;
-      left = resolvePosition(pos.x, 'x') - resolveEdge(edgePos.x, 'x') + posOffset.x;
+
+      const targetY = resolvePosition(pos.y, 'y');
+      const edgeY = resolveEdge(edgePos.y, 'y');
+      const targetX = resolvePosition(pos.x, 'x');
+      const edgeX = resolveEdge(edgePos.x, 'x');
+      
+      top = targetY - edgeY + posOffset.y;
+      left = targetX - edgeX + posOffset.x;
   
       // Viewport boundary detection and adjustment
       const viewportWidth = window.innerWidth;
@@ -290,9 +312,9 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
         top = padding;
       }
 
-      popoverElement.style.top = '0px';
-      popoverElement.style.left = '0px';
-      setPositionStyle({ x: left, y: top });
+      // Safari fix: Use direct positioning instead of transform
+      popoverElement.style.top = `${top}px`;
+      popoverElement.style.left = `${left}px`;
     }
   };
 
@@ -305,11 +327,9 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
     <Portal>
       <div 
         ref={popoverRef} 
-        className={`BDPopover ${className} ${isVisible ? 'visible' : ''} ${noStyles ? 'no-styles' : ''}`}
+        className={`BDPopover ${className} ${isAnimating ? 'visible' : ''} ${noStyles ? 'no-styles' : ''}`}
         style={{
-          zIndex: zIndex, 
-          opacity: isVisible ? 1 : 0,
-          transform: `translate(${positionStyle.x}px, ${positionStyle.y}px)`
+          zIndex: zIndex,
         }}>
         {closeButton && (
           <button className="BDPopover-CloseButton" onClick={hide}>

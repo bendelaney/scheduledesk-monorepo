@@ -1,9 +1,10 @@
 import { AvailabilityEvent } from "../types";
+import TeamMembersData from '@/data/teamMembersData';
 
 const AvailabilityEventsData: AvailabilityEvent[] = [
   {
     id: "1",
-    teamMember: {id: "1", firstName: "Ben", lastName: "Delaney" },
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY4Mzkz", firstName: "Ben", lastName: "Delaney" },
     eventType: "Personal Appointment",
     startDate: "2025-08-20",
     endDate: "2025-08-20",
@@ -13,7 +14,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "2",
-    teamMember: {id: "2", firstName: "Isaiah", lastName: "Crandall" },
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY5NTE2", firstName: "Isaiah", lastName: "Crandall" },
     eventType: "Vacation",
     startDate: "2025-08-25",
     endDate: "2025-08-29",
@@ -21,7 +22,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "3",
-    teamMember: {id: "3", firstName: "Kelly", lastName: "Chadwick" },
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY4Mzkx", firstName: "Kelly", lastName: "Chadwick" },
     eventType: "Starts Late",
     startDate: "2025-08-22",
     endDate: "2025-08-22",
@@ -31,7 +32,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "4",
-    teamMember: {id: "4", firstName: "Krystn", lastName: "Parmley" },
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvNDU0NzYw", firstName: "Krystn", lastName: "Parmley" },
     eventType: "Not Working",
     startDate: "2025-08-23",
     endDate: "2025-08-23",
@@ -39,7 +40,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "5",
-    teamMember: {id: "1", firstName: "Ben", lastName: "Delaney" },
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY4Mzkz", firstName: "Ben", lastName: "Delaney" },
     eventType: "Ends Early",
     startDate: "2025-08-26",
     endDate: "2025-08-26",
@@ -49,7 +50,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "6",
-    teamMember: {id: "2", firstName: "Isaiah", lastName: "Crandall" },
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY5NTE2", firstName: "Isaiah", lastName: "Crandall" },
     eventType: "Personal Appointment",
     startDate: "2025-09-02",
     endDate: "2025-09-02",
@@ -59,7 +60,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   },
   {
     id: "7",
-    teamMember: {id: "3", firstName: "Kelly", lastName: "Chadwick" },
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY4Mzkx", firstName: "Kelly", lastName: "Chadwick" },
     eventType: "Vacation",
     startDate: "2025-09-15",
     endDate: "2025-09-19",
@@ -67,4 +68,12 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
   }
 ];
 
-export default AvailabilityEventsData;
+const combinedAvailabilityEventsData = AvailabilityEventsData.map(event => {
+  const teamMember = TeamMembersData.find(member => member.id === event.teamMember.id);
+  return {
+    ...event,
+    teamMember: teamMember || event.teamMember
+  };
+});
+
+export default combinedAvailabilityEventsData;

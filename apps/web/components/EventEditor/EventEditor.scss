@@ -16,4 +16,11 @@
     font-weight: 600;
     padding-left: 4px;
   }
+
+  .all-day-toggle {
+    margin: 0 auto;
+    .label {
+      color: $gray;
+    }
+  }
 }

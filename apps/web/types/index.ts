@@ -129,7 +129,7 @@ export interface TeamMemberInstance {
   isAnimatingIn?: boolean; // Flag for initial hidden state during drop animation
 }
 
-export type EventTypeType = 
+export type EventTypeName = 
   | "Starts Late" 
   | "Ends Early" 
   | "Personal Appointment" 
@@ -159,7 +159,7 @@ export type MonthlyRecurrenceDataType = {
 export interface AvailabilityEvent {
   id?: string;
   teamMember: Partial<TeamMember>;
-  eventType: EventTypeType;
+  eventType: EventTypeName;
   startDate?: string;
   endDate?: string;
   startTime?: string;
@@ -207,4 +207,12 @@ export interface Block {
   content: string;
   children?: Block[];
   parentId?: string | null;
+}
+
+export interface MainNavigationItem {
+  id: string;
+  className: string;
+  label: string;
+  path: string;
+  icon: React.ComponentType;
 }

@@ -5,11 +5,11 @@ import AppFrame from '@/components/AppFrame';
 import TeamCalendar from '@/components/TeamCalendar';
 import TeamMemberList from '@/components/TeamMemberList';
 import TeamMembersData from '@/data/teamMembersData';
-import { AvailabilityEvent, RecurrenceType, EventTypeType } from '@/types';
-import EventEditor from '@/components/EventEditor';
+import { AvailabilityEvent, RecurrenceType, EventTypeName } from '@/types';
 import './page.scss';
-import DataViewer from '@/components/DataViewer';
 import { DateTime } from 'luxon';
+import EventEditor from '@/components/EventEditor';
+import DataViewer from '@/components/DataViewer';
 
 export default function Sandbox() {
   const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>(
@@ -21,6 +21,11 @@ export default function Sandbox() {
     setSelectedTeamMembers(selected);
   };
 
+  const handleTeamMemberFilter = useCallback((filter: string) => {
+    console.log('Team member filter changed:', filter);
+    console.log('Selected Members', selectedTeamMembers);
+  }, []);
+
   const currentDate = DateTime.now().toISODate();
   const teamMemberList = TeamMembersData.map((member) => (member.firstName + " " + member.lastName));
 
@@ -29,7 +34,7 @@ export default function Sandbox() {
       firstName: "Ben",
       lastName: "Delaney",
     },
-    eventType: "Personal Appointment" as EventTypeType, // Add type assertion here
+    eventType: "Personal Appointment" as EventTypeName, // Add type assertion here
     recurrence: "Every Week" as RecurrenceType, // Add type assertion here
     startDate: currentDate,
     allDay: false,
@@ -82,6 +87,7 @@ export default function Sandbox() {
           teamMembers={TeamMembersData}
           selectedMembers={selectedTeamMembers}
           onSelectionChange={handleSelectionChange}
+          onFilterChange={handleTeamMemberFilter}
           togglable={true}
           filterable={true}
         />

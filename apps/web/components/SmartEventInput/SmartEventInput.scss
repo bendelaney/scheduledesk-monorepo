@@ -1,6 +1,7 @@
 @use 'mixins' as *;
 
 .smart-event-input-wrapper {
+  background-color: #fff;;
   display: flex;
   align-items: center;
   padding: 4px 10px;
@@ -20,7 +21,7 @@
     width: auto;
     min-width: 100px;
     padding: 4px 0;
-    caret-color: var(--primary-blue);
+    caret-color: $primary-blue;
 
     &.loading {
       color: #999;
