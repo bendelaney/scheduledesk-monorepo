@@ -82,7 +82,7 @@ export default function Sandbox() {
     //   <DataViewer data={eventEditorOutput} log={false}/>
     // </AppFrame>
     <AppFrame 
-      sidebar={
+      sidebarContent={
         <TeamMemberList 
           teamMembers={TeamMembersData}
           selectedMembers={selectedTeamMembers}

@@ -20,7 +20,7 @@ export default function SchedulePage() {
 
   return (
     <AppFrame 
-      sidebar={
+      sidebarContent={
         <TeamMemberList 
           teamMembers={TeamMembersData}
           selectedMembers={selectedTeamMembers}
