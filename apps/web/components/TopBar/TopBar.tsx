@@ -34,6 +34,8 @@ const TopBar: React.FC<TopBarProps> = ({
         <button
           className="sidebar-toggle"
           onClick={toggleSidebar}
+          aria-label="Toggle sidebar (CMD+\\)"
+          title={isSidebarOpen ? "Close sidebar (CMD+\\)" : "Open sidebar (CMD+\\)"}
         >
           {isSidebarOpen ? <SidebarOpen /> : <SidebarClosed />}
         </button>

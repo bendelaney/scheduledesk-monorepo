@@ -142,15 +142,16 @@ const TeamMemberList: React.FC<TeamMemberListProps> = ({
             <div className="team-member-list__filter" onClick={handleFilterFocus}>
               <SearchIcon className="team-member-list__filter-icon"/>
               <input
-              ref={filterInputRef}
-              type="text"
-              placeholder=""
-              value={filterText}
-              onChange={handleFilterChange}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-              onKeyDown={handleInputKeyDown}
-              className="team-member-list__filter-input"
+                ref={filterInputRef}
+                type="text"
+                placeholder=""
+                value={filterText}
+                onChange={handleFilterChange}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                onKeyDown={handleInputKeyDown}
+                className="team-member-list__filter-input"
+                title={'Filter team members'}
               />
               {filterText && (
               <button
@@ -162,7 +163,9 @@ const TeamMemberList: React.FC<TeamMemberListProps> = ({
               </button>
               )}
               {(!filterText && !filterIsFocused) && (
-                <span className="team-member-list__filter-key-tip">/</span>
+                <span 
+                  className="team-member-list__filter-key-tip"
+                  title={'Hit the \'/\' key to start searching'}>/</span>
               )}
             </div>
           )}
