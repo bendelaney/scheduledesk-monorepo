@@ -65,6 +65,7 @@ const EventEditor: FC<EventEditorProps> = ({
     const initialState = {
       teamMember: values?.teamMember,
       eventType: values?.eventType,
+      customEventName: values?.customEventName,
       startDate: values?.startDate,
       endDate: values?.endDate,
       allDay: values?.allDay ?? false,
@@ -174,6 +175,7 @@ const EventEditor: FC<EventEditorProps> = ({
     setFormState({
       teamMember: values.teamMember,
       eventType: values.eventType,
+      customEventName: values.customEventName,
       startDate: values.startDate,
       endDate: values.endDate,
       allDay: values.allDay ?? false,
@@ -207,6 +209,7 @@ const EventEditor: FC<EventEditorProps> = ({
     // Only include defined fields with proper typing
     if (formState.teamMember) output.teamMember = formState.teamMember;
     if (formState.eventType) output.eventType = formState.eventType as EventTypeName;
+    if (formState.customEventName) output.customEventName = formState.customEventName;
 
     // Store dates as YYYY-MM-DD strings without time components
     if (formState.startDate) {
@@ -413,6 +416,17 @@ const EventEditor: FC<EventEditorProps> = ({
         {...customProps}
       />
     ),
+    customEventNameInput: (customProps = {}) =>
+      formState.eventType === "Custom" ? (
+        <input
+          type="text"
+          placeholder="Enter custom event name"
+          value={formState.customEventName || ''}
+          onChange={(e) => updateField('customEventName', e.target.value)}
+          className="custom-event-name-input"
+          {...customProps}
+        />
+      ) : null,
     dateRange: (customProps = {}) => {
       // Parse dates safely, stripping any time components
       const parseDate = (dateString?: string) => {

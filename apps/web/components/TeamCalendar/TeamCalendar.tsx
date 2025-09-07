@@ -108,7 +108,7 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
             onDayClick={handleDayClick}
             activeEvent={activeEvent}
             className="team-calendar__grid"
-            showWeekends={false}
+            showWeekends={true}
           />
           
           {/* Conditional popover rendering */}

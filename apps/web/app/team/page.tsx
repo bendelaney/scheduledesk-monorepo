@@ -3,12 +3,14 @@
 import { TeamMember } from "@/types";
 import AppFrame from '@/components/AppFrame';
 import TeamMemberId from '@/components/TeamMemberId';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { useRouter } from 'next/navigation';
-import TeamMembersData from '@/data/teamMembersData';
+import { useTeamMembers } from '@/lib/supabase/hooks/useTeamMembers';
 import './TeamPage.scss';
 
 export default function TeamPage() {
   const router = useRouter();
+  const { data: teamMembers, loading, error } = useTeamMembers();
 
   const handleMemberClick = (member: TeamMember) => {
     // Navigate using member ID or create a slug
@@ -18,13 +20,20 @@ export default function TeamPage() {
 
   return (
     <AppFrame className="team-page">
+      <LoadingSpinner isLoading={loading} />
       <div className="team-grid">
-        {TeamMembersData.map((member) => (
+        {error && (
+          <div style={{ padding: '20px', background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', marginBottom: '20px' }}>
+            <h4>⚠️ Database Connection Issue</h4>
+            <p>{error}</p>
+          </div>
+        )}
+        {!loading && teamMembers.map((member) => (
           <TeamMemberId
             key={member.id}
             teamMember={member}
-            avatarPlacement="left"
-            stackNames={true}
+            avatarPlacement="top"
+            stackNames={false}
             onClick={() => handleMemberClick(member)}
           />
         ))}

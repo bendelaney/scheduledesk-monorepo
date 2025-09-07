@@ -31,6 +31,11 @@ export const EventTypes: EventTypeConfig[] = [
     name: "Vacation",
     displayName: "On Vacation",
     color: "#2BAA2E" // --person-green
+  },
+  {
+    name: "Custom",
+    displayName: "Custom",
+    color: "#0087ff" // --primary-blue
   }
 ];
 

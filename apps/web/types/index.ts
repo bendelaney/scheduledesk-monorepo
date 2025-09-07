@@ -134,7 +134,8 @@ export type EventTypeName =
   | "Ends Early" 
   | "Personal Appointment" 
   | "Not Working" 
-  | "Vacation";
+  | "Vacation"
+  | "Custom";
 
 export type RecurrenceType = 
   | "Every Week"
@@ -160,6 +161,7 @@ export interface AvailabilityEvent {
   id?: string;
   teamMember: Partial<TeamMember>;
   eventType: EventTypeName;
+  customEventName?: string;
   startDate?: string;
   endDate?: string;
   startTime?: string;
