@@ -1,7 +1,11 @@
 .app-frame.team-calendar-page {
   .content-wrapper {
     padding: 0 14px;
-  }
+
+    @media (max-width: 768px) {
+      padding: 0;
+    }
+}
 
   .team-member-list {
     margin-left: -14px;
