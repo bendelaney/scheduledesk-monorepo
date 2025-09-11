@@ -1,4 +1,14 @@
 .app-frame.team-calendar-page {
+  .new-event-button {
+    color: $primary-blue;
+    &:hover {
+    }
+    
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
   .content-wrapper {
     padding: 0 14px;
 
@@ -24,5 +34,15 @@
     .team-member-list__header {
       opacity: 0;
     }
+  }
+
+}
+
+.team-calendar__new-event-popover {
+  .event-editor__actions {
+    display: flex; 
+    align-items: center;
+    justify-content: right;
+    padding-top: 8px;
   }
 }

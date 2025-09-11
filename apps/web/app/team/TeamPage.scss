@@ -8,7 +8,9 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 2.2rem;
     background-color: $app-bg;
-    padding: 2rem 20% 2rem 20%;
+    padding: 2rem;
+    max-width: 680px;
+    margin: 0 auto;
   }
 
   .team-member-id {

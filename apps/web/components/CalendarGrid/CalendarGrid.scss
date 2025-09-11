@@ -191,7 +191,6 @@
     min-height: 120px;
     padding: 0.2rem;
     border-right: 1px solid #e5e7eb;
-    cursor: pointer;
     transition: background-color 0.15s ease;
     position: relative;
 
@@ -244,6 +243,29 @@
       max-height: calc(100% - 2rem);
       overflow-y: auto;
     }
+
+    &__new-event-button {
+      position: absolute;
+      bottom: 0rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      color: $light-gray;
+      opacity: 1;
+      font-size: 1.7rem;
+      
+      &:hover {
+        color: $medium-dark-gray;
+        transform: translateX(-50%) scale(1.1);
+      }
+    }
+
+    @media (max-width: 768px) {
+      padding: 0.1rem;
+    }
   }
 
   // the Calendar Event
@@ -252,7 +274,6 @@
     padding: 0.175rem 0.3rem;
     border-radius: 0.4rem;
     font-size: 0.75rem;
-    cursor: pointer;
     transition: all 0.15s ease;
     color: #fff;
     justify-content: space-between;
@@ -275,65 +296,84 @@
       min-width: 0; 
     }
 
-    &__info {
+    &__eventType {
       font-weight: 350;
       letter-spacing: -0.02rem;
       margin-left: 0.25rem; // Small gap between member and info
       overflow: hidden; // Hide overflow
       text-overflow: ellipsis; // Show ellipsis if truncated
       
-      // Hide info text when container gets narrow
-      // @media (max-width: 768px) {
-      //   display: none;
-      // }
-    }
-    
-    &__info {
-      // This will hide the info when the calendar day is narrow
-      @container calendar-day (max-width: 100px) {
+      &--short {
         display: none;
       }
-    }
 
+      @container calendar-day (max-width: 119px) {
+        &--full {
+          display: none;
+        }
+        &--short {
+          display: inline-block;
+        }
+      }
+    }
+    
     // Dynamic event type styling using CSS custom properties
+
+    $eventtype-starts-late: #feb816;
+$eventtype-ends-early: #FF7F00;
+$eventtype-personal-appointment: #9D4DF2;
+$eventtype-not-working: #A87360;
+$eventtype-on-vacation: #2BAA2E;
+$eventtype-custom: #4babff;
+
     &--starts-late {
-      background-color: $person-orange;
+      background-color: $eventtype-starts-late;
 
       &.calendar-event--active {
-        background-color: color-mix(in srgb, $person-orange 80%, #000 20%);
+        background-color: color-mix(in srgb, $eventtype-starts-late 80%, #000 20%);
       }
     }
 
     &--ends-early {
-      background-color: $person-orange;
+      background-color: $eventtype-ends-early;
 
       &.calendar-event--active {
-        background-color: color-mix(in srgb, $person-orange 80%, #000 20%);
+        background-color: color-mix(in srgb, $eventtype-ends-early 80%, #000 20%);
       }
     }
     
     &--personal-appointment {
-      background-color: $person-purple;
+      background-color: $eventtype-personal-appointment;
 
       &.calendar-event--active {
-        background-color: color-mix(in srgb, $person-purple 80%, #000 20%);
+        background-color: color-mix(in srgb, $eventtype-personal-appointment 80%, #000 20%);
       }
     }
     
     &--not-working {
-      background-color: $person-brown;
+      background-color: $eventtype-not-working;
 
       &.calendar-event--active {
-        background-color: color-mix(in srgb, $person-brown 80%, #000 20%);
+        background-color: color-mix(in srgb, $eventtype-not-working 80%, #000 20%);
       }
     }
     
     &--vacation {
-      background-color: $person-green;
+      background-color: $eventtype-on-vacation;
 
       &.calendar-event--active {
-        background-color: color-mix(in srgb, $person-green 80%, #000 20%);
+        background-color: color-mix(in srgb, $eventtype-on-vacation 80%, #000 20%);
       }
+    }
+
+    @media (max-width: 768px) {
+      font-size: 0.60rem;
+      padding: 0.15rem 0.2rem 0.18rem;
+      border-radius: 0.2rem;
+    }
+    @media (max-width: 480px) {
+      
+    
     }
   }
 }

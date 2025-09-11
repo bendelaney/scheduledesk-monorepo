@@ -65,6 +65,146 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     startDate: "2025-09-15",
     endDate: "2025-09-19",
     allDay: true
+  },
+  {
+    id: "8",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvNTM2MDYx", firstName: "Dario", lastName: "Ré" },
+    eventType: "Not Working",
+    startDate: "2025-09-08",
+    endDate: "2025-09-08",
+    allDay: true
+  },
+  {
+    id: "9",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY5NTE4", firstName: "Anthony", lastName: "Morrow" },
+    eventType: "Starts Late",
+    startDate: "2025-09-10",
+    endDate: "2025-09-10",
+    startTime: "11:30:00",
+    endTime: "17:00:00",
+    allDay: false
+  },
+  {
+    id: "10",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvOTExMjIy", firstName: "Felix", lastName: "Gayton" },
+    eventType: "Personal Appointment",
+    startDate: "2025-09-12",
+    endDate: "2025-09-12",
+    startTime: "14:00:00",
+    endTime: "16:30:00",
+    allDay: false
+  },
+  {
+    id: "11",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY5NTA5", firstName: "Jose", lastName: "Villa" },
+    eventType: "Ends Early",
+    startDate: "2025-09-11",
+    endDate: "2025-09-11",
+    startTime: "08:00:00",
+    endTime: "13:00:00",
+    allDay: false
+  },
+  {
+    id: "12",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvNDc1NDUx", firstName: "Tal", lastName: "Weisenburger" },
+    eventType: "Vacation",
+    startDate: "2025-09-16",
+    endDate: "2025-09-20",
+    allDay: true
+  },
+  {
+    id: "13",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY4Mzkz", firstName: "Ben", lastName: "Delaney" },
+    eventType: "Personal Appointment",
+    startDate: "2025-09-13",
+    endDate: "2025-09-13",
+    startTime: "10:00:00",
+    endTime: "12:00:00",
+    allDay: false
+  },
+  {
+    id: "14",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY5NTEx", firstName: "Wakan", lastName: "Burrows" },
+    eventType: "Not Working",
+    startDate: "2025-09-14",
+    endDate: "2025-09-14",
+    allDay: true
+  },
+  {
+    id: "15",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMTg5NjI2OA==", firstName: "Peter", lastName: "Sherman" },
+    eventType: "Starts Late",
+    startDate: "2025-09-17",
+    endDate: "2025-09-17",
+    startTime: "12:00:00",
+    endTime: "17:00:00",
+    allDay: false
+  },
+  {
+    id: "16",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvNjAzMzI2", firstName: "Zayren", lastName: "Bubb" },
+    eventType: "Ends Early",
+    startDate: "2025-09-18",
+    endDate: "2025-09-18",
+    startTime: "08:00:00",
+    endTime: "15:00:00",
+    allDay: false
+  },
+  {
+    id: "17",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzMxMzczOA==", firstName: "Justin", lastName: "Howe" },
+    eventType: "Personal Appointment",
+    startDate: "2025-09-19",
+    endDate: "2025-09-19",
+    startTime: "15:30:00",
+    endTime: "17:00:00",
+    allDay: false
+  },
+  {
+    id: "18",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMjgyMTI3Mw==", firstName: "Coty", lastName: "Newby" },
+    eventType: "Vacation",
+    startDate: "2025-09-22",
+    endDate: "2025-09-26",
+    allDay: true
+  },
+  {
+    id: "19",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzMxMzczOA==", firstName: "Justin", lastName: "Howe" },
+    eventType: "Not Working",
+    startDate: "2025-09-21",
+    endDate: "2025-09-21",
+    allDay: true
+  },
+  {
+    id: "20",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzMxMzczOA==", firstName: "Justin", lastName: "Howe" },
+    eventType: "Starts Late",
+    startDate: "2025-09-24",
+    endDate: "2025-09-24",
+    startTime: "10:30:00",
+    endTime: "17:00:00",
+    allDay: false
+  },
+  {
+    id: "21",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzMxMzczOA==", firstName: "Justin", lastName: "Howe" },
+    eventType: "Personal Appointment",
+    startDate: "2025-09-25",
+    endDate: "2025-09-25",
+    startTime: "09:00:00",
+    endTime: "11:30:00",
+    allDay: false
+  },
+  {
+    id: "22",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzMxMzczOA==", firstName: "Justin", lastName: "Howe" },
+    eventType: "Ends Early",
+    startDate: "2025-09-27",
+    endDate: "2025-09-27",
+    startTime: "08:00:00",
+    endTime: "14:30:00",
+    allDay: false
   }
 ];
 

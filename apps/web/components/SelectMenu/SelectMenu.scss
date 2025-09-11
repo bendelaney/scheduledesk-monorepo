@@ -1,16 +1,10 @@
 .selectmenu__control {
-  .selectmenu__value-container {
-    // order: 2;
-    // padding-left: 0;
-  }
-  .selectmenu__indicators {
-    // order: 1;
+  .selectmenu__value-container {}
 
-    .selectmenu__clear-indicator {
-      // order: 2;
-      // font-size: 24px;
-      // margin-right: 0;
-      // padding: 0;
+  .selectmenu__indicators {
+    .selectmenu__clear-indicator,
+    .selectmenu__dropdown-indicator {
+      cursor: pointer;
     }
   } 
 }

@@ -499,7 +499,7 @@ const EventEditor: FC<EventEditorProps> = ({
           selectMenuProps={{
             styles: SelectMenuStylePresets.Large,
             instanceId: "event-editor-time-range",
-            ...customProps.selectMenuProps
+              ...customProps.selectMenuProps
           }}
           {...customProps}
         />
@@ -527,7 +527,7 @@ const EventEditor: FC<EventEditorProps> = ({
             selectMenuProps={{
               styles: SelectMenuStylePresets.Large,
               instanceId: "event-editor-monthly-recurrence",
-              ...customProps.selectMenuProps
+                  ...customProps.selectMenuProps
             }}
             {...customProps}
           />
@@ -543,7 +543,7 @@ const EventEditor: FC<EventEditorProps> = ({
             selectMenuProps={{
               styles: SelectMenuStylePresets.Large,
               instanceId: "event-editor-monthly-recurrence-detail",
-              ...customProps.detailSelectorProps?.selectMenuProps
+                  ...customProps.detailSelectorProps?.selectMenuProps
             }}
             {...customProps.detailSelectorProps}
           />

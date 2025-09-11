@@ -28,10 +28,21 @@ const useClickOutside = (
         targetElement = targetElement.parentNode;
       }
 
-      // Do nothing if clicking ref's element or descendent elements or the ignore element
+      // Check if clicking on a react-select dropdown menu or controls
+      const clickedElement = event.target as Element;
+      const isReactSelectMenu = clickedElement.closest('.selectmenu__menu') || 
+                               clickedElement.closest('.selectmenu__menu-list') ||
+                               clickedElement.closest('.selectmenu__option') ||
+                               clickedElement.closest('.selectmenu__clear-indicator') ||
+                               clickedElement.closest('.selectmenu__dropdown-indicator') ||
+                               clickedElement.closest('.selectmenu__control') ||
+                               clickedElement.closest('[id^="react-select"]');
+
+      // Do nothing if clicking ref's element or descendent elements or the ignore element or react-select menus
       if (
         isInsideElement ||
-        (ignoreRef?.current && ignoreRef.current.contains(event.target as Node))
+        (ignoreRef?.current && ignoreRef.current.contains(event.target as Node)) ||
+        isReactSelectMenu
       ) {
         return;
       }

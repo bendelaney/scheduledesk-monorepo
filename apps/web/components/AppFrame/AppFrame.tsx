@@ -1,12 +1,17 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from "react";
-import TopBar from "../TopBar";
+import { SidebarClosed, SidebarOpen } from "../Icons";
+// import TopBar from "../TopBar";
 import "./AppFrame.scss";
 
 interface AppFrameProps {
   className?: string;
   children: React.ReactNode;
+  topBarLeftContent?: React.ReactNode;
+  topBarMiddleContent?: React.ReactNode;
+  topBarRightContent?: React.ReactNode;
+  showSidebarToggle?: boolean;
   sidebarContent?: React.ReactNode;
   sidebarOpen?: boolean;
   sidebarWidth?: string;
@@ -15,9 +20,13 @@ interface AppFrameProps {
 const AppFrame: React.FC<AppFrameProps> = ({ 
   className,
   children, 
+  showSidebarToggle = true,
   sidebarContent,
   sidebarOpen,
-  sidebarWidth = "240px"
+  sidebarWidth = "240px",
+  topBarLeftContent,
+  topBarMiddleContent,
+  topBarRightContent
 }) => {
   const [isSidebarOpen, setSidebarOpen] = useState(sidebarOpen ?? true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -48,14 +57,34 @@ const AppFrame: React.FC<AppFrameProps> = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const handleToggleSidebar = () => {
+    setSidebarOpen(!isSidebarOpen);
+  }
+
   return (
     <div className={`app-frame ${className}`}>
-      <TopBar
-        sidebar={!!sidebarContent}
-        toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
-        isSidebarOpen={isSidebarOpen}
-      />
-      
+      <div className="top-bar">
+        <div className="top-bar__left">
+          {showSidebarToggle && (
+            <button
+              className="sidebar-toggle-button"
+              onClick={handleToggleSidebar}
+              aria-label="Toggle sidebar (CMD+\\)"
+              title="Toggle sidebar (CMD+\\)"
+            >
+              {isSidebarOpen ? <SidebarOpen /> : <SidebarClosed />}
+            </button>
+          )}
+          {topBarLeftContent}
+        </div>
+        <div className="top-bar__middle">
+          {topBarMiddleContent}
+        </div>
+        <div className="top-bar__right">
+          {topBarRightContent}
+        </div>
+      </div>
+
       <div className="content-wrapper">
         {sidebarContent && (
           <div

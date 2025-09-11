@@ -4,8 +4,12 @@ import React, { useState, useEffect } from 'react';
 import AppFrame from '@/components/AppFrame';
 import TeamMemberList from '@/components/TeamMemberList';
 import { useTeamMembers } from '@/lib/supabase/hooks/useTeamMembers';
+import { useRouter, usePathname } from 'next/navigation';
+import MainNavigationConfig from '@/config/MainNavigation';
 
 export default function SchedulePage() {
+  const router = useRouter();
+  const pathname = usePathname();
   const { data: teamMembers, loading, error } = useTeamMembers();
   const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>([]);
   
@@ -26,9 +30,35 @@ export default function SchedulePage() {
     console.log('Team member filter changed:', filter);
   };
 
+  const handleNavigation = (path: string) => {
+    router.push(path);
+  };
+
   if (loading) {
     return (
-      <AppFrame sidebarOpen={false} sidebarWidth="260px">
+      <AppFrame 
+        sidebarOpen={false} 
+        sidebarWidth="260px"
+        topBarMiddleContent={
+          <div className="top-bar__navigation">
+            {MainNavigationConfig.map((navItem) => {
+              const Icon = navItem.icon;
+              const isActive = pathname === navItem.path;
+              
+              return (
+                <button
+                  key={navItem.id}
+                  id={`main-nav-${navItem.id}`}
+                  className={`main-nav-button ${navItem.className} ${isActive ? 'active' : ''}`}
+                  onClick={() => handleNavigation(navItem.path)}
+                >
+                  <Icon />
+                </button>
+              );
+            })}
+          </div>
+        }
+      >
         <div>Loading team members...</div>
       </AppFrame>
     );
@@ -55,6 +85,25 @@ export default function SchedulePage() {
       }
       sidebarOpen={false}
       sidebarWidth="260px"
+      topBarMiddleContent={
+        <div className="top-bar__navigation">
+          {MainNavigationConfig.map((navItem) => {
+            const Icon = navItem.icon;
+            const isActive = pathname === navItem.path;
+            
+            return (
+              <button
+                key={navItem.id}
+                id={`main-nav-${navItem.id}`}
+                className={`main-nav-button ${navItem.className} ${isActive ? 'active' : ''}`}
+                onClick={() => handleNavigation(navItem.path)}
+              >
+                <Icon />
+              </button>
+            );
+          })}
+        </div>
+      }
     >
       <div>SchedulePad goes here</div>
     </AppFrame>

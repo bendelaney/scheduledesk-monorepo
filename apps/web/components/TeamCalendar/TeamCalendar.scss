@@ -10,11 +10,17 @@
   }
 
   // The Team Member Event Popover
-  &__event-popover {
+  &__event-popover,
+  &__new-event-popover {
     background-color: $app-bg;
 
     .team-member-id {
       margin-bottom: 14px;
+    }
+  }
+  &__new-event-popover {
+    .BDPopover-Content {
+      padding-top: 36px;
     }
   }
 }

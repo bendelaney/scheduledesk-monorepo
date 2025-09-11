@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { AvailabilityEvent, TeamMember, EventTypeName } from '@/types';
+import { AvailabilityEvent, TeamMember } from '@/types';
+import { getEventTypeColor } from '@/config/EventTypes';
 import AvailabilityEventsData from '@/data/availabilityEventsData';
-import { AngleUp, AngleDown } from '../Icons';
+import { AngleUp, AngleDown, PlusCircle } from '../Icons';
 import TeamMembersData from '@/data/teamMembersData';
 import './CalendarGrid.scss';
 
@@ -27,6 +28,7 @@ export interface CalendarGridProps {
   teamMembers?: TeamMember[];
   onEventClick?: (event: AvailabilityEvent, targetElement?: HTMLElement) => void;
   onDayClick?: (date: string) => void;
+  onNewEventClick?: (date: string, targetElement: HTMLElement) => void;
   className?: string;
   infiniteScroll?: boolean;
   activeEvent?: AvailabilityEvent | null;
@@ -64,39 +66,60 @@ const getFirstDayOfMonth = (year: number, month: number): number => {
   return new Date(year, month, 1).getDay();
 };
 
-export const getEventDisplayText = (event: AvailabilityEvent): string => {
+export const getEventTypeDisplayText = (event: AvailabilityEvent, isShort: boolean = false): string => {
   const { eventType, startTime, endTime } = event;
   
   // Format time helper (remove seconds, convert to 12hr format)
-  const formatTime = (time: string): string => {
+  const formatTime = (time: string, showAMPM: boolean = !isShort): string => {
     if (!time) return '';
     const [hours, minutes] = time.split(':');
     const hour12 = parseInt(hours) === 0 ? 12 : parseInt(hours) > 12 ? parseInt(hours) - 12 : parseInt(hours);
-    const ampm = parseInt(hours) < 12 ? 'AM' : 'PM';
+    const ampm = parseInt(hours) < 12 ? (isShort ? 'a':'AM') : (isShort ? 'p':'PM');
+    if (isShort) {
+      return `${hour12}${minutes === '00' ? '' : ':'+minutes}${showAMPM ? ampm : ''}`;
+    }
     return `${hour12}:${minutes}`;
+  };
+  const isAM = (time: string): boolean => {
+    if (!time) return false;
+    const [hours] = time.split(':');
+    return parseInt(hours) < 12;
   };
   
   switch (eventType) {
     case "Starts Late":
+      if (isShort) {
+        return startTime ? `>${formatTime(startTime)}` : 'late';
+      }
       return startTime ? `start: ${formatTime(startTime)}` : 'starts late';
       
     case "Ends Early":
+      if (isShort) {
+        return endTime ? `<${formatTime(endTime)}` : 'early';
+      }
       return endTime ? `end: ${formatTime(endTime)}` : 'ends early';
       
     case "Not Working":
-      return 'off';
+      return isShort ? '×' : 'off';
       
     case "Vacation":
-      return 'vacation';
+      return isShort ? '⛱️' : 'vacation';
       
     case "Personal Appointment":
       if (startTime && endTime) {
+        if (isShort) {
+          if (isAM(startTime) === isAM(endTime)) {
+            return `${formatTime(startTime, false)}-${formatTime(endTime, true)}`;
+          } else {
+            return `${formatTime(startTime)}-${formatTime(endTime)}`;
+          }
+        }
         return `${formatTime(startTime)}-${formatTime(endTime)}`;
       }
-      return 'personal appointment';
+      return isShort ? 'appt' : 'personal appointment';
       
     default:
-      return eventType;
+      return isShort ? eventType.slice(0, 4) : eventType;
   }
 };
 
@@ -244,6 +267,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   events = AvailabilityEventsData,
   onEventClick,
   onDayClick,
+  onNewEventClick,
   className = '',
   infiniteScroll = true,
   activeEvent = null,
@@ -589,6 +613,12 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     const targetElement = e.currentTarget as HTMLElement;
     onEventClick?.(event, targetElement);
   }, [onEventClick]);
+
+  const handleNewEventClick = useCallback((date: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const targetElement = e.currentTarget as HTMLElement;
+    onNewEventClick?.(date, targetElement);
+  }, [onNewEventClick]);
   
   const renderEvent = (event: AvailabilityEvent) => {
     const isActive = activeEvent && activeEvent.id === event.id;
@@ -599,11 +629,15 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         className={`calendar-event calendar-event--${event.eventType.toLowerCase().replace(/\s+/g, '-')} ${isActive ? 'calendar-event--active' : ''}`}
         onClick={(e) => handleEventClick(event, e)}
         title={`${event.teamMember.firstName} ${event.teamMember.lastName || ''}: ${event.eventType}${event.allDay ? '' : ` (${event.startTime} - ${event.endTime})`}`}
+        style={{ backgroundColor: getEventTypeColor(event.eventType) }}
       >
         <span className="calendar-event__member">{event.teamMember.firstName} {/*{event.teamMember.lastName || ''}*/}</span>
         {/* <span className="calendar-event__type">{event.eventType}</span> */}
-        <span className="calendar-event__info">
-          {getEventDisplayText(event)}
+        <span className="calendar-event__eventType--full">
+          {getEventTypeDisplayText(event)}
+        </span>
+        <span className="calendar-event__eventType--short">
+          {getEventTypeDisplayText(event, true)}
         </span>
       </div>
     );
@@ -619,6 +653,15 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       <div className="calendar-day__events">
         {day.events.map(renderEvent)}
       </div>
+      {onNewEventClick && (
+        <button
+          className="calendar-day__new-event-button"
+          onClick={(e) => handleNewEventClick(day.date, e)}
+          title={`Add new event for ${day.date}`}
+        >
+          <PlusCircle />
+        </button>
+      )}
     </div>
   );
   

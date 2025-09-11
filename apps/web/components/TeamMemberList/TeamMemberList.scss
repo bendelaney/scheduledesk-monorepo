@@ -185,7 +185,7 @@
   &__item-content {
     display: flex;
     align-items: center;
-    gap: 12px;
+    // gap: 12px;
     flex: 1;
     min-width: 0; // Critical for proper shrinking
     overflow: hidden; // Hide overflow content
