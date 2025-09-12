@@ -1,6 +1,6 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 # migration stuff
-/_temp-migration/
+/_temp_migration/
 
 # Dependencies
 node_modules
