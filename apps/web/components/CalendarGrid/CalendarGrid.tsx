@@ -122,7 +122,7 @@ export const getEventTypeDisplayText = (event: AvailabilityEvent, isShort: boole
       return customEventName || (isShort ? 'cust' : 'custom');
       
     default:
-      return isShort ? eventType.slice(0, 4) : eventType;
+      return isShort ? String(eventType).slice(0, 4) : String(eventType);
   }
 };
 

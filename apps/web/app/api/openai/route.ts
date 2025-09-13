@@ -70,10 +70,13 @@ Event type rules:
 
 Recurrence rules:
 - If "Every Week" is mentioned, include it as the "recurrence" field, and DO NOT include the "monthlyRecurrence" field.
-- DO NOT EVER include the "recurrence" field unless recurrence is explicitly specified (e.g., "every..." "every other..." or "each..."), otherwise omit the "monthlyRecurrence" field and its child fields entirely.
-- DO NOT EVER include the "monthlyRecurrence" field or its child fields ('monthlyWeek' and 'monthlyDayOfWeek') if MONTHLY recurrence is explicitly specified (e.g., "Every Month" or "each month"), otherwise omit the "monthlyRecurrence" field and its child fields entirely.
-- DO NOT EVER include the monthlyWeek and monthlyDayOfWeek fields if "Week & Day" recurrence is inferred (by the use of the words "First", "Second", "Third", "Fourth", "Last" ALONG WITH a corresponding day name like "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"). 
-- ONLY include the monthlyWeek and monthlyDayOfWeek fields if the message clearly describes a specific week and day (e.g. "first Monday", "third Friday").
+- DO NOT include the "recurrence" field unless recurrence is explicitly specified (e.g., "every..." "every other..." or "each...").
+- If MONTHLY recurrence is explicitly specified (e.g., "Every Month", "each month") OR inferred from patterns like "every month on the [number]", then:
+  - Include "Every Month" as the "recurrence" field
+  - Include the "monthlyRecurrence" field with appropriate sub-fields
+- For monthly recurrence patterns:
+  - If a specific date number is mentioned (e.g., "on the 4th", "on the 15th", "every month on the 20th"), use type "Exact Date" and include "monthlyDate" field with the number (1-31)
+  - If a specific week and day are mentioned (e.g., "first Monday", "third Friday", "last Tuesday"), use type "Week & Day" and include both "monthlyWeek" and "monthlyDayOfWeek" fields
 - If "Every Other Week" is mentioned, include it as the "recurrence" field, and DO NOT include the "monthlyRecurrence" field.
 
 Date rules:

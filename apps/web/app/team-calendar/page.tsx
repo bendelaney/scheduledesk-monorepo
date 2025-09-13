@@ -29,6 +29,7 @@ export default function CalendarPage() {
   
   // New Event Popover state
   const [showNewEventPopover, setShowNewEventPopover] = useState(false);
+  const [popoverIsSaveable, setPopoverIsSaveable] = useState(false);
   const [newEventData, setNewEventData] = useState<Partial<AvailabilityEvent>>({});
   const newEventButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -136,6 +137,19 @@ export default function CalendarPage() {
           closeButton={true}
           // width={400}
         >
+          <Button 
+            disabled={!popoverIsSaveable}
+            // variant={popoverIsSaveable ? 'primary' : 'ghost'}
+            size="small" 
+            onClick={() => {
+              if (popoverIsSaveable) {
+                console.log('STUB: Save new event:', newEventData);
+              }
+            }} 
+            className="team-calendar__popover-save-button"
+          >
+            Save
+          </Button>
           <EventEditor
             formConfig={[
               'smartEventInput',
@@ -150,19 +164,8 @@ export default function CalendarPage() {
             ]}
             values={newEventData}
             onChange={handleNewEventDataChange}
+            onSaveableChange={setPopoverIsSaveable}
           />
-          <div className="event-editor__actions">
-            <Button 
-              variant="primary"
-              onClick={() => {
-              // Handle save logic here
-              console.log('Saving event:', newEventData);
-              handleNewEventPopoverClose();
-              }}
-            >
-              Save
-            </Button>
-          </div>
         </Popover>
       )}
     </AppFrame>

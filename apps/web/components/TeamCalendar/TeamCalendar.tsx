@@ -182,7 +182,7 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
               {!activeEvent && (
                 <Button 
                   disabled={!popoverIsSaveable}
-                  variant={popoverIsSaveable ? 'primary' : 'ghost'}
+                  // variant={popoverIsSaveable ? 'primary' : 'ghost'}
                   size="small" 
                   onClick={() => {
                     if (popoverIsSaveable) {

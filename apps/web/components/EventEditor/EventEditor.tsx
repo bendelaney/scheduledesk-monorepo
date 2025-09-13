@@ -18,6 +18,7 @@ import {
   EventTypeName,
   RecurrenceType,
   MonthlyRecurrenceDataType,
+  MonthlyDateType,
   AvailabilityEvent
 } from "@/types";
 import SmartEventInput from '@/components/SmartEventInput';
@@ -120,10 +121,10 @@ const EventEditor: FC<EventEditorProps> = ({
   // Focus custom event name input when eventType changes to "Custom"
   useEffect(() => {
     if (formState.eventType === "Custom" && customEventNameInputRef.current) {
-      // Use setTimeout to ensure the input is rendered before focusing
+      // Use longer delay to ensure this happens after SmartEventInput focus logic
       setTimeout(() => {
         customEventNameInputRef.current?.focus();
-      }, 0);
+      }, 50);
     }
   }, [formState.eventType]);
 
@@ -156,9 +157,15 @@ const EventEditor: FC<EventEditorProps> = ({
           newState.endTime = undefined;
         }
         
-        // If recurrence is changed, handle monthlyRecurrence
-        if (key === 'recurrence' && value !== 'Every Month') {
-          newState.monthlyRecurrence = undefined;
+        // If recurrence is changed, handle monthlyRecurrence and endDate
+        if (key === 'recurrence') {
+          if (value !== 'Every Month') {
+            newState.monthlyRecurrence = undefined;
+          }
+          // Clear endDate for recurring events (infinite recurrence by default)
+          if (value) {
+            newState.endDate = undefined;
+          }
         }
         
         // Handle monthlyRecurrence type changes
@@ -301,6 +308,12 @@ const EventEditor: FC<EventEditorProps> = ({
     }
   }, [formState, onChange]);
   
+  // Helper function to convert number to ordinal string
+  const numberToOrdinal = (num: number): string => {
+    const ordinals = ["1st","2nd","3rd","4th","5th","6th","7th","8th","9th","10th","11th","12th","13th","14th","15th","16th","17th","18th","19th","20th","21st","22nd","23rd","24th","25th","26th","27th","28th","29th","30th","31st"];
+    return ordinals[num - 1] || `${num}th`; // Fallback for numbers outside 1-31
+  };
+
   // Special handlers for complex interactions
   const handleAllDay = (isAllDay: boolean) => {
     updateField('allDay', isAllDay);
@@ -419,18 +432,33 @@ const EventEditor: FC<EventEditorProps> = ({
         
           // Only process if we have data
           if (data && data.length > 0) {
-            const normalizedData = data.map(event => ({
-              ...event,
-              // we might need this... ? 
-              // or other normalizations..? 
-              // startDate: event.startDate,
-              // endDate: event.endDate
-            }))[0]; // Take the first event
+            const normalizedData = data.map(event => {
+              // Handle monthlyRecurrence monthlyDate conversion from number to ordinal string
+              let normalizedMonthlyRecurrence = event.monthlyRecurrence;
+              if (event.monthlyRecurrence?.monthlyDate && typeof event.monthlyRecurrence.monthlyDate === 'number') {
+                normalizedMonthlyRecurrence = {
+                  ...event.monthlyRecurrence,
+                  monthlyDate: numberToOrdinal(event.monthlyRecurrence.monthlyDate) as MonthlyDateType
+                };
+              }
+
+              return {
+                ...event,
+                monthlyRecurrence: normalizedMonthlyRecurrence
+              };
+            })[0]; // Take the first event
             
-            // Set as form state directly
-            setFormState(prev => ({
-              ...normalizedData
-            }));
+            // Set form state with dependency handling for recurring events
+            setFormState(prev => {
+              const newState = { ...normalizedData };
+
+              // If this is a recurring event, clear endDate for infinite recurrence
+              if (normalizedData.recurrence) {
+                newState.endDate = undefined;
+              }
+
+              return newState;
+            });
           }
         }}
         additionalRules={`When a name is mentioned, check it against this list: ${TeamMembersData.map(member => 
@@ -621,12 +649,18 @@ const EventEditor: FC<EventEditorProps> = ({
   };
 
   return (
-    <div className="event-editor">
+    <div
+      className="event-editor"
+      onKeyDown={(e) => {
+        // Prevent keyboard events from bubbling up to parent components
+        e.stopPropagation();
+      }}
+    >
       {formConfig?.map((configItem, index) => {
         // Handle both string and object format
         const componentName = typeof configItem === 'string' ? configItem : configItem.component;
         const customProps = typeof configItem === 'object' ? configItem.props || {} : {};
-        
+
         const renderFunction = formControlRenderers[componentName];
         return renderFunction ? <React.Fragment key={index}>{renderFunction(customProps)}</React.Fragment> : null;
       })}
