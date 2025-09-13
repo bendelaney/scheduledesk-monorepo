@@ -16,8 +16,38 @@
 
     .team-member-id {
       margin-bottom: 14px;
+      margin-left: auto; // Push to the right
+      width: fit-content; // Only take up necessary space
+      display: flex; // Ensure proper inline layout
     }
   }
+
+  &__popover-saved-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background-color: $app-bg;
+    position: absolute;
+    top: 9px;
+    left: 9px;
+    opacity: 0;
+    color: $medium-dark-gray; 
+    font-size: 14px;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+    font-weight: 700;
+
+    svg {
+      color: $success-color;
+      font-size: 32px;
+    }
+
+    &.visible {
+      opacity: 1;
+    }
+  }
+
   &__new-event-popover {
     .BDPopover-Content {
       padding-top: 36px;

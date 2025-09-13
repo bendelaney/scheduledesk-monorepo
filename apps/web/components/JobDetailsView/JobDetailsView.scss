@@ -1,0 +1,293 @@
+@use '/src/styles/variables.scss' as *;
+@use '/src/styles/mixins.scss' as *;
+@use '/src/styles/jobHighlights.scss' as *;
+
+$gap: 16px;
+
+.job-details-view {
+  max-height: calc(100vh - (var(--modal-padding) * 2) - 40px);
+  width: 70vw;
+  max-width: 700px;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow-x: visible;
+
+  @media (max-width: 767px) {
+    width: calc(96vw - var(--modal-padding) * 2);
+  }
+  @media (max-width: 390px) {
+    width: calc(100vw - var(--modal-padding) * 2);
+    height: 90vh;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;    
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin-bottom: 24px;
+
+    .jobber-link {
+      @include link-styles($color: $jobber-green);
+      @include link-hover($hide: true);
+      border-bottom-color: transparent;
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+      margin-left: auto;
+      margin-right: 34px;
+
+      svg {
+        margin-left: 4px;
+      }
+    }
+
+    .job-title {
+      padding: 0px;
+      margin: 0;
+      border-radius: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: default;
+
+      
+      // Loop through the highlights and apply the color to the job-title
+      @each $id, $highlight in $jobHighlights {
+        &.highlight-#{$id} {
+          background: $highlight;
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          box-decoration-break: clone;
+          -webkit-box-decoration-break: clone;
+        }
+      }
+    }
+  }
+
+  .container {
+    display: flex;
+    flex: 1;
+    gap: $gap;
+    overflow: hidden;
+
+    @media (max-width: 450px) {
+      flex-direction: column;
+    }
+  }
+
+  .column {
+    display: flex;
+    // flex: 1;
+    flex-direction: column;
+    gap: $gap;
+    overflow: hidden; // Add this to contain the flex children
+
+    &.left {
+      // background: pink;
+      flex: 1;
+    }
+
+    &.right {
+      // background: lightblue;
+      flex: 1;
+    }
+  }
+
+  .label {
+    display: block;
+    font-weight: 700;
+    line-height: 1;;
+    margin-bottom: 6px;
+
+    // margin-bottom: 8px;
+  }
+
+  .secondary {
+    font-size: 14px;
+    color: var(--medium-gray);
+    font-style: italic;
+  }
+
+  .scheduling-details-container {
+    display: flex;
+    gap: 6px;
+    // background: pink;
+    flex-direction: column;
+    // margin-bottom: 16px;
+
+    .date-time {
+      display: flex;
+      flex-direction: column;
+      // justify-content: space-between;
+      // flex-wrap: nowrap;
+      gap: 6px;
+      // background: lightblue;
+      // margin-left: auto;
+  
+      .date {
+        font-weight: 700;
+      }
+  
+      .time-inputs {
+        // background: lightgreen;
+        // display: flex;
+        // align-items: center;
+        // flex-wrap: nowrap;
+        margin-right: auto;
+        min-width: 220px;
+  
+        input[type="time"] {
+          background: var(--extra-light-gray);
+          border: 1px solid var(--light-gray);
+          border-radius: 6px;
+          padding: 3px;
+          font-size: 13px;
+          font-weight: bold;
+          font-family: Inter, sans-serif;
+          text-align: right;
+          letter-spacing: -0.5px;
+          word-spacing: -2px;
+          color: var(--dark-gray);
+          cursor: pointer;
+  
+          &:hover {
+            background: var(--light-gray);
+          }
+  
+          &:focus {
+            background: #ffffff;
+            color: var(--dark-gray);
+          }
+  
+          &::selection {
+            background-color: var(--extra-light-gray);
+          }
+        }
+  
+        span {
+          font-weight: 800;
+        }
+      }
+    }
+
+    .status-selector-wrap {
+      margin-top: 16px;
+      // justify-content: space-between;
+      // align-items: center;
+    }
+  }
+
+  .fields-and-instructions {
+    display: flex;
+    flex-direction: column;
+    gap: $gap;
+    flex: 1; // Allow this to grow and fill available space
+    overflow: hidden; // Contain the flex children
+    
+    .fields {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex-shrink: 0; // Don't let this shrink
+      
+      .label {display: inline-block;}
+    }
+    
+    .instructions {
+      display: flex;
+      flex-direction: column;
+      flex: 1; // Allow this to grow to fill remaining space
+      min-height: 0; // Important for flex children to shrink below content size
+      
+      .label {
+        flex-shrink: 0; // Don't let the label shrink
+      }
+      
+      .instructions-text {
+        flex: 1; // Fill all remaining space
+        overflow-y: scroll; // Always show scrollbar when there's overflow
+        line-height: 1.3;
+        white-space: pre-wrap;
+      }
+    }
+  }
+
+  .client-details {
+    display: flex;
+    flex-direction: column;    
+
+    a {
+      color: inherit;
+      border-bottom-color: transparent;
+    }
+
+    .client-name {
+      line-height: 1;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .client-location {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 4px;
+
+      a {
+        @include link-styles($color: var(--dark-gray));
+        @include link-hover($color: var(--primary-blue));
+      }
+    }
+
+    .client-contact-info {
+      line-height: 1.4;
+
+      a {
+        @include link-hover($color: var(--primary-blue));
+      }
+    }
+  }
+
+  .assigned-team-members{
+    line-height: 1.4;
+
+    ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      .team-member {
+        margin-top: 8px;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 600;
+
+        .avatar {
+          // display: flex;
+          // align-items: center;
+          // justify-content: center;
+          margin: 0 auto;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          overflow: hidden;
+          background: var(--light-gray);
+          font-weight: 700;
+          color: var(--medium-dark-gray);
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+      }
+    }
+  }
+}

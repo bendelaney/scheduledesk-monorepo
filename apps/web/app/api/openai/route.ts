@@ -35,7 +35,8 @@ Return a JSON object. The expected structure of this object is exactly as follow
 [
   {
     teamMember: object with firstName and lastName properties (e.g. { firstName: "Krystn", lastName: "Parmley" }),
-    eventType: one of ["Ends Early", "Starts Late", "Personal Appointment", "Not Working", "On Vacation"],
+    eventType: one of ["Ends Early", "Starts Late", "Personal Appointment", "Not Working", "On Vacation", "Custom"],
+    customEventName: string (ONLY include this field when eventType is "Custom"),
     startDate: string in ISO 8601 format (e.g. "2025-04-02T00:00:00Z"),
     endDate: string in ISO 8601 format (e.g. "2025-04-02T00:00:00Z"),
     allDay: boolean (true if the event lasts all day, false otherwise),
@@ -63,6 +64,9 @@ Event type rules:
 - If you infer that "Starts Late" is the event type, include the "startTime" field, but do not include the endTime field. 
 - If you infer that "Personal Appointment" is the event type, include both the "startTime" and "endTime" fields.
 - If you infer that "Personal Appointment" is the event type, AND a time is mentioned but a DURATION is NOT mentioned, assume the event lasts 1 hour and include a startTime and endTime.
+- If the event CANNOT be clearly classified as one of the other event types (Ends Early, Starts Late, Personal Appointment, Not Working, On Vacation), then classify it as "Custom" and include the "customEventName" field with a descriptive name based on the activity mentioned (e.g., "Bidding", "Training", "Meeting", "Site Visit", "Equipment Maintenance").
+- If you infer that "Custom" is the event type, the "customEventName" field is REQUIRED and should contain a brief, descriptive name for the activity (2-3 words maximum).
+- Custom events should follow the same time and date rules as other event types - include startTime and endTime if specific times are mentioned, set allDay to true if it's an all-day activity.
 
 Recurrence rules:
 - If "Every Week" is mentioned, include it as the "recurrence" field, and DO NOT include the "monthlyRecurrence" field.

@@ -67,7 +67,7 @@ const getFirstDayOfMonth = (year: number, month: number): number => {
 };
 
 export const getEventTypeDisplayText = (event: AvailabilityEvent, isShort: boolean = false): string => {
-  const { eventType, startTime, endTime } = event;
+  const { eventType, startTime, endTime, customEventName } = event;
   
   // Format time helper (remove seconds, convert to 12hr format)
   const formatTime = (time: string, showAMPM: boolean = !isShort): string => {
@@ -117,6 +117,9 @@ export const getEventTypeDisplayText = (event: AvailabilityEvent, isShort: boole
         return `${formatTime(startTime)}-${formatTime(endTime)}`;
       }
       return isShort ? 'appt' : 'personal appointment';
+      
+    case "Custom":
+      return customEventName || (isShort ? 'cust' : 'custom');
       
     default:
       return isShort ? eventType.slice(0, 4) : eventType;
@@ -253,10 +256,10 @@ class CalendarUtils {
   static getEventsForDay(date: Date, events: AvailabilityEvent[]): AvailabilityEvent[] {
     const dateStr = formatDate(date);
     return events.filter(event => {
-      if (!event.startDate || !event.endDate) return false;
+      if (!event.startDate) return false;
       
       const startDate = event.startDate;
-      const endDate = event.endDate;
+      const endDate = event.endDate || event.startDate; // Use startDate if no endDate (single-day event)
       
       return dateStr >= startDate && dateStr <= endDate;
     });

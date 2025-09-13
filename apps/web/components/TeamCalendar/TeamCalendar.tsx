@@ -10,6 +10,7 @@ import TeamMemberId from '@/components/TeamMemberId';
 import TeamMembersData from '@/data/teamMembersData';
 import AvailabilityEventsData from '@/data/availabilityEventsData';
 import './TeamCalendar.scss';
+import { CheckCircle } from '@/components/Icons';
 
 interface TeamCalendarProps {
   className?: string;
@@ -42,6 +43,7 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
   const [popoverTarget, setPopoverTarget] = useState<{ current: HTMLElement | null }>({ current: null });
   const [activeEvent, setActiveEvent] = useState<AvailabilityEvent | null>(null);
   const [eventEditorValues, setEventEditorValues] = useState<Partial<AvailabilityEvent>>({});
+  const [showPopoverSaveIndicator, setShowPopoverSaveIndicator] = useState(false);
 
 
   // Refs
@@ -106,10 +108,16 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
     router.push(`/team/${memberSlug}`);
   };
 
-  const updateEventData = useCallback((data: Partial<AvailabilityEvent>) => {
+  const handleEventEditorChange = useCallback((data: Partial<AvailabilityEvent>) => {
     console.log('Event data updated:', data);
     setEventEditorValues(prev => ({ ...prev, ...data }));
     
+    // Trigger save indicator animation
+    setShowPopoverSaveIndicator(true);
+    setTimeout(() => {
+      setShowPopoverSaveIndicator(false);
+    }, 1000);
+
     // TODO: Implement save functionality here
     // This is where you would:
     // 1. Validate the data
@@ -157,6 +165,11 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
               closeButton={true}
               // noStyles={true}
             >
+              {
+                <div className={`team-calendar__popover-saved-indicator ${showPopoverSaveIndicator ? 'visible' : ''}`}>
+                  <CheckCircle/>
+                </div>
+              }
               {activeEvent && (
                 <TeamMemberId 
                   teamMember={activeEvent.teamMember as TeamMember} 
@@ -175,6 +188,7 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
                   }]),
                   'teamMember',
                   'eventType',
+                  'customEventNameInput',
                   'dateRange',
                   'allDaySwitch',
                   'timeRange',
@@ -182,7 +196,7 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
                   'monthlyRecurrence',
                 ]}
                 values={eventEditorValues}
-                onChange={updateEventData}
+                onChange={handleEventEditorChange}
               />
             </Popover>
           )}

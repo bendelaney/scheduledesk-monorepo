@@ -10,7 +10,7 @@ export const SelectMenuStylePresets = {
     control: (baseStyles: any) => ({
       ...baseStyles,
       backgroundColor: '#f5f5f5',
-      borderRadius: '5px',
+      borderRadius: '8px',
       borderColor: '#D8D8D8',
       fontWeight: '700',
       fontSize: '16px',

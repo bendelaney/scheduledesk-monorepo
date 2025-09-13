@@ -78,7 +78,6 @@ export interface JobVisit {
   workCode?: string;
   highlightId?: string;
   confirmationStatus?: JobVisitConfirmationStatus;
-  // assignedMembers?: TeamMember[];
   assignedMembers?: TeamMemberInstance[];
   notes?: JobNote[];
   assignedDate?: string;
@@ -115,9 +114,7 @@ export interface TeamMember {
   lastName: string;
   displayName?: string;
   email?: string;
-  highlightId?: string;
   phone?: string;
-  assignedJobId?: string;
   avatarUri?: string;
 }
 
@@ -187,7 +184,6 @@ export interface ScheduleDay {
   shortDate: string;
   weather?: string;
   teamMembers?: TeamMembersWithAvailability[];
-  // unassignedTeamMembers?: TeamMember[];
   unassignedTeamMembers?: TeamMemberInstance[];
   jobVisits?: JobVisit[];
 }

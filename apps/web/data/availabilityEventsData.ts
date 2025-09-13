@@ -7,7 +7,6 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY4Mzkz", firstName: "Ben", lastName: "Delaney" },
     eventType: "Personal Appointment",
     startDate: "2025-08-20",
-    endDate: "2025-08-20",
     startTime: "09:00:00",
     endTime: "11:00:00",
     allDay: false
@@ -25,9 +24,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY4Mzkx", firstName: "Kelly", lastName: "Chadwick" },
     eventType: "Starts Late",
     startDate: "2025-08-22",
-    endDate: "2025-08-22",
     startTime: "10:00:00",
-    endTime: "17:00:00",
     allDay: false
   },
   {
@@ -35,7 +32,6 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvNDU0NzYw", firstName: "Krystn", lastName: "Parmley" },
     eventType: "Not Working",
     startDate: "2025-08-23",
-    endDate: "2025-08-23",
     allDay: true
   },
   {
@@ -43,8 +39,6 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY4Mzkz", firstName: "Ben", lastName: "Delaney" },
     eventType: "Ends Early",
     startDate: "2025-08-26",
-    endDate: "2025-08-26",
-    startTime: "08:00:00",
     endTime: "14:00:00",
     allDay: false
   },
@@ -53,7 +47,6 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY5NTE2", firstName: "Isaiah", lastName: "Crandall" },
     eventType: "Personal Appointment",
     startDate: "2025-09-02",
-    endDate: "2025-09-02",
     startTime: "13:00:00",
     endTime: "15:00:00",
     allDay: false
@@ -71,7 +64,6 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvNTM2MDYx", firstName: "Dario", lastName: "Ré" },
     eventType: "Not Working",
     startDate: "2025-09-08",
-    endDate: "2025-09-08",
     allDay: true
   },
   {
@@ -79,9 +71,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY5NTE4", firstName: "Anthony", lastName: "Morrow" },
     eventType: "Starts Late",
     startDate: "2025-09-10",
-    endDate: "2025-09-10",
     startTime: "11:30:00",
-    endTime: "17:00:00",
     allDay: false
   },
   {
@@ -89,7 +79,6 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvOTExMjIy", firstName: "Felix", lastName: "Gayton" },
     eventType: "Personal Appointment",
     startDate: "2025-09-12",
-    endDate: "2025-09-12",
     startTime: "14:00:00",
     endTime: "16:30:00",
     allDay: false
@@ -99,8 +88,6 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY5NTA5", firstName: "Jose", lastName: "Villa" },
     eventType: "Ends Early",
     startDate: "2025-09-11",
-    endDate: "2025-09-11",
-    startTime: "08:00:00",
     endTime: "13:00:00",
     allDay: false
   },
@@ -117,7 +104,6 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY4Mzkz", firstName: "Ben", lastName: "Delaney" },
     eventType: "Personal Appointment",
     startDate: "2025-09-13",
-    endDate: "2025-09-13",
     startTime: "10:00:00",
     endTime: "12:00:00",
     allDay: false
@@ -127,7 +113,6 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY5NTEx", firstName: "Wakan", lastName: "Burrows" },
     eventType: "Not Working",
     startDate: "2025-09-14",
-    endDate: "2025-09-14",
     allDay: true
   },
   {
@@ -135,9 +120,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMTg5NjI2OA==", firstName: "Peter", lastName: "Sherman" },
     eventType: "Starts Late",
     startDate: "2025-09-17",
-    endDate: "2025-09-17",
     startTime: "12:00:00",
-    endTime: "17:00:00",
     allDay: false
   },
   {
@@ -145,8 +128,6 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvNjAzMzI2", firstName: "Zayren", lastName: "Bubb" },
     eventType: "Ends Early",
     startDate: "2025-09-18",
-    endDate: "2025-09-18",
-    startTime: "08:00:00",
     endTime: "15:00:00",
     allDay: false
   },
@@ -155,7 +136,6 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzMxMzczOA==", firstName: "Justin", lastName: "Howe" },
     eventType: "Personal Appointment",
     startDate: "2025-09-19",
-    endDate: "2025-09-19",
     startTime: "15:30:00",
     endTime: "17:00:00",
     allDay: false
@@ -173,7 +153,6 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzMxMzczOA==", firstName: "Justin", lastName: "Howe" },
     eventType: "Not Working",
     startDate: "2025-09-21",
-    endDate: "2025-09-21",
     allDay: true
   },
   {
@@ -181,9 +160,7 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzMxMzczOA==", firstName: "Justin", lastName: "Howe" },
     eventType: "Starts Late",
     startDate: "2025-09-24",
-    endDate: "2025-09-24",
     startTime: "10:30:00",
-    endTime: "17:00:00",
     allDay: false
   },
   {
@@ -191,7 +168,6 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzMxMzczOA==", firstName: "Justin", lastName: "Howe" },
     eventType: "Personal Appointment",
     startDate: "2025-09-25",
-    endDate: "2025-09-25",
     startTime: "09:00:00",
     endTime: "11:30:00",
     allDay: false
@@ -201,10 +177,44 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzMxMzczOA==", firstName: "Justin", lastName: "Howe" },
     eventType: "Ends Early",
     startDate: "2025-09-27",
-    endDate: "2025-09-27",
-    startTime: "08:00:00",
     endTime: "14:30:00",
     allDay: false
+  },
+  {
+    id: "23",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY4Mzkz", firstName: "Ben", lastName: "Delaney" },
+    eventType: "Custom",
+    customEventName: "Bidding",
+    startDate: "2025-09-01",
+    startTime: "09:00:00",
+    endTime: "12:00:00",
+    allDay: false
+  },
+  {
+    id: "24",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY5NTE2", firstName: "Isaiah", lastName: "Crandall" },
+    eventType: "Custom",
+    customEventName: "Working",
+    startDate: "2025-09-05",
+    allDay: true
+  },
+  {
+    id: "25",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY4Mzkx", firstName: "Kelly", lastName: "Chadwick" },
+    eventType: "Custom",
+    customEventName: "Available",
+    startDate: "2025-09-07",
+    startTime: "10:00:00",
+    endTime: "16:00:00",
+    allDay: false
+  },
+  {
+    id: "26",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvNDU0NzYw", firstName: "Krystn", lastName: "Parmley" },
+    eventType: "Custom",
+    customEventName: "Maintenance Day",
+    startDate: "2025-09-04",
+    allDay: true
   }
 ];
 

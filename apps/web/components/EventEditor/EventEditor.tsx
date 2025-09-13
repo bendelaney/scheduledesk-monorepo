@@ -23,6 +23,7 @@ import {
 import SmartEventInput from '@/components/SmartEventInput';
 import DateRangeSelector from '@/components/DateRangeSelector';
 import SlideSwitch from '@/components/SlideSwitch';
+import { X } from '@/components/Icons';
 import './EventEditor.scss';
 
 // Team member data
@@ -45,6 +46,7 @@ const EventEditor: FC<EventEditorProps> = ({
     'smartEventInput',
     'teamMember',
     'eventType',
+    'customEventNameInput',
     'dateRange',
     'allDaySwitch',
     'timeRange',
@@ -59,6 +61,10 @@ const EventEditor: FC<EventEditorProps> = ({
   const isInternalUpdateRef = useRef(false);
   const prevValuesStringRef = useRef<string>('{}');
   const lastOutputStringRef = useRef<string>('{}');
+  const customEventNameInputRef = useRef<HTMLInputElement>(null);
+  
+  // Local state for custom event name input (to prevent onChange on every keystroke)
+  const [localCustomEventName, setLocalCustomEventName] = useState('');
   
   // Create a single state object for all form values
   const [formState, setFormState] = useState<Partial<AvailabilityEvent>>(() => {
@@ -92,6 +98,21 @@ const EventEditor: FC<EventEditorProps> = ({
       isInitializedRef.current = false;
     };
   }, []);
+
+  // Focus custom event name input when eventType changes to "Custom"
+  useEffect(() => {
+    if (formState.eventType === "Custom" && customEventNameInputRef.current) {
+      // Use setTimeout to ensure the input is rendered before focusing
+      setTimeout(() => {
+        customEventNameInputRef.current?.focus();
+      }, 0);
+    }
+  }, [formState.eventType]);
+
+  // Sync local custom event name with form state
+  useEffect(() => {
+    setLocalCustomEventName(formState.customEventName || '');
+  }, [formState.customEventName, formState.eventType]);
   
   // Function to update individual fields with dependency handling
   const updateField = useCallback((
@@ -418,14 +439,33 @@ const EventEditor: FC<EventEditorProps> = ({
     ),
     customEventNameInput: (customProps = {}) =>
       formState.eventType === "Custom" ? (
-        <input
-          type="text"
-          placeholder="Enter custom event name"
-          value={formState.customEventName || ''}
-          onChange={(e) => updateField('customEventName', e.target.value)}
-          className="custom-event-name-input"
-          {...customProps}
-        />
+        <div className="custom-event-name-input-wrapper" {...customProps}>
+          <input
+            ref={customEventNameInputRef}
+            type="text"
+            placeholder="Enter custom event name"
+            value={localCustomEventName}
+            onChange={(e) => setLocalCustomEventName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                updateField('customEventName', localCustomEventName);
+              }
+            }}
+            onBlur={() => {
+              updateField('customEventName', localCustomEventName);
+            }}
+            className="custom-event-name-input"
+          />
+          <button 
+            className={`custom-event-name-clear-button ${!localCustomEventName.length ? 'hide' : ''}`}
+            onClick={() => {
+              setLocalCustomEventName('');
+              updateField('customEventName', '');
+            }}
+          >
+            <X />
+          </button>
+        </div>
       ) : null,
     dateRange: (customProps = {}) => {
       // Parse dates safely, stripping any time components

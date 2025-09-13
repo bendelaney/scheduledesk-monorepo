@@ -141,6 +141,7 @@ export default function CalendarPage() {
               'smartEventInput',
               'teamMember',
               'eventType',
+              'customEventNameInput',
               'dateRange',
               'allDaySwitch',
               'timeRange',

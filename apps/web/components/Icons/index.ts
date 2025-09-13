@@ -3,6 +3,7 @@ export { default as AngleUp } from "./AngleUp";
 export { default as Archive } from "./Archive";
 export { default as Calendar } from "./Calendar";
 export { default as Check } from "./Check";
+export { default as CheckCircle } from "./CheckCircle";
 export { default as Checklist } from "./Checklist";
 export { default as CloseX } from "./CloseX";
 export { default as Duplicate } from "./Duplicate";
