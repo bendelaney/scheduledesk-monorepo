@@ -6,6 +6,27 @@ import { getTodayInLocalTimezone } from '@/utils/dateUtils';
 import { X } from "@/components/Icons";
 import './SmartEventInput.scss';
 
+const LOADING_MESSAGES = [
+  'Loading...',
+  'Prepping...',
+  'Processing...',
+  'Working...',
+  'Thinking...',
+  'Tinkering...',
+  'Brewing...',
+  'Fetching...',
+  'Assembling...',
+  'Jimmying...',
+  'Crunching...',
+  'Computing...',
+  'Parsing...',
+  'Generating...',
+];
+
+const getRandomLoadingMessage = () => {
+  return LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];
+};
+
 interface SmartEventInputProps {
   currentDate?: string;
   additionalRules?: string;
@@ -36,7 +57,7 @@ const SmartEventInput: FC<SmartEventInputProps> = ({
   const handleSubmit = async () => {
     setLoading(true);
     const prevText = inputText;
-    setInputText('Loading...');
+    setInputText(getRandomLoadingMessage());
     
     try {
       const response = await fetch('/api/openai', {

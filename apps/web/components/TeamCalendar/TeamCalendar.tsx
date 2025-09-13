@@ -7,10 +7,11 @@ import Popover, { PopoverProvider, PopoverContext } from '@/components/Popover';
 import CalendarGrid from '@/components/CalendarGrid';
 import EventEditor from '@/components/EventEditor';
 import TeamMemberId from '@/components/TeamMemberId';
+import Button from '@/components/Button';
+import { CheckCircle } from '@/components/Icons';
+import './TeamCalendar.scss';
 import TeamMembersData from '@/data/teamMembersData';
 import AvailabilityEventsData from '@/data/availabilityEventsData';
-import './TeamCalendar.scss';
-import { CheckCircle } from '@/components/Icons';
 
 interface TeamCalendarProps {
   className?: string;
@@ -40,6 +41,7 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
     return TeamMembersData.map(m => m.displayName || `${m.firstName} ${m.lastName || ''}`.trim());
   });
   const [showPopover, setShowPopover] = useState(false);
+  const [popoverIsSaveable, setPopoverIsSaveable] = useState(false);
   const [popoverTarget, setPopoverTarget] = useState<{ current: HTMLElement | null }>({ current: null });
   const [activeEvent, setActiveEvent] = useState<AvailabilityEvent | null>(null);
   const [eventEditorValues, setEventEditorValues] = useState<Partial<AvailabilityEvent>>({});
@@ -177,6 +179,21 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
                   onClick={() => handleTeamMemberClick(activeEvent.teamMember as TeamMember)}
                 />
               )}
+              {!activeEvent && (
+                <Button 
+                  disabled={!popoverIsSaveable}
+                  variant={popoverIsSaveable ? 'primary' : 'ghost'}
+                  size="small" 
+                  onClick={() => {
+                    if (popoverIsSaveable) {
+                      console.log('STUB: Save new event:', eventEditorValues);
+                    }
+                  }} 
+                  className="team-calendar__popover-save-button"
+                >
+                  Save
+                </Button>
+              )}
               <EventEditor
                 formConfig={[
                   // Include SmartEventInput for new events
@@ -197,6 +214,7 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
                 ]}
                 values={eventEditorValues}
                 onChange={handleEventEditorChange}
+                onSaveableChange={setPopoverIsSaveable}
               />
             </Popover>
           )}

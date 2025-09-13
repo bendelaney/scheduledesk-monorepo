@@ -3,7 +3,7 @@
 
 'use client'
 
-import React, { FC, useState, useEffect, useRef, useCallback } from 'react';
+import React, { FC, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { DateTime } from 'luxon';
 import { 
   EventTypeSelectMenu,
@@ -38,7 +38,8 @@ type FormConfigItem = string | {
 interface EventEditorProps {
   formConfig?: FormConfigItem[];
   values?: Partial<AvailabilityEvent>;
-  onChange?: (data: Partial<AvailabilityEvent>) => void; 
+  onChange?: (data: Partial<AvailabilityEvent>) => void;
+  onSaveableChange?: (isSaveable: boolean) => void;
 }
 
 const EventEditor: FC<EventEditorProps> = ({
@@ -54,7 +55,8 @@ const EventEditor: FC<EventEditorProps> = ({
     'monthlyRecurrence',
   ],
   values,
-  onChange 
+  onChange,
+  onSaveableChange
 }) => {
   // Lifecycle tracking refs
   const isInitializedRef = useRef(false);
@@ -65,7 +67,7 @@ const EventEditor: FC<EventEditorProps> = ({
   
   // Local state for custom event name input (to prevent onChange on every keystroke)
   const [localCustomEventName, setLocalCustomEventName] = useState('');
-  
+
   // Create a single state object for all form values
   const [formState, setFormState] = useState<Partial<AvailabilityEvent>>(() => {
     const initialState = {
@@ -88,13 +90,29 @@ const EventEditor: FC<EventEditorProps> = ({
     
     return initialState;
   });
-  
-  // Mark component as initialized after first render
+
+  // Compute whether the form is saveable (has meaningful values)
+  const isSaveable = useMemo(() => {
+    // Must have at least one of these core fields filled
+    const hasTeamMember = !!formState.teamMember;
+    const hasEventType = !!formState.eventType;
+    const hasCustomEventName = formState.eventType === "Custom" ? !!formState.customEventName : true;
+    const hasStartDate = !!formState.startDate;
+
+    // Basic validation: need event type and start date as minimum
+    return hasEventType && hasCustomEventName && hasStartDate;
+  }, [formState.teamMember, formState.eventType, formState.customEventName, formState.startDate]);
+
+  // Mark component as initialized after initial values have been processed
   useEffect(() => {
-    isInitializedRef.current = true;
+    // Only mark as initialized after a brief delay to ensure initial values are processed
+    const timer = setTimeout(() => {
+      isInitializedRef.current = true;
+    }, 50);
     
     // Return cleanup to handle unmounting
     return () => {
+      clearTimeout(timer);
       isInitializedRef.current = false;
     };
   }, []);
@@ -108,6 +126,13 @@ const EventEditor: FC<EventEditorProps> = ({
       }, 0);
     }
   }, [formState.eventType]);
+
+  // Notify parent when saveable state changes
+  useEffect(() => {
+    if (onSaveableChange && isInitializedRef.current) {
+      onSaveableChange(isSaveable);
+    }
+  }, [isSaveable, onSaveableChange]);
 
   // Sync local custom event name with form state
   useEffect(() => {
@@ -205,6 +230,11 @@ const EventEditor: FC<EventEditorProps> = ({
       recurrence: values.recurrence,
       monthlyRecurrence: values.monthlyRecurrence
     });
+
+    // Keep the flag set for a brief moment to ensure it persists through the state update
+    setTimeout(() => {
+      isInternalUpdateRef.current = false;
+    }, 10);
   }, [values]);
   
   // Memoize the onChange callback to prevent infinite re-renders
@@ -220,7 +250,6 @@ const EventEditor: FC<EventEditorProps> = ({
     // Skip if this update was triggered by external values prop change
     if (isInternalUpdateRef.current) {
       console.log("Skipping onChange - internal update");
-      isInternalUpdateRef.current = false;
       return;
     }
     

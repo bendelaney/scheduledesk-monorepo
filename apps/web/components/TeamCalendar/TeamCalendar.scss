@@ -48,6 +48,12 @@
     }
   }
 
+  &__popover-save-button {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    z-index: 1;
+  }
   &__new-event-popover {
     .BDPopover-Content {
       padding-top: 36px;
