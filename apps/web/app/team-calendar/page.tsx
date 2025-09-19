@@ -1,41 +1,41 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {TeamMember, AvailabilityEvent} from '@/types';
 import AppFrame from '@/components/AppFrame';
 import TeamCalendar from '@/components/TeamCalendar';
 import TeamMemberList from '@/components/TeamMemberList';
-import TeamMembersData from '@/data/teamMembersData';
+import { useTeamMembers } from '@/lib/supabase/hooks/useTeamMembers';
 import MainNavigationConfig from '@/config/MainNavigation';
-import Popover from '@/components/Popover';
-import Button from '@/components/Button';
-import EventEditor from '@/components/EventEditor';
-import {
-  SidebarClosed,
-  SidebarOpen,
-} from "@/components/Icons";
+import CalendarPopover from '@/components/CalendarPopover';
 import './TeamCalendarPage.scss';
 import PlusCircle from '@/components/Icons/PlusCircle';
 
-export default function CalendarPage() {
-    const router = useRouter();
-    const pathname = usePathname();
+export default function TeamCalendarPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  // TODO: we should integrate the loading and error states below somewhere.
+  const { data: teamMembersData, loading: teamMembersLoading, error: teamMembersError } = useTeamMembers();
+
+  const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>([]);
   
-  const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>(
-    TeamMembersData.map(m => m.displayName || `${m.firstName} ${m.lastName || ''}`.trim())
-  );
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
-  // New Event Popover state
+  // Event Popover state
   const [showNewEventPopover, setShowNewEventPopover] = useState(false);
   const [popoverIsSaveable, setPopoverIsSaveable] = useState(false);
   const [newEventData, setNewEventData] = useState<Partial<AvailabilityEvent>>({});
+  const [popoverTarget, setPopoverTarget] = useState<{ current: HTMLElement | null }>({ current: null });
+  const [activeEvent, setActiveEvent] = useState<AvailabilityEvent | null>(null);
   const newEventButtonRef = useRef<HTMLButtonElement>(null);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  // Initialize selected team members when data loads
+  useEffect(() => {
+    if (teamMembersData.length > 0 && selectedTeamMembers.length === 0) {
+      setSelectedTeamMembers(
+        teamMembersData.map(m => m.displayName || `${m.firstName} ${m.lastName || ''}`.trim())
+      );
+    }
+  }, [teamMembersData, selectedTeamMembers.length]);
 
   const handleNavigation = (path: string) => {
     router.push(path);
@@ -52,18 +52,49 @@ export default function CalendarPage() {
   };
 
   const handleNewEventPopoverOpen = () => {
-    setShowNewEventPopover(true);
-  };
-
-  const handleNewEventPopoverClose = () => {
-    setShowNewEventPopover(false);
-    setNewEventData({});
+    if (newEventButtonRef.current) {
+      setPopoverTarget({ current: newEventButtonRef.current });
+      setShowNewEventPopover(true);
+    }
   };
 
   const handleNewEventDataChange = (data: Partial<AvailabilityEvent>) => {
     setNewEventData(data);
     console.log('New event data:', data);
   };
+
+  const handleEventClickFromGrid = useCallback((event: AvailabilityEvent, targetEl?: HTMLElement) => {
+    if (targetEl) {
+      setPopoverTarget({ current: targetEl });
+      setActiveEvent(event);
+      setNewEventData(event);
+      setShowNewEventPopover(true);
+    }
+  }, []);
+
+  const handleClosePopover = useCallback(() => {
+    setShowNewEventPopover(false);
+    setActiveEvent(null);
+    setNewEventData({});
+    setPopoverTarget({ current: null });
+  }, []);
+
+  const handleDayClick = useCallback((date: string) => {
+    console.log('Day clicked:', date);
+  }, []);
+
+  const handleNewEventClick = useCallback((date: string, targetEl: HTMLElement) => {
+    console.log('New event clicked for date:', date, 'Target:', targetEl);
+    if (targetEl) {
+      setPopoverTarget({ current: targetEl });
+      setActiveEvent(null);
+      setNewEventData({
+        startDate: date,
+        endDate: date,
+      });
+      setShowNewEventPopover(true);
+    }
+  }, []);
 
   return (
     <AppFrame
@@ -99,8 +130,8 @@ export default function CalendarPage() {
       }
       // topBarRightContent={<div>Right</div>}
       sidebarContent={
-        <TeamMemberList 
-          teamMembers={TeamMembersData}
+        <TeamMemberList
+          teamMembers={teamMembersData}
           selectedMembers={selectedTeamMembers}
           onSelectionChange={handleSelectionChange}
           onFilterChange={handleTeamMemberFilter}
@@ -111,63 +142,26 @@ export default function CalendarPage() {
       sidebarOpen={false}
       // sidebarWidth="240px"
     >
-      <TeamCalendar 
+      <TeamCalendar
         selectedTeamMembers={selectedTeamMembers}
         onSelectionChange={handleSelectionChange}
+        onEventClick={handleEventClickFromGrid}
+        onDayClick={handleDayClick}
+        onNewEventClick={handleNewEventClick}
+        activeEvent={activeEvent}
       />
       
       {/* New Event Popover */}
-      {showNewEventPopover && newEventButtonRef.current && (
-        <Popover
-          className="team-calendar__new-event-popover"
-          targetRef={newEventButtonRef as React.RefObject<HTMLElement>}
-          position="topLeft"
-          edge="topLeft"
-          offset={{ x: -8, y: -8 }}
-          onShow={() => {
-            // Focus the SmartEventInput after popover is shown
-            setTimeout(() => {
-              const smartEventInput = document.querySelector('.team-calendar__new-event-popover .smart-event-input-input');
-              if (smartEventInput) {
-                (smartEventInput as HTMLElement).focus();
-              }
-            }, 0);
-          }}
-          onHide={handleNewEventPopoverClose}
-          closeButton={true}
-          // width={400}
-        >
-          <Button 
-            disabled={!popoverIsSaveable}
-            // variant={popoverIsSaveable ? 'primary' : 'ghost'}
-            size="small" 
-            onClick={() => {
-              if (popoverIsSaveable) {
-                console.log('STUB: Save new event:', newEventData);
-              }
-            }} 
-            className="team-calendar__popover-save-button"
-          >
-            Save
-          </Button>
-          <EventEditor
-            formConfig={[
-              'smartEventInput',
-              'teamMember',
-              'eventType',
-              'customEventNameInput',
-              'dateRange',
-              'allDaySwitch',
-              'timeRange',
-              'recurrence',
-              'monthlyRecurrence',
-            ]}
-            values={newEventData}
-            onChange={handleNewEventDataChange}
-            onSaveableChange={setPopoverIsSaveable}
-          />
-        </Popover>
-      )}
+      <CalendarPopover
+        show={showNewEventPopover}
+        target={popoverTarget}
+        activeEvent={activeEvent}
+        eventEditorValues={newEventData}
+        onClose={handleClosePopover}
+        onChange={handleNewEventDataChange}
+        onSaveableChange={setPopoverIsSaveable}
+        isSaveable={popoverIsSaveable}
+      />
     </AppFrame>
   );
 }

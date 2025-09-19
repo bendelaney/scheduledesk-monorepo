@@ -487,6 +487,7 @@ const EventEditor: FC<EventEditorProps> = ({
         selected={formState.eventType}
         onChange={(selected) => updateField('eventType', selected?.value)}
         selectMenuProps={{
+          isSearchable: true,
           styles: SelectMenuStylePresets.Large,
           instanceId: "event-editor-event-type",
           ...customProps.selectMenuProps
@@ -594,6 +595,7 @@ const EventEditor: FC<EventEditorProps> = ({
           onChange={handleTimeRange}
           interval={30}
           selectMenuProps={{
+            isSearchable: true,
             styles: SelectMenuStylePresets.Large,
             instanceId: "event-editor-time-range",
               ...customProps.selectMenuProps
@@ -607,6 +609,7 @@ const EventEditor: FC<EventEditorProps> = ({
         selected={formState.recurrence}
         onChange={handleRecurrenceChange}
         selectMenuProps={{
+          isSearchable: true,
           styles: SelectMenuStylePresets.Large,
           instanceId: "event-editor-recurrence",
           ...customProps.selectMenuProps
@@ -622,6 +625,7 @@ const EventEditor: FC<EventEditorProps> = ({
             selected={formState.monthlyRecurrence?.type}
             onChange={handleMonthlyRecurrenceType}
             selectMenuProps={{
+              isSearchable: true,
               styles: SelectMenuStylePresets.Large,
               instanceId: "event-editor-monthly-recurrence",
                   ...customProps.selectMenuProps
@@ -638,6 +642,7 @@ const EventEditor: FC<EventEditorProps> = ({
             onMonthlyWeekChange={handleMonthlyWeekChange}
             onMonthlyDayOfWeekChange={handleMonthlyDayOfWeekChange}
             selectMenuProps={{
+              isSearchable: true,
               styles: SelectMenuStylePresets.Large,
               instanceId: "event-editor-monthly-recurrence-detail",
                   ...customProps.detailSelectorProps?.selectMenuProps

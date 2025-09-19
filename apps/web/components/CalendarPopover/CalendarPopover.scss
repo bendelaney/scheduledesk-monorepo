@@ -1,0 +1,64 @@
+@use '@/styles/variables' as *;
+
+.calendar-popover {
+  background-color: $app-bg;
+
+  &.team-member-page__calendar-popover {
+    padding-top: 46px;
+  }
+
+  // Team member display in event popover
+  .team-member-id {
+    margin-bottom: 14px;
+    margin-left: auto; // Push to the right
+    width: fit-content; // Only take up necessary space
+    display: flex; // Ensure proper inline layout
+  }
+
+  // Save indicator (appears during save)
+  &__saved-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background-color: $app-bg;
+    position: absolute;
+    top: 9px;
+    left: 9px;
+    opacity: 0;
+    color: $medium-dark-gray;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+    font-weight: 700;
+
+    svg {
+      color: $success-color;
+      font-size: 32px;
+    }
+
+    &.visible {
+      opacity: 1;
+    }
+  }
+
+  // Save button for new events
+  &__save-button {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    z-index: 1;
+  }
+
+  // Event editor container
+  .event-editor {
+    min-width: 320px;
+  }
+}
+
+// Add padding for new event popover (when save button is present)
+.calendar-popover {
+  &:has(.calendar-popover__save-button) .BDPopover-Content {
+    padding-top: 36px;
+  }
+}

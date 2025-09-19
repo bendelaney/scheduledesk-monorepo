@@ -139,7 +139,7 @@ export const getMergedTeamMembers = async (): Promise<TeamMember[]> => {
         highlightId: '', // Will add this field later
       } as TeamMember;
       
-      console.log('🔗 Merged member:', merged.firstName, merged.lastName);
+      // console.log('🔗 Merged member:', merged.firstName, merged.lastName);
       return merged;
     });
     

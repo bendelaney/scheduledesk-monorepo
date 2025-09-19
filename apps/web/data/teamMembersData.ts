@@ -127,22 +127,6 @@ const jobberData = {
         },
         {
           "node": {
-            "id": "Z2lkOi8vSm9iYmVyL1VzZXIvMzY5NTE4",
-            "name": {
-              "first": "Anthony",
-              "last": "Morrow",
-              "full": "Anthony Morrow"
-            },
-            "email": {
-              "raw": "anthonymorrow044@gmail.com"
-            },
-            "phone": {
-              "friendly": "(509) 768-6971"
-            }
-          }
-        },
-        {
-          "node": {
             "id": "Z2lkOi8vSm9iYmVyL1VzZXIvMzE4OTM2Mw==",
             "name": {
               "first": "Carson",
@@ -479,16 +463,6 @@ let nonJobberData = [
     },
     "avatarUri": "/data/teamMemberAvatars/amoe.png",
     "highlightId": "1"
-  },
-  {
-    "jobberId": "Z2lkOi8vSm9iYmVyL1VzZXIvMzY5NTE4",
-    "name": {
-      "first": "Anthony",
-      "last": "Morrow",
-      "full": "Anthony Morrow"
-    },
-    "avatarUri": "/data/teamMemberAvatars/anthony.png",
-    "highlightId": "3"
   },
   {
     "jobberId": "Z2lkOi8vSm9iYmVyL1VzZXIvNTM2MDYx",

@@ -1,4 +1,4 @@
-.team-calendar {
+.team-member-calendar {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -10,7 +10,15 @@
 
   &__grid {
     flex: 1;
-    height: 100%;
   }
 
+  .calendar-event__eventType {
+    &--short {
+      display: none !important;
+    }
+    &--full {
+      display: inline-block !important;
+    }
+  }
 }
+

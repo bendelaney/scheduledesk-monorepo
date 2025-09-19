@@ -33,6 +33,7 @@ export interface CalendarGridProps {
   infiniteScroll?: boolean;
   activeEvent?: AvailabilityEvent | null;
   showWeekends?: boolean;
+  showTeamMemberName?: boolean;
 }
 
 // Helper functions
@@ -274,7 +275,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   className = '',
   infiniteScroll = true,
   activeEvent = null,
-  showWeekends = true
+  showWeekends = true,
+  showTeamMemberName = true
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [months, setMonths] = useState<CalendarMonth[]>([]);
@@ -634,7 +636,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         title={`${event.teamMember.firstName} ${event.teamMember.lastName || ''}: ${event.eventType}${event.allDay ? '' : ` (${event.startTime} - ${event.endTime})`}`}
         style={{ backgroundColor: getEventTypeColor(event.eventType) }}
       >
-        <span className="calendar-event__member">{event.teamMember.firstName} {/*{event.teamMember.lastName || ''}*/}</span>
+        {showTeamMemberName && <span className="calendar-event__member">{event.teamMember.firstName} {/*{event.teamMember.lastName || ''}*/}</span>}
         {/* <span className="calendar-event__type">{event.eventType}</span> */}
         <span className="calendar-event__eventType--full">
           {getEventTypeDisplayText(event)}
