@@ -1,25 +1,32 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  if (typeof window !== 'undefined') {
-    // Only throw error on client side
-    throw new Error('Missing Supabase environment variables');
-  } else {
-    // During build time, use empty strings to prevent build failure
-    console.warn('Supabase environment variables not available during build');
-  }
-}
+let supabaseClient: SupabaseClient | null = null;
 
-export const supabase = createClient(
-  supabaseUrl || '',
-  supabaseAnonKey || '',
-  {
+// Only create client if we have valid environment variables
+if (supabaseUrl && supabaseAnonKey) {
+  supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
     },
+  });
+} else {
+  if (typeof window !== 'undefined') {
+    console.error('Missing Supabase environment variables');
+  } else {
+    console.warn('Supabase environment variables not available during build');
   }
-);
+}
+
+// Export a proxy that throws helpful errors when used without proper setup
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    if (!supabaseClient) {
+      throw new Error('Supabase client not initialized - missing environment variables');
+    }
+    return (supabaseClient as any)[prop];
+  }
+});
