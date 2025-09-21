@@ -103,7 +103,7 @@ const EventEditor: FC<EventEditorProps> = ({
 
     // Basic validation: need event type and start date as minimum
     return hasEventType && hasCustomEventName && hasStartDate;
-  }, [formState.teamMember, formState.eventType, formState.customEventName, formState.startDate]);
+  }, [formState.teamMember, formState.eventType, formState.customEventName, formState.startDate, formState.startTime, formState.endTime]);
 
   // Mark component as initialized after initial values have been processed
   useEffect(() => {
@@ -143,10 +143,10 @@ const EventEditor: FC<EventEditorProps> = ({
   
   // Function to update individual fields with dependency handling
   const updateField = useCallback((
-    key: keyof AvailabilityEvent, 
-    value: any, 
+    key: keyof AvailabilityEvent,
+    value: any,
     skipDependencies = false
-  ) => {    
+  ) => {
     setFormState(prev => {
       const newState = { ...prev, [key]: value };
       
@@ -191,7 +191,7 @@ const EventEditor: FC<EventEditorProps> = ({
       return newState;
     });
   }, []);
-  
+
   // Sync incoming prop values with internal state
   useEffect(() => {
     // Skip if component is not initialized yet
@@ -212,8 +212,9 @@ const EventEditor: FC<EventEditorProps> = ({
       return;
     }
     
-    // IMPORTANT: Skip if this matches our last output - prevents feedback loop
-    if (currentValuesString === lastOutputStringRef.current) {
+    // IMPORTANT: Skip feedback only if this is truly a programmatic update
+    // Allow user-initiated changes to flow through even if they match last output
+    if (currentValuesString === lastOutputStringRef.current && isInternalUpdateRef.current) {
       console.log("Skipping values sync - matches last output (feedback prevention)");
       prevValuesStringRef.current = currentValuesString;
       return;
@@ -255,11 +256,7 @@ const EventEditor: FC<EventEditorProps> = ({
       return;
     }
     
-    // Skip if this update was triggered by external values prop change
-    if (isInternalUpdateRef.current) {
-      console.log("Skipping onChange - internal update");
-      return;
-    }
+    // Allow onChange to fire even during internal updates to support auto-save
     
     // Build output data
     const output: Partial<AvailabilityEvent> = {};

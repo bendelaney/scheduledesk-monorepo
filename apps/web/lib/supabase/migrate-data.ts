@@ -190,7 +190,7 @@ async function migrateTeamMemberHighlights() {
       .insert(
         teamMemberHighlightsData.map(highlight => ({
           name: highlight.name,
-          category: highlight.category || null
+          category: null
         }))
       );
 

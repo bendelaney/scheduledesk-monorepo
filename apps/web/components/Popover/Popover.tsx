@@ -22,6 +22,8 @@ interface PositionOffset {
 
 type PositionType = 'center' | 'top' | 'bottom' | 'left' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'centerLeft' | 'centerRight' | 'centerTop' | 'centerBottom' | 'topCenter' | 'bottomCenter' | 'upperLeft' | 'upperRight' | 'centerCenter';
 
+type EdgeType = PositionType | 'auto';
+
 interface PopoverType {
   hide: () => void;
 }
@@ -89,7 +91,7 @@ interface PopoverProps {
   height?: number | string;
   width?: number | string;
   position?: PositionType | PositionObject;
-  edge?: PositionType | PositionObject;
+  edge?: EdgeType | PositionObject;
   offset?: PositionOffset;
   closeButton?: boolean;
   clickToClose?: boolean;
@@ -130,7 +132,9 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollContainerRef } = useContext(PopoverContext);
 
-  useClickOutside(popoverRef as React.RefObject<HTMLElement>, onHide, targetRef||undefined);
+  if (clickOutsideToClose == true) {
+    useClickOutside(popoverRef as React.RefObject<HTMLElement>, onHide, targetRef||undefined);
+  }
 
   // Generate a unique ID for this popover
   const id = useRef(Math.random().toString(36).substring(2, 9)).current;
@@ -194,7 +198,61 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
       onHide();
     }, 200); // Match CSS transition duration
   };
-   
+
+  // Helper function to calculate available space around a target position
+  const calculateAvailableSpace = (targetRect: DOMRect, position: PositionObject, popoverRect: DOMRect) => {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const padding = 10; // Minimum distance from viewport edges
+
+    // Calculate the target point based on position
+    const targetX = position.x === 'left' ? targetRect.left :
+                    position.x === 'right' ? targetRect.right :
+                    targetRect.left + (targetRect.width / 2); // center
+
+    const targetY = position.y === 'top' ? targetRect.top :
+                    position.y === 'bottom' ? targetRect.bottom :
+                    targetRect.top + (targetRect.height / 2); // center
+
+    return {
+      left: targetX - padding,
+      right: viewportWidth - targetX - padding,
+      top: targetY - padding,
+      bottom: viewportHeight - targetY - padding,
+      requiredWidth: popoverRect.width,
+      requiredHeight: popoverRect.height
+    };
+  };
+
+  // Helper function to get opposite position for center positions
+  const getOppositePosition = (position: PositionObject): PositionObject | null => {
+    if (position.y === 'center') {
+      if (position.x === 'left') return { x: 'right', y: 'center' };
+      if (position.x === 'right') return { x: 'left', y: 'center' };
+    }
+    if (position.x === 'center') {
+      if (position.y === 'top') return { x: 'center', y: 'bottom' };
+      if (position.y === 'bottom') return { x: 'center', y: 'top' };
+    }
+    return null; // Not a center position or no opposite
+  };
+
+  // Helper function to resolve auto edge based on final position
+  const resolveAutoEdge = (position: PositionObject): PositionObject => {
+    if (position.y === 'center') {
+      // For centerLeft/centerRight, popover edge should be opposite
+      if (position.x === 'left') return { x: 'right', y: 'center' }; // popover's right edge aligns
+      if (position.x === 'right') return { x: 'left', y: 'center' }; // popover's left edge aligns
+    }
+    if (position.x === 'center') {
+      // For centerTop/centerBottom, popover edge should be opposite
+      if (position.y === 'top') return { x: 'center', y: 'bottom' }; // popover's bottom edge aligns
+      if (position.y === 'bottom') return { x: 'center', y: 'top' }; // popover's top edge aligns
+    }
+    // Default fallback
+    return position;
+  };
+
   const positionPopover = () => {
     if (!targetRef || !targetRef.current || !popoverRef.current) {
       return;
@@ -204,8 +262,15 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
     const popoverElement = popoverRef.current;
   
     if (targetElement && popoverElement) {
+      // Temporarily remove scale transform to get accurate measurements
+      const originalTransform = popoverElement.style.transform;
+      popoverElement.style.transform = 'translateY(-20px) scale(1)';
+      
       const triggerRect = targetElement.getBoundingClientRect();
       const popoverRect = popoverElement.getBoundingClientRect();
+      
+      // Restore original transform after measurements
+      popoverElement.style.transform = originalTransform;
   
       let top = 0;
       let left = 0;
@@ -230,20 +295,19 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
       };
   
       const resolveEdge = (pos: 'left' | 'right' | 'center' | 'top' | 'bottom', axis: 'x' | 'y') => {
-        // Returns offset from popover's top-left corner to the desired edge anchor point
         if (axis === 'x') {
           switch (pos) {
             case 'left': return 0;
             case 'right': return popoverRect.width;
             case 'center': return popoverRect.width / 2;
-            default: return 0; // top/bottom don't affect x-axis
+            default: return 0;
           }
-        } else { // axis === 'y'
+        } else {
           switch (pos) {
             case 'top': return 0;
             case 'bottom': return popoverRect.height;
             case 'center': return popoverRect.height / 2;
-            default: return 0; // left/right don't affect y-axis
+            default: return 0;
           }
         }
       };
@@ -275,49 +339,84 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
         return position;
       };
   
-      const pos = getPosition(position as PositionType);
-      const edgePos = getPosition(edge as PositionType);
+      let pos = getPosition(position as PositionType);
+      let edgePos = getPosition(edge as PositionType);
       const posOffset = offset || { x: 0, y: 0 };
-
+      let wasFlipped = false;
+  
+      // Auto-positioning logic for center positions when edge is "auto"
+      if (edge === 'auto' && (pos.x === 'center' || pos.y === 'center')) {
+        const oppositePos = getOppositePosition(pos);
+  
+        if (oppositePos) {
+          const originalSpace = calculateAvailableSpace(triggerRect, pos, popoverRect);
+          const oppositeSpace = calculateAvailableSpace(triggerRect, oppositePos, popoverRect);
+  
+          let shouldFlip = false;
+  
+          if (pos.x === 'center') {
+            if (pos.y === 'top') {
+              shouldFlip = originalSpace.top < popoverRect.height && oppositeSpace.bottom > originalSpace.top;
+            } else if (pos.y === 'bottom') {
+              shouldFlip = originalSpace.bottom < popoverRect.height && oppositeSpace.top > originalSpace.bottom;
+            }
+          } else if (pos.y === 'center') {
+            if (pos.x === 'left') {
+              shouldFlip = originalSpace.left < popoverRect.width && oppositeSpace.right > originalSpace.left;
+            } else if (pos.x === 'right') {
+              shouldFlip = originalSpace.right < popoverRect.width && oppositeSpace.left > originalSpace.right;
+            }
+          }
+  
+          if (shouldFlip) {
+            pos = oppositePos;
+            wasFlipped = true;
+          }
+        }
+  
+        edgePos = resolveAutoEdge(pos);
+      }
+  
       const targetY = resolvePosition(pos.y, 'y');
       const edgeY = resolveEdge(edgePos.y, 'y');
       const targetX = resolvePosition(pos.x, 'x');
       const edgeX = resolveEdge(edgePos.x, 'x');
-      
+  
       top = targetY - edgeY + posOffset.y;
       left = targetX - edgeX + posOffset.x;
   
-      // Viewport boundary detection and adjustment
+      // Viewport boundary adjustments
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
-      const padding = 10; // Minimum distance from viewport edges
-
-      // Adjust if going off right edge
+      const padding = 10;
+  
       if (left + popoverRect.width > viewportWidth) {
         left = viewportWidth - popoverRect.width - padding;
       }
-
-      // Adjust if going off left edge  
       if (left < 0) {
         left = padding;
       }
-
-      // Adjust if going off bottom
       if (top + popoverRect.height > viewportHeight) {
         top = viewportHeight - popoverRect.height - padding;
       }
-
-      // Adjust if going off top
       if (top < 0) {
         top = padding;
       }
-
-      // Safari fix: Use direct positioning instead of transform
+  
+      // Remove the padding compensation since we're now measuring at full scale
       popoverElement.style.top = `${top}px`;
       popoverElement.style.left = `${left}px`;
     }
   };
 
+  useEffect(() => {
+    if (!isVisible) {
+      return;
+    }
+
+    positionPopover();
+  }, [targetRef?.current, position, edge, offset]);
+  
   useImperativeHandle(ref, () => ({
     show,
     hide,
@@ -327,12 +426,12 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
     <Portal>
       <div 
         ref={popoverRef} 
-        className={`BDPopover ${className} ${isAnimating ? 'visible' : ''} ${noStyles ? 'no-styles' : ''}`}
+        className={`popover ${className} ${isAnimating ? 'visible' : ''} ${noStyles ? 'no-styles' : ''}`}
         style={{
           zIndex: zIndex,
         }}>
         {closeButton && (
-          <button className="BDPopover-CloseButton" onClick={hide}>
+          <button className="popover__close-button" onClick={hide}>
             <svg width="1em" height="1em" viewBox="0 0 22 22" version="1.1" xmlns="http://www.w3.org/2000/svg">
               <g fill="currentColor" fillRule="nonzero">
                 <path d="M11,22 C17.0445545,22 22,17.0336634 22,11 C22,4.95544554 17.0445545,0 11,0 C4.95544554,0 0,4.95544554 0,11 C0,17.0336634 4.95544554,22 11,22 Z M7.83069307,15.4435644 C7.1009901,15.4435644 6.54554455,14.8772277 6.54554455,14.1475248 C6.54554455,13.8316832 6.68712871,13.5049505 6.93762376,13.2653465 L9.18118812,11.0108911 L6.93762376,8.75643564 C6.68712871,8.51683168 6.54554455,8.19009901 6.54554455,7.87425743 C6.54554455,7.13366337 7.1009901,6.57821782 7.83069307,6.57821782 C8.22277228,6.57821782 8.51683168,6.70891089 8.76732673,6.95940594 L11,9.18118812 L13.2544554,6.94851485 C13.5158416,6.6980198 13.809901,6.57821782 14.1910891,6.57821782 C14.9207921,6.57821782 15.4762376,7.13366337 15.4762376,7.86336634 C15.4762376,8.19009901 15.3455446,8.50594059 15.0841584,8.74554455 L12.8405941,11.0108911 L15.0841584,13.2653465 C15.3346535,13.5049505 15.4653465,13.8207921 15.4653465,14.1475248 C15.4653465,14.8772277 14.909901,15.4435644 14.1910891,15.4435644 C13.7990099,15.4435644 13.4831683,15.3237624 13.2326733,15.0623762 L11,12.8514851 L8.78910891,15.0623762 C8.52772277,15.3237624 8.22277228,15.4435644 7.83069307,15.4435644 Z" id="Shape"></path>
@@ -341,12 +440,12 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
             {/* Close */}
           </button>
         )}
-        <div className="BDPopover-Content" ref={containerRef} style={{ height, width }}>
+        <div className="popover__content" ref={containerRef} style={{ height, width }}>
           {children}
         </div>
         {maskOptions && isVisible && (
           <div
-            className="BDPopover-Mask"
+            className="popover__mask"
             style={{
               backgroundColor: maskOptions.color,
               opacity: maskOptions.opacity,

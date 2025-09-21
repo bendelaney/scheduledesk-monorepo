@@ -627,13 +627,25 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   
   const renderEvent = (event: AvailabilityEvent) => {
     const isActive = activeEvent && activeEvent.id === event.id;
-    
+
+    // Build recurring event classes
+    const recurringClasses = [];
+    if (event.isRecurring) {
+      recurringClasses.push('recurring-event');
+    }
+    if (event.isInstance) {
+      recurringClasses.push('recurring-instance');
+    }
+    if (event.recurrence && !event.isInstance) {
+      recurringClasses.push('recurring-base');
+    }
+
     return (
       <div
         key={event.id}
-        className={`calendar-event calendar-event--${event.eventType.toLowerCase().replace(/\s+/g, '-')} ${isActive ? 'calendar-event--active' : ''}`}
+        className={`calendar-event calendar-event--${event.eventType.toLowerCase().replace(/\s+/g, '-')} ${isActive ? 'calendar-event--active' : ''} ${recurringClasses.join(' ')}`}
         onClick={(e) => handleEventClick(event, e)}
-        title={`${event.teamMember.firstName} ${event.teamMember.lastName || ''}: ${event.eventType}${event.allDay ? '' : ` (${event.startTime} - ${event.endTime})`}`}
+        title={`${event.teamMember.firstName} ${event.teamMember.lastName || ''}: ${event.eventType}${event.allDay ? '' : ` (${event.startTime} - ${event.endTime})`}${event.isInstance ? ' (recurring)' : ''}`}
         style={{ backgroundColor: getEventTypeColor(event.eventType) }}
       >
         {showTeamMemberName && <span className="calendar-event__member">{event.teamMember.firstName} {/*{event.teamMember.lastName || ''}*/}</span>}

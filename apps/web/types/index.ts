@@ -170,7 +170,11 @@ export interface AvailabilityEvent {
     monthlyDate?: MonthlyDateType;
     monthlyWeek?: MonthlyWeekType;
     monthlyDayOfWeek?: MonthlyDayOfWeekType;
-  }
+  };
+  // Recurring event metadata
+  isRecurring?: boolean;      // True if this is a recurring event (base or instance)
+  isInstance?: boolean;       // True if this is a generated recurring instance
+  originalEventId?: string;   // ID of the base recurring event (for instances)
 }
 export interface TeamMembersWithAvailability extends TeamMember {
   available: boolean;

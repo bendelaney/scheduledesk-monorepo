@@ -10,10 +10,14 @@ import ErrorMessage from '@/components/ErrorMessage';
 import { CheckCircle } from '@/components/Icons';
 import './CalendarPopover.scss';
 
+type PopoverProps = React.ComponentProps<typeof Popover>;
+
 interface CalendarPopoverProps {
   className?: string;
   show: boolean;
-  target: { current: HTMLElement | null };
+  target: React.RefObject<HTMLElement | null>;
+  popoverProps?: Omit<PopoverProps, 'className' | 'children' | 'onShow' | 'onHide' | 'targetRef'>;
+  // Event data and handlers
   activeEvent: AvailabilityEvent | null;
   eventEditorValues: Partial<AvailabilityEvent>;
   onClose: () => void;
@@ -31,6 +35,7 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
   className = '',
   show,
   target,
+  popoverProps = {},
   activeEvent,
   eventEditorValues,
   onClose,
@@ -45,21 +50,58 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
 }) => {
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const initialLoadRef = useRef(true);
+  const lastActiveEventIdRef = useRef<string | null>(null);
+  
   const handleEventEditorChange = useCallback((data: Partial<AvailabilityEvent>) => {
     onChange(data);
+
+    // Mark that user has made changes (not initial load)
+    initialLoadRef.current = false;
 
     // Clear any existing error when user makes changes
     if (error) {
       setError(null);
     }
+  }, [onChange, error]);
 
-    // Show save indicator for all changes
-    setShowSaveIndicator(true);
-    setTimeout(() => {
-      setShowSaveIndicator(false);
-    }, 1000);
-  }, [onChange, error, activeEvent, onSave, saving]);
+  // Auto-save effect that runs after parent state updates
+  useEffect(() => {
+    const currentEventId = activeEvent?.id ?? null;
+    if (currentEventId !== lastActiveEventIdRef.current) {
+      lastActiveEventIdRef.current = currentEventId;
+      initialLoadRef.current = true;
+    }
+
+    // Skip if initial load, no active event, or already saving
+    if (initialLoadRef.current || !activeEvent || saving || !onSave) {
+      return;
+    }
+
+    const autoSave = async () => {
+      try {
+        console.log('Auto-saving existing event after state update...');
+        await onSave();
+        // Show save indicator only after successful save
+        setShowSaveIndicator(true);
+        setTimeout(() => {
+          setShowSaveIndicator(false);
+        }, 1000);
+      } catch (err: any) {
+        console.error('Auto-save failed:', err);
+        setError(err.message || 'Failed to save changes');
+      }
+    };
+
+    autoSave();
+  }, [eventEditorValues, activeEvent, onSave, saving]);
+
+  // Reset initial load flag when popover opens
+  useEffect(() => {
+    if (show) {
+      initialLoadRef.current = true;
+    }
+  }, [show, activeEvent?.id]);
 
   const handleSave = useCallback(async () => {
     console.log('Save handler called. isSaveable:', isSaveable, 'onSave:', !!onSave);
@@ -109,9 +151,12 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
     <Popover
       className={`calendar-popover ${className}`}
       targetRef={target as React.RefObject<HTMLElement>}
-      position={'topLeft'}
-      edge={'bottomLeft'}
-      offset={{ x: 0, y: -20 }}
+      position={(!activeEvent) ? 'bottomLeft' : 'centerRight'}
+      edge={(!activeEvent) ? 'topLeft' : 'auto'}
+      offset={(!activeEvent) ? { x: -8, y: 0 } : { x: 0, y: 0 }}
+      closeButton={true}
+      clickOutsideToClose={false}
+      {...popoverProps}
       onShow={() => {
         // Focus the SmartEventInput after popover is shown
         setTimeout(() => {
@@ -122,8 +167,7 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
         }, 0);
       }}
       onHide={onClose}
-      closeButton={true}
-    >
+      >
       <div className={`calendar-popover__saved-indicator ${showSaveIndicator ? 'visible' : ''}`}>
         <CheckCircle/>
       </div>
@@ -139,7 +183,33 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
       )}
 
       <div className="calendar-popover__header-actions">
-        {/* {!activeEvent && ( */}
+        {/* Show recurring event edit options for recurring instances */}
+        {/* {activeEvent?.isInstance && (
+          <>
+            <Button
+              disabled={saving}
+              size="small"
+              onClick={handleSave}
+              className="calendar-popover__edit-instance-button"
+            >
+              {saving ? 'Saving...' : 'Edit This Instance'}
+            </Button>
+            <Button
+              disabled={saving}
+              size="small"
+              onClick={() => {
+                // TODO: Handle edit all instances
+                console.log('Edit all instances clicked');
+              }}
+              className="calendar-popover__edit-all-button"
+            >
+              Edit All Instances
+            </Button>
+          </>
+        )} */}
+
+        {/* Show save button only for new events (no activeEvent) */}
+        {!activeEvent && (
           <Button
             disabled={!isSaveable || saving}
             size="small"
@@ -148,7 +218,7 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
           >
             {saving ? 'Saving...' : 'Save'}
           </Button>
-        {/* )} */}
+        )}
       </div>
 
       <ErrorMessage error={error} className="calendar-popover__error" />
@@ -158,6 +228,7 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
           // Include SmartEventInput for new events
           ...(activeEvent ? [] : ['smartEventInput']),
           // Always include teamMember - it will be pre-populated for team member calendar
+          ...(!activeEvent ? ['teamMember'] : [] ),
           // 'teamMember',
           'eventType',
           'customEventNameInput',

@@ -60,6 +60,16 @@ const AvailabilityEventsData: AvailabilityEvent[] = [
     allDay: true
   },
   {
+    id: "recurring-test-1",
+    teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvMzY4Mzkz", firstName: "Ben", lastName: "Delaney" },
+    eventType: "Personal Appointment",
+    startDate: "2025-09-09",
+    startTime: "09:00:00",
+    endTime: "10:00:00",
+    allDay: false,
+    recurrence: "Every Week"
+  },
+  {
     id: "8",
     teamMember: {id: "Z2lkOi8vSm9iYmVyL1VzZXIvNTM2MDYx", firstName: "Dario", lastName: "Ré" },
     eventType: "Not Working",

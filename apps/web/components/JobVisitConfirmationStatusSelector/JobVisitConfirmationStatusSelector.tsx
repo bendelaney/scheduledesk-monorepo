@@ -1,7 +1,7 @@
 'use client'
 
 import React, { ForwardRefRenderFunction, useState, useEffect, useRef } from "react";
-import BDPopover, { PopoverContext } from "components/Popover";
+import Popover, { PopoverContext } from "components/Popover";
 import { JobVisitConfirmationStatus, StatusIconMapping } from "types";
 import {
   StatusOpen,
@@ -91,7 +91,7 @@ const JobVisitConfirmationStatusSelector: ForwardRefRenderFunction<HTMLDivElemen
       </button>
 
       {showMenu && (
-        <BDPopover
+        <Popover
             targetRef={toggleRef as React.RefObject<HTMLElement>}
             scrollContainerRef={menuRef as React.RefObject<HTMLDivElement>}
             position={'bottomLeft'}
@@ -109,7 +109,7 @@ const JobVisitConfirmationStatusSelector: ForwardRefRenderFunction<HTMLDivElemen
               </li>
             ))}
           </ul>
-        </BDPopover>
+        </Popover>
       )}
     </div>
   );

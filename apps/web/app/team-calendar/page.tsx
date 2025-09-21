@@ -103,7 +103,7 @@ export default function TeamCalendarPage() {
         loading={loading}
         error={error || null}
       />
-      
+
       {/* New Event Popover */}
       <CalendarPopover
         show={showNewEventPopover}
@@ -114,7 +114,7 @@ export default function TeamCalendarPage() {
         onChange={handleNewEventDataChange}
         onSaveableChange={setPopoverIsSaveable}
         isSaveable={popoverIsSaveable}
-        onSave={handleSaveEvent}
+        onSave={!activeEvent ? handleSaveEvent : undefined}
         onDelete={handleDeleteEvent}
         saving={saving}
         teamMembers={teamMembers}

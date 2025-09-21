@@ -112,7 +112,7 @@ export const syncJobberUser = async (jobberUser: {
 // This replaces your convertAndMergeData function
 export const getMergedTeamMembers = async (): Promise<TeamMember[]> => {
   try {
-    console.log('🔄 Fetching team members from Supabase...');
+    // console.log('🔄 Fetching team members from Supabase...');
     
     // Fetch both data sources in parallel
     const [jobberUsers, teamMembers] = await Promise.all([
@@ -120,7 +120,7 @@ export const getMergedTeamMembers = async (): Promise<TeamMember[]> => {
       getTeamMembersFromDb()
     ]);
     
-    console.log(`📊 Found ${jobberUsers.length} Jobber users, ${teamMembers.length} internal team members`);
+    // console.log(`📊 Found ${jobberUsers.length} Jobber users, ${teamMembers.length} internal team members`);
     
     // Merge the data similar to your convertAndMergeData function
     const mergedData = jobberUsers.map((jobberUser: any) => {
@@ -146,7 +146,7 @@ export const getMergedTeamMembers = async (): Promise<TeamMember[]> => {
     // Sort by firstName like your original code
     const sorted = mergedData.sort((a, b) => (a.firstName > b.firstName) ? 1 : -1);
     
-    console.log(`✅ Returning ${sorted.length} merged team members`);
+    // console.log(`✅ Returning ${sorted.length} merged team members`);
     return sorted;
     
   } catch (error) {

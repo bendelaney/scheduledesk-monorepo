@@ -37,13 +37,13 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
   // Filter events for selected team members
   const filteredEvents = useMemo(() => {
     const filtered = events.filter(event => {
-      console.log('TeamCalendar event.teamMember:', event.teamMember);
+      // console.log('TeamCalendar event.teamMember:', event.teamMember);
       const fullName = `${event.teamMember.firstName} ${event.teamMember.lastName || ''}`.trim();
       const isSelected = selectedTeamMembers.includes(fullName);
-      console.log('TeamCalendar filtering:', { fullName, isSelected, selectedTeamMembers });
+      // console.log('TeamCalendar filtering:', { fullName, isSelected, selectedTeamMembers });
       return isSelected;
     });
-    console.log('TeamCalendar - Filtered events:', filtered.length, 'from', events.length, 'total');
+    // console.log('TeamCalendar - Filtered events:', filtered.length, 'from', events.length, 'total');
     return filtered;
   }, [selectedTeamMembers, events]);
 

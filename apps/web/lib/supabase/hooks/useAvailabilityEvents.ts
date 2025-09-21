@@ -8,6 +8,7 @@ import {
 } from '../services/availabilityEvents';
 import { eventToDatabase, eventFromDatabase, validateEvent, getTeamMemberDbId } from '../adapters/eventAdapters';
 import { useTeamMembers } from './useTeamMembers';
+import { expandAllRecurringEvents, getDefaultExpansionRange } from '@/lib/recurrence/RecurrenceExpander';
 
 interface UseAvailabilityEventsResult {
   data: AvailabilityEvent[];
@@ -19,7 +20,7 @@ interface UseAvailabilityEventsResult {
   deleteEvent: (id: string) => Promise<void>;
 }
 
-export const useAvailabilityEvents = (teamMemberId?: string): UseAvailabilityEventsResult => {
+export const useAvailabilityEvents = (teamMemberId?: string | null): UseAvailabilityEventsResult => {
   const [data, setData] = useState<AvailabilityEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +30,15 @@ export const useAvailabilityEvents = (teamMemberId?: string): UseAvailabilityEve
     try {
       setLoading(true);
       setError(null);
+
+      // If teamMemberId is null, don't fetch anything yet (team member page waiting for member to be found)
+      // If teamMemberId is undefined, fetch all events (team calendar page)
+      // If teamMemberId is a string, fetch filtered events (team member page with specific member)
+      if (teamMemberId === null) {
+        setData([]);
+        setLoading(false);
+        return;
+      }
 
       let dbTeamMemberId = teamMemberId;
 
@@ -44,15 +54,18 @@ export const useAvailabilityEvents = (teamMemberId?: string): UseAvailabilityEve
       }
 
       const dbEvents = await getAvailabilityEvents(dbTeamMemberId);
-      console.log('Fetched events from database:', dbEvents.length);
+      // console.log('Fetched events from database:', dbEvents.length);
 
       // Convert database events to frontend format
       const convertedEvents = await Promise.all(
         dbEvents.map(dbEvent => eventFromDatabase(dbEvent, teamMembers))
       );
 
-      console.log('Converted events to frontend format:', convertedEvents.length);
-      setData(convertedEvents);
+      // Expand recurring events for calendar display
+      const { startDate, endDate } = getDefaultExpansionRange();
+      const expandedEvents = expandAllRecurringEvents(convertedEvents, startDate, endDate);
+
+      setData(expandedEvents);
       setError(null); // Clear any previous errors on successful fetch
     } catch (err: any) {
       console.error('useAvailabilityEvents error:', err);
@@ -68,7 +81,11 @@ export const useAvailabilityEvents = (teamMemberId?: string): UseAvailabilityEve
           ? staticData.filter(event => event.teamMember.id === teamMemberId)
           : staticData;
 
-        setData(filteredStaticData);
+        // Expand recurring events in static data too
+        const { startDate, endDate } = getDefaultExpansionRange();
+        const expandedStaticData = expandAllRecurringEvents(filteredStaticData, startDate, endDate);
+
+        setData(expandedStaticData);
         setError('Using fallback data - database connection failed');
       } catch (staticErr) {
         console.error('Static data fallback failed:', staticErr);
@@ -136,7 +153,20 @@ export const useAvailabilityEvents = (teamMemberId?: string): UseAvailabilityEve
 
       // Use optimistic update for immediate UI feedback
       console.log('Adding new event to state optimistically');
-      setData(prev => [...prev, newEvent]);
+
+      if (newEvent.recurrence) {
+        // If it's a recurring event, expand it immediately
+        console.log('New event is recurring, expanding instances...');
+        const { startDate, endDate } = getDefaultExpansionRange();
+        const expandedEvents = expandAllRecurringEvents([newEvent], startDate, endDate);
+        console.log('Expanded new recurring event into', expandedEvents.length, 'instances');
+
+        setData(prev => [...prev, ...expandedEvents]);
+      } else {
+        // Regular event
+        setData(prev => [...prev, newEvent]);
+      }
+
       setError(null);
 
       return newEvent;
@@ -167,9 +197,28 @@ export const useAvailabilityEvents = (teamMemberId?: string): UseAvailabilityEve
       const updatedEvent = await eventFromDatabase(updatedDbEvent, teamMembers);
 
       // Use optimistic update for immediate UI feedback
-      setData(prev => prev.map(event =>
-        event.id === id ? updatedEvent : event
-      ));
+      if (updatedEvent.recurrence) {
+        // If updating a recurring event, we need to re-expand all instances
+        console.log('Updated event is recurring, re-expanding all events...');
+        setData(prev => {
+          // Remove any existing instances of this recurring event
+          const filteredPrev = prev.filter(event =>
+            !(event.originalEventId === id || event.id === id)
+          );
+
+          // Add the updated base event
+          const withUpdatedEvent = [...filteredPrev, updatedEvent];
+
+          // Re-expand all recurring events including the updated one
+          const { startDate, endDate } = getDefaultExpansionRange();
+          return expandAllRecurringEvents(withUpdatedEvent, startDate, endDate);
+        });
+      } else {
+        // Regular event update
+        setData(prev => prev.map(event =>
+          event.id === id ? updatedEvent : event
+        ));
+      }
       setError(null);
 
       return updatedEvent;
@@ -184,7 +233,10 @@ export const useAvailabilityEvents = (teamMemberId?: string): UseAvailabilityEve
       await deleteAvailabilityEvent(id);
 
       // Use optimistic update for immediate UI feedback
-      setData(prev => prev.filter(event => event.id !== id));
+      // Remove the base event and all its instances
+      setData(prev => prev.filter(event =>
+        event.id !== id && event.originalEventId !== id
+      ));
       setError(null);
     } catch (err: any) {
       setError(err.message);

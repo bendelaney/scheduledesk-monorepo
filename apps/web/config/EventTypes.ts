@@ -35,7 +35,8 @@ export const EventTypes: EventTypeConfig[] = [
   {
     name: "Custom",
     displayName: "Custom",
-    color: "#4babff" // 
+    // color: "#4babff"
+    color: "#8c8e90ff"
   }
 ];
 

@@ -221,8 +221,8 @@ function displayParsedEvents() {
   });
   
   // Summary
-  const teamMembers = [...new Set(events.map(e => e.teamMemberName))];
-  const eventTypes = [...new Set(events.map(e => e.eventType))];
+  const teamMembers = Array.from(new Set(events.map(e => e.teamMemberName).filter(Boolean)));
+  const eventTypes = Array.from(new Set(events.map(e => e.eventType).filter(Boolean)));
   
   console.log('📊 SUMMARY');
   console.log('=' .repeat(20));

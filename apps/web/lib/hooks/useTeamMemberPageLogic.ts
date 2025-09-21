@@ -3,6 +3,13 @@ import { TeamMember, AvailabilityEvent } from '@/types';
 import { useTeamMembers } from '@/lib/supabase/hooks/useTeamMembers';
 import { useAvailabilityEvents } from '@/lib/supabase/hooks/useAvailabilityEvents';
 
+// Utility function to extract base UUID from recurring instance IDs
+const getBaseUuid = (id: string): string => {
+  // If it's an instance ID (format: uuid-instance-YYYY-MM-DD), extract the base UUID
+  const instanceMatch = id.match(/^(.+)-instance-\d{4}-\d{2}-\d{2}$/);
+  return instanceMatch ? instanceMatch[1] : id;
+};
+
 interface UseTeamMemberPageLogicResult {
   // Data
   teamMember: TeamMember | undefined;
@@ -54,7 +61,8 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
     }
   }, [memberId, teamMembers]);
 
-  // Events data and CRUD functions
+  // Events data and CRUD functions - only fetch when we have a valid team member
+  // Pass null when waiting for team member, pass the ID when ready
   const {
     data: availabilityEvents,
     loading: eventsLoading,
@@ -62,7 +70,7 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
     createEvent,
     updateEvent,
     deleteEvent
-  } = useAvailabilityEvents(teamMember?.id);
+  } = useAvailabilityEvents(teamMember?.id || null);
 
   // Safe CRUD functions
   const safeCreateEvent = createEvent || (async () => { throw new Error('Create function not ready'); });
@@ -73,25 +81,39 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
   const [showPopover, setShowPopover] = useState(false);
   const [popoverIsSaveable, setPopoverIsSaveable] = useState(false);
   const [popoverTarget, setPopoverTarget] = useState<{ current: HTMLElement | null }>({ current: null });
-  const [activeEvent, setActiveEvent] = useState<AvailabilityEvent | null>(null);
+  const [activeEventId, setActiveEventId] = useState<string | null>(null); // Store ID instead of object
   const [eventEditorValues, setEventEditorValues] = useState<Partial<AvailabilityEvent>>({});
   const [saving, setSaving] = useState(false);
   const newEventButtonRef = useRef<HTMLButtonElement>(null);
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout>();
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Compute activeEvent from current data based on activeEventId
+  const activeEvent = activeEventId ? availabilityEvents.find(e => e.id === activeEventId) || null : null;
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Popover state changed:', {
+      showPopover,
+      activeEventId,
+      activeEventFound: !!activeEvent,
+      availabilityEventsCount: availabilityEvents.length
+    });
+  }, [showPopover, activeEventId, activeEvent, availabilityEvents.length]);
 
   // Event handlers
   const handleEventClickFromGrid = useCallback((event: AvailabilityEvent, targetEl?: HTMLElement) => {
     if (targetEl) {
       setPopoverTarget({ current: targetEl });
-      setActiveEvent(event);
+      setActiveEventId(event.id || null);
       setEventEditorValues(event);
       setShowPopover(true);
     }
   }, []);
 
   const handleClosePopover = useCallback(() => {
+    console.log('handleClosePopover called - closing popover');
     setShowPopover(false);
-    setActiveEvent(null);
+    setActiveEventId(null);
     setEventEditorValues({});
     setPopoverTarget({ current: null });
   }, []);
@@ -104,7 +126,7 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
     console.log('New event clicked for date:', date, 'Target:', targetEl);
     if (targetEl && teamMember) {
       setPopoverTarget({ current: targetEl });
-      setActiveEvent(null);
+      setActiveEventId(null);
 
       console.log('=== ORIGINAL TEAM MEMBER DEBUG ===');
       console.log('teamMember object:', teamMember);
@@ -124,7 +146,7 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
   const handleNewEventPopoverOpen = useCallback(() => {
     if (newEventButtonRef.current && teamMember) {
       setPopoverTarget({ current: newEventButtonRef.current });
-      setActiveEvent(null);
+      setActiveEventId(null);
       setEventEditorValues({
         teamMember: teamMember,
       });
@@ -149,8 +171,22 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
           console.log('Auto-save triggered for existing event');
           try {
             setSaving(true);
-            await safeUpdateEvent(activeEvent.id!, newValues);
-            console.log('Auto-save completed successfully');
+
+            // Handle recurring event instances differently
+            if (activeEvent.isInstance && activeEvent.originalEventId) {
+              // For now, we can't update individual instances - only the whole series
+              console.warn('Updating individual recurring instances not yet implemented');
+              console.log('Would update the entire recurring series with ID:', activeEvent.originalEventId);
+
+              // For now, update the original recurring event (entire series)
+              const baseUuid = getBaseUuid(activeEvent.originalEventId || activeEvent.id || '');
+              await safeUpdateEvent(baseUuid, newValues);
+              console.log('Recurring series updated successfully');
+            } else {
+              // Regular event update
+              await safeUpdateEvent(activeEvent.id!, newValues);
+              console.log('Auto-save completed successfully');
+            }
           } catch (err: any) {
             console.error('Auto-save failed:', err);
           } finally {
@@ -183,15 +219,31 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
 
       if (activeEvent?.id) {
         console.log('Updating existing event with ID:', activeEvent.id);
-        await safeUpdateEvent(activeEvent.id, eventEditorValues);
-        console.log('Event updated successfully');
+
+        // Handle recurring event instances differently
+        if (activeEvent.isInstance && activeEvent.originalEventId) {
+          // For now, we can't update individual instances - only the whole series
+          console.warn('Updating individual recurring instances not yet implemented');
+          console.log('Would update the entire recurring series with ID:', activeEvent.originalEventId);
+
+          // For now, update the original recurring event (entire series)
+          const baseUuid = getBaseUuid(activeEvent.originalEventId || activeEvent.id || '');
+          await safeUpdateEvent(baseUuid, eventEditorValues);
+          console.log('Recurring series updated successfully');
+        } else {
+          // Regular event update
+          await safeUpdateEvent(activeEvent.id, eventEditorValues);
+          console.log('Event updated successfully');
+        }
       } else {
         console.log('Creating new event...');
         const result = await safeCreateEvent(eventEditorValues);
         console.log('Event created successfully:', result);
       }
 
-      handleClosePopover();
+      if (!activeEvent?.id) {
+        handleClosePopover();
+      }
     } catch (err) {
       console.error('Failed to save event:', err);
       console.error('Error details:', err);
@@ -205,8 +257,24 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
 
     try {
       setSaving(true);
-      await safeDeleteEvent(activeEvent.id);
-      console.log('Event deleted successfully');
+
+      // Handle recurring event instances differently
+      if (activeEvent.isInstance && activeEvent.originalEventId) {
+        // For now, we can't delete individual instances - only the whole series
+        // In a full implementation, you'd create exception records or handle single instance deletion
+        console.warn('Deleting individual recurring instances not yet implemented');
+        console.log('Would delete the entire recurring series with ID:', activeEvent.originalEventId);
+
+        // For now, delete the original recurring event (entire series)
+        const baseUuid = getBaseUuid(activeEvent.originalEventId || activeEvent.id || '');
+        await safeDeleteEvent(baseUuid);
+        console.log('Recurring series deleted successfully');
+      } else {
+        // Regular event deletion
+        await safeDeleteEvent(activeEvent.id);
+        console.log('Event deleted successfully');
+      }
+
       handleClosePopover();
     } catch (err) {
       console.error('Failed to delete event:', err);

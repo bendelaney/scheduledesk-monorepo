@@ -1,4 +1,4 @@
-.BDPopover {
+.popover {
   position: fixed;
   padding: 14px;
   z-index: 10000;
@@ -8,7 +8,7 @@
   
   // Animation properties
   opacity: 0;
-  transform: translateY(-20px) scale(0.95);
+  transform: translateY(-20px) scale(0.9);
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
   
@@ -25,7 +25,7 @@
     background: none;
   }
 
-  &-CloseButton {
+  &__close-button {
     position: absolute;
     top:  14px;
     left: 14px;

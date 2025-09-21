@@ -44,12 +44,26 @@ const TimeRangeSelectMenu: FC<TimeRangeSelectMenuProps> = ({
   instanceId
 }) => {
   const timeOptions = generateTimeOptions(interval);
-  
+
   const startOption = startTime ? timeOptions.find(opt => opt.value === startTime) : undefined;
   const endOption = endTime ? timeOptions.find(opt => opt.value === endTime) : undefined;
 
+  // Filter end time options to only show times after the selected start time
+  const getFilteredEndTimeOptions = () => {
+    if (!startTime) return timeOptions;
+
+    return timeOptions.filter(option => option.value > startTime);
+  };
+
+  const filteredEndTimeOptions = getFilteredEndTimeOptions();
+
   const handleStartChange = (option: any) => {
-    onChange?.(option?.value, endTime);
+    const newStartTime = option?.value;
+
+    // If the current end time is now invalid (before the new start time), clear it
+    const newEndTime = (endTime && newStartTime && endTime <= newStartTime) ? undefined : endTime;
+
+    onChange?.(newStartTime, newEndTime);
   };
 
   const handleEndChange = (option: any) => {
@@ -73,7 +87,7 @@ const TimeRangeSelectMenu: FC<TimeRangeSelectMenuProps> = ({
       </div>
       <div className="time-range-selector-control-wrapper">
         <SelectMenu
-          options={timeOptions}
+          options={filteredEndTimeOptions}
           value={endOption}
           selectedOption={endOption}
           placeholder="End Time"

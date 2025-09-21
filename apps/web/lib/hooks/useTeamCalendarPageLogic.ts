@@ -3,6 +3,13 @@ import { TeamMember, AvailabilityEvent } from '@/types';
 import { useTeamMembers } from '@/lib/supabase/hooks/useTeamMembers';
 import { useAvailabilityEvents } from '@/lib/supabase/hooks/useAvailabilityEvents';
 
+// Utility function to extract base UUID from recurring instance IDs
+const getBaseUuid = (id: string): string => {
+  // If it's an instance ID (format: uuid-instance-YYYY-MM-DD), extract the base UUID
+  const instanceMatch = id.match(/^(.+)-instance-\d{4}-\d{2}-\d{2}$/);
+  return instanceMatch ? instanceMatch[1] : id;
+};
+
 interface UseTeamCalendarPageLogicResult {
   // Data
   teamMembers: TeamMember[];
@@ -60,9 +67,31 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
   const [popoverIsSaveable, setPopoverIsSaveable] = useState(false);
   const [newEventData, setNewEventData] = useState<Partial<AvailabilityEvent>>({});
   const [popoverTarget, setPopoverTarget] = useState<{ current: HTMLElement | null }>({ current: null });
-  const [activeEvent, setActiveEvent] = useState<AvailabilityEvent | null>(null);
+  const [activeEventId, setActiveEventId] = useState<string | null>(null); // Store ID instead of object
   const [saving, setSaving] = useState(false);
   const newEventButtonRef = useRef<HTMLButtonElement>(null);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Compute activeEvent from current data based on activeEventId
+  const activeEvent = activeEventId ? availabilityEvents.find(e => e.id === activeEventId) || null : null;
+
+  // Debug logging
+  useEffect(() => {
+    console.log('TEAM CALENDAR: Popover state changed:', {
+      showNewEventPopover,
+      activeEventId,
+      activeEventFound: !!activeEvent,
+      availabilityEventsCount: availabilityEvents.length
+    });
+  }, [showNewEventPopover, activeEventId, activeEvent, availabilityEvents.length]);
+
+  // Sync newEventData with activeEvent when data refreshes
+  useEffect(() => {
+    if (activeEvent && activeEventId) {
+      console.log('TEAM CALENDAR: Syncing newEventData with refreshed activeEvent');
+      setNewEventData(activeEvent);
+    }
+  }, [activeEvent, activeEventId]);
 
   // Safe CRUD functions
   const safeCreateEvent = createEvent || (async () => { throw new Error('Create function not ready'); });
@@ -89,23 +118,64 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
   }, []);
 
   const handleNewEventDataChange = useCallback((data: Partial<AvailabilityEvent>) => {
-    setNewEventData(data);
-    console.log('New event data changed:', data);
-    console.log('Team member in data:', data.teamMember);
-  }, []);
+    setNewEventData(prev => {
+      const newValues = { ...prev, ...data };
+
+      // For existing events, trigger auto-save after state update
+      if (activeEvent?.id && !saving) {
+        // Clear any existing timeout
+        if (autoSaveTimeoutRef.current) {
+          clearTimeout(autoSaveTimeoutRef.current);
+        }
+
+        // Auto-save after a debounced delay
+        autoSaveTimeoutRef.current = setTimeout(async () => {
+          console.log('Auto-save triggered for existing event');
+          try {
+            setSaving(true);
+
+            // Handle recurring event instances differently
+            if (activeEvent.isInstance && activeEvent.originalEventId) {
+              // For now, we can't update individual instances - only the whole series
+              console.warn('Updating individual recurring instances not yet implemented');
+              console.log('Would update the entire recurring series with ID:', activeEvent.originalEventId);
+
+              // For now, update the original recurring event (entire series)
+              const baseUuid = getBaseUuid(activeEvent.originalEventId || activeEvent.id || '');
+              await safeUpdateEvent(baseUuid, newValues);
+              console.log('Recurring series updated successfully');
+            } else {
+              // Regular event update
+              await safeUpdateEvent(activeEvent.id!, newValues);
+              console.log('Auto-save completed successfully');
+            }
+          } catch (err: any) {
+            console.error('Auto-save failed:', err);
+          } finally {
+            setSaving(false);
+          }
+        }, 1000);
+      }
+
+      console.log('New event data changed:', newValues);
+      console.log('Team member in data:', newValues.teamMember);
+      return newValues;
+    });
+  }, [activeEvent, saving, safeUpdateEvent]);
 
   const handleEventClickFromGrid = useCallback((event: AvailabilityEvent, targetEl?: HTMLElement) => {
     if (targetEl) {
       setPopoverTarget({ current: targetEl });
-      setActiveEvent(event);
+      setActiveEventId(event.id || null);
       setNewEventData(event);
       setShowNewEventPopover(true);
     }
   }, []);
 
   const handleClosePopover = useCallback(() => {
+    console.log('TEAM CALENDAR: handleClosePopover called - closing popover');
     setShowNewEventPopover(false);
-    setActiveEvent(null);
+    setActiveEventId(null);
     setNewEventData({});
     setPopoverTarget({ current: null });
   }, []);
@@ -118,7 +188,7 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
     console.log('New event clicked for date:', date, 'Target:', targetEl);
     if (targetEl) {
       setPopoverTarget({ current: targetEl });
-      setActiveEvent(null);
+      setActiveEventId(null);
 
       // Pre-populate with the clicked date only
       setNewEventData({
@@ -134,19 +204,34 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
     console.log('popoverIsSaveable:', popoverIsSaveable);
     console.log('saving:', saving);
     console.log('newEventData:', newEventData);
-    console.log('newEventData.teamMember:', newEventData.teamMember);
+    // console.log('newEventData.teamMember:', newEventData.teamMember);
     console.log('activeEvent:', activeEvent);
-
-    if (!popoverIsSaveable || saving) return;
-
+    
+    // For existing events, always allow save. For new events, require validation.
+    if (saving || (!activeEvent?.id && !popoverIsSaveable)) return;
+    
     try {
       setSaving(true);
-
+      console.log('saving:', saving);      
       if (activeEvent?.id) {
         // Update existing event
         console.log('Updating event with data:', newEventData);
-        await safeUpdateEvent(activeEvent.id, newEventData);
-        console.log('Event updated successfully');
+
+        // Handle recurring event instances differently
+        if (activeEvent.isInstance && activeEvent.originalEventId) {
+          // For now, we can't update individual instances - only the whole series
+          console.warn('Updating individual recurring instances not yet implemented');
+          console.log('Would update the entire recurring series with ID:', activeEvent.originalEventId);
+
+          // For now, update the original recurring event (entire series)
+          const baseUuid = getBaseUuid(activeEvent.originalEventId || activeEvent.id || '');
+          await safeUpdateEvent(baseUuid, newEventData);
+          console.log('Recurring series updated successfully');
+        } else {
+          // Regular event update
+          await safeUpdateEvent(activeEvent.id, newEventData);
+          console.log('Event updated successfully');
+        }
       } else {
         // Create new event
         console.log('Creating event with data:', newEventData);
@@ -154,7 +239,10 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
         console.log('Event created successfully');
       }
 
-      handleClosePopover();
+      // Only close popover for new events, keep it open for existing event updates
+      if (!activeEvent?.id) {
+        handleClosePopover();
+      }
     } catch (err) {
       console.error('Failed to save event:', err);
     } finally {
@@ -167,8 +255,24 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
 
     try {
       setSaving(true);
-      await safeDeleteEvent(activeEvent.id);
-      console.log('Event deleted successfully');
+
+      // Handle recurring event instances differently
+      if (activeEvent.isInstance && activeEvent.originalEventId) {
+        // For now, we can't delete individual instances - only the whole series
+        // In a full implementation, you'd create exception records or handle single instance deletion
+        console.warn('Deleting individual recurring instances not yet implemented');
+        console.log('Would delete the entire recurring series with ID:', activeEvent.originalEventId);
+
+        // For now, delete the original recurring event (entire series)
+        const baseUuid = getBaseUuid(activeEvent.originalEventId || activeEvent.id || '');
+        await safeDeleteEvent(baseUuid);
+        console.log('Recurring series deleted successfully');
+      } else {
+        // Regular event deletion
+        await safeDeleteEvent(activeEvent.id);
+        console.log('Event deleted successfully');
+      }
+
       handleClosePopover();
     } catch (err) {
       console.error('Failed to delete event:', err);
@@ -177,17 +281,26 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
     }
   }, [activeEvent, safeDeleteEvent, saving, handleClosePopover]);
 
-  console.log('TeamCalendarPage - All events from database:', availabilityEvents.length);
-  console.log('TeamCalendarPage - Event details:', availabilityEvents.map(e => ({
-    id: e.id,
-    teamMemberObject: e.teamMember,
-    teamMember: `${e.teamMember.firstName} ${e.teamMember.lastName}`,
-    eventType: e.eventType,
-    startDate: e.startDate
-  })));
+  // console.log('TeamCalendarPage - All events from database:', availabilityEvents.length);
+  // console.log('TeamCalendarPage - Event details:', availabilityEvents.map(e => ({
+  //   id: e.id,
+  //   teamMemberObject: e.teamMember,
+  //   teamMember: `${e.teamMember.firstName} ${e.teamMember.lastName}`,
+  //   eventType: e.eventType,
+  //   startDate: e.startDate
+  // })));
 
-  console.log('TeamCalendarPage - Selected team members:', selectedTeamMembers);
-  console.log('TeamCalendarPage - Available team members:', teamMembers.map(m => m.displayName || `${m.firstName} ${m.lastName || ''}`.trim()));
+  // console.log('TeamCalendarPage - Selected team members:', selectedTeamMembers);
+  // console.log('TeamCalendarPage - Available team members:', teamMembers.map(m => m.displayName || `${m.firstName} ${m.lastName || ''}`.trim()));
+
+  // Cleanup auto-save timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return {
     // Data
