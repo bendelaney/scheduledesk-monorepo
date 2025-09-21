@@ -31,14 +31,16 @@ interface SmartEventInputProps {
   currentDate?: string;
   additionalRules?: string;
   placeholderText?: string;
+  teamMembers?: { firstName: string; lastName: string; id: string }[];
   onParse: (events: AvailabilityEvent[], inputText: string) => void;
   onClear?: () => void;
 }
 
-const SmartEventInput: FC<SmartEventInputProps> = ({ 
-  currentDate, 
+const SmartEventInput: FC<SmartEventInputProps> = ({
+  currentDate,
   additionalRules,
   placeholderText = "✨ Describe your event...",
+  teamMembers = [],
   onParse,
   onClear
 }) => {
@@ -68,7 +70,8 @@ const SmartEventInput: FC<SmartEventInputProps> = ({
         body: JSON.stringify({
           inputText: prevText,
           today,
-          additionalRules: additionalRules || ''
+          additionalRules: additionalRules || '',
+          teamMembers
         }),
       });
 

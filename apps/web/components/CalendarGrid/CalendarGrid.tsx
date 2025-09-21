@@ -115,7 +115,7 @@ export const getEventTypeDisplayText = (event: AvailabilityEvent, isShort: boole
             return `${formatTime(startTime)}-${formatTime(endTime)}`;
           }
         }
-        return `${formatTime(startTime)}-${formatTime(endTime)}`;
+        return `appt: ${formatTime(startTime)}-${formatTime(endTime)}`;
       }
       return isShort ? 'appt' : 'personal appointment';
       

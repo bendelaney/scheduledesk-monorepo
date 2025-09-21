@@ -27,6 +27,7 @@ export default function TeamPage() {
   return (
     <AppFrame 
       className="team-page"
+      showSidebarToggle={false}
       topBarMiddleContent={
         <div className="top-bar__navigation">
           {MainNavigationConfig.map((navItem) => {

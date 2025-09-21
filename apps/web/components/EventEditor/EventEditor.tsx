@@ -27,8 +27,7 @@ import SlideSwitch from '@/components/SlideSwitch';
 import { X } from '@/components/Icons';
 import './EventEditor.scss';
 
-// Team member data
-import TeamMembersData from '@/data/teamMembersData';
+// Team member data (now passed as props)
 
 // Form config types
 type FormConfigItem = string | {
@@ -41,6 +40,7 @@ interface EventEditorProps {
   values?: Partial<AvailabilityEvent>;
   onChange?: (data: Partial<AvailabilityEvent>) => void;
   onSaveableChange?: (isSaveable: boolean) => void;
+  teamMembers?: { firstName: string; lastName: string; id: string }[];
 }
 
 const EventEditor: FC<EventEditorProps> = ({
@@ -57,7 +57,8 @@ const EventEditor: FC<EventEditorProps> = ({
   ],
   values,
   onChange,
-  onSaveableChange
+  onSaveableChange,
+  teamMembers = []
 }) => {
   // Lifecycle tracking refs
   const isInitializedRef = useRef(false);
@@ -452,6 +453,23 @@ const EventEditor: FC<EventEditorProps> = ({
             setFormState(prev => {
               const newState = { ...normalizedData };
 
+              // Preserve existing team member if AI didn't provide a complete one
+              if (prev.teamMember && prev.teamMember.id &&
+                  (!newState.teamMember || !newState.teamMember.id)) {
+                console.log('Preserving existing team member:', prev.teamMember);
+                newState.teamMember = prev.teamMember;
+              }
+
+              // Preserve existing dates if AI didn't provide them
+              if (prev.startDate && !newState.startDate) {
+                console.log('Preserving existing startDate:', prev.startDate);
+                newState.startDate = prev.startDate;
+              }
+              if (prev.endDate && !newState.endDate) {
+                console.log('Preserving existing endDate:', prev.endDate);
+                newState.endDate = prev.endDate;
+              }
+
               // If this is a recurring event, clear endDate for infinite recurrence
               if (normalizedData.recurrence) {
                 newState.endDate = undefined;
@@ -461,8 +479,8 @@ const EventEditor: FC<EventEditorProps> = ({
             });
           }
         }}
-        additionalRules={`When a name is mentioned, check it against this list: ${TeamMembersData.map(member => 
-        member.firstName + " " + member.lastName).join(", ")}. If only the first name is found, return an object with firstName and lastName properties.`}
+        teamMembers={teamMembers}
+        currentDate={formState.startDate}
         {...customProps}
       />
     ),
@@ -470,7 +488,7 @@ const EventEditor: FC<EventEditorProps> = ({
       <TeamMemberSelectMenu
         key={`team-member-${formState.teamMember ? (formState.teamMember.firstName || '') + (formState.teamMember.lastName || '') : 'none'}`}
         selected={formState.teamMember && formState.teamMember.firstName ? formState.teamMember as { firstName: string; lastName?: string } : undefined}
-        teamMembers={TeamMembersData}
+        teamMembers={teamMembers}
         selectMenuProps={{
           placeholder: "Team Member", 
           styles: SelectMenuStylePresets.Large,

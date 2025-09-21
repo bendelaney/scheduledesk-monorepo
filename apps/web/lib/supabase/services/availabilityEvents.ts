@@ -22,6 +22,7 @@ export const getAvailabilityEvents = async (teamMemberId?: string) => {
 export const createAvailabilityEvent = async (event: {
   team_member_id: string;
   event_type: string;
+  custom_event_name?: string;
   start_date: string;
   end_date: string;
   start_time?: string;
@@ -46,6 +47,7 @@ export const createAvailabilityEvent = async (event: {
 
 export const updateAvailabilityEvent = async (id: string, updates: {
   event_type?: string;
+  custom_event_name?: string;
   start_date?: string;
   end_date?: string;
   start_time?: string;

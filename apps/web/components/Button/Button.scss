@@ -36,9 +36,22 @@
   }
   
   &--ghost {
-    background: transparent;
+    // background: rgba(255,255,255,0.25);
+    background: rgba(0,0,0,0.04);
     color: $gray;
+    border-color: $medium-gray;
+    color: $medium-gray;
     &:hover:not(:disabled) { background: #f1f5f9; }
+  }
+
+  &--danger {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+    &:hover:not(:disabled) {
+      background: #c82333;
+      border-color: #bd2130;
+    }
   }
   
   // Sizes

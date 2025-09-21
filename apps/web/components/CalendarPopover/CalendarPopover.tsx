@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { AvailabilityEvent, TeamMember } from '@/types';
 import Popover from '@/components/Popover';
 import EventEditor from '@/components/EventEditor';
 import TeamMemberId from '@/components/TeamMemberId';
 import Button from '@/components/Button';
+import ErrorMessage from '@/components/ErrorMessage';
 import { CheckCircle } from '@/components/Icons';
 import './CalendarPopover.scss';
 
@@ -20,6 +21,10 @@ interface CalendarPopoverProps {
   onSaveableChange: (saveable: boolean) => void;
   isSaveable: boolean;
   showTeamMemberId?: boolean;
+  onSave?: () => Promise<void>;
+  onDelete?: () => Promise<void>;
+  saving?: boolean;
+  teamMembers?: { firstName: string; lastName: string; id: string }[];
 }
 
 const CalendarPopover: React.FC<CalendarPopoverProps> = ({
@@ -32,19 +37,69 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
   onChange,
   onSaveableChange,
   isSaveable,
-  showTeamMemberId = true
+  showTeamMemberId = true,
+  onSave,
+  onDelete,
+  saving = false,
+  teamMembers = []
 }) => {
   const [showSaveIndicator, setShowSaveIndicator] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleEventEditorChange = useCallback((data: Partial<AvailabilityEvent>) => {
     onChange(data);
 
-    // Trigger save indicator animation
+    // Clear any existing error when user makes changes
+    if (error) {
+      setError(null);
+    }
+
+    // Show save indicator for all changes
     setShowSaveIndicator(true);
     setTimeout(() => {
       setShowSaveIndicator(false);
     }, 1000);
-  }, [onChange]);
+  }, [onChange, error, activeEvent, onSave, saving]);
+
+  const handleSave = useCallback(async () => {
+    console.log('Save handler called. isSaveable:', isSaveable, 'onSave:', !!onSave);
+    console.log('Event data to save:', eventEditorValues);
+
+    if (isSaveable && onSave) {
+      try {
+        setError(null);
+        console.log('Calling onSave...');
+        await onSave();
+        console.log('Save completed successfully');
+      } catch (err: any) {
+        console.error('Save failed:', err);
+        setError(err.message || 'Failed to save event');
+      }
+    } else {
+      console.log('Save not triggered - isSaveable:', isSaveable, 'onSave available:', !!onSave);
+    }
+  }, [isSaveable, onSave, eventEditorValues]);
+
+  useEffect(() => {
+    // Only add listener when popover is shown
+    if (!show) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for Enter key with Cmd/Ctrl modifier
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        // Only trigger if save button would be active (no activeEvent, saveable, not saving)
+        if (!activeEvent && isSaveable && onSave && !saving) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleSave();
+        }
+      }
+    };
+
+    // Add listener to capture phase to ensure we catch it
+    document.addEventListener('keydown', handleKeyDown, true);
+    return () => document.removeEventListener('keydown', handleKeyDown, true);
+  }, [show, activeEvent, isSaveable, onSave, saving, handleSave]);
 
   if (!show || !target.current) {
     return null;
@@ -83,27 +138,27 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
         />
       )}
 
-      {!activeEvent && (
-        <Button
-          disabled={!isSaveable}
-          size="small"
-          onClick={() => {
-            if (isSaveable) {
-              console.log('STUB: Save new event:', eventEditorValues);
-            }
-          }}
-          className="calendar-popover__save-button"
-        >
-          Save
-        </Button>
-      )}
+      <div className="calendar-popover__header-actions">
+        {/* {!activeEvent && ( */}
+          <Button
+            disabled={!isSaveable || saving}
+            size="small"
+            onClick={handleSave}
+            className="calendar-popover__save-button"
+          >
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
+        {/* )} */}
+      </div>
+
+      <ErrorMessage error={error} className="calendar-popover__error" />
 
       <EventEditor
         formConfig={[
           // Include SmartEventInput for new events
           ...(activeEvent ? [] : ['smartEventInput']),
           // Always include teamMember - it will be pre-populated for team member calendar
-          ...(showTeamMemberId ? ['teamMember'] : []),
+          // 'teamMember',
           'eventType',
           'customEventNameInput',
           'dateRange',
@@ -115,7 +170,32 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
         values={eventEditorValues}
         onChange={handleEventEditorChange}
         onSaveableChange={onSaveableChange}
+        teamMembers={teamMembers}
       />
+
+      <div className="calendar-popover__footer-actions">
+        {activeEvent && onDelete && (
+          <Button
+            disabled={saving}
+            size="small"
+            variant="ghost"
+            onClick={async () => {
+              if (onDelete && confirm('Are you sure you want to delete this event?')) {
+                try {
+                  setError(null);
+                  await onDelete();
+                } catch (err: any) {
+                  console.error('Delete failed:', err);
+                  setError(err.message || 'Failed to delete event');
+                }
+              }
+            }}
+            className="calendar-popover__delete-button"
+          >
+            {saving ? 'Deleting...' : 'Delete'}
+          </Button>
+        )}
+      </div>
     </Popover>
   );
 };

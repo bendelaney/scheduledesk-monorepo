@@ -20,6 +20,7 @@ CREATE TABLE availability_events (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   team_member_id UUID REFERENCES team_members(id) ON DELETE CASCADE,
   event_type TEXT NOT NULL,
+  custom_event_name TEXT, -- For Custom event types
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
   start_time TIME,

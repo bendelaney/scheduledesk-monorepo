@@ -95,9 +95,12 @@ export default function Sandbox() {
       sidebarOpen={false}
       sidebarWidth="260px"
     >
-      <TeamCalendar 
+      <TeamCalendar
         selectedTeamMembers={selectedTeamMembers}
         onSelectionChange={handleSelectionChange}
+        events={[]}
+        loading={false}
+        error={null}
       />
     </AppFrame>
   );

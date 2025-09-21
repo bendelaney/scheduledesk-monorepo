@@ -1,100 +1,50 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import {TeamMember, AvailabilityEvent} from '@/types';
 import AppFrame from '@/components/AppFrame';
 import TeamCalendar from '@/components/TeamCalendar';
 import TeamMemberList from '@/components/TeamMemberList';
-import { useTeamMembers } from '@/lib/supabase/hooks/useTeamMembers';
 import MainNavigationConfig from '@/config/MainNavigation';
 import CalendarPopover from '@/components/CalendarPopover';
 import './TeamCalendarPage.scss';
 import PlusCircle from '@/components/Icons/PlusCircle';
+import { useTeamCalendarPageLogic } from '@/lib/hooks/useTeamCalendarPageLogic';
 
 export default function TeamCalendarPage() {
   const router = useRouter();
   const pathname = usePathname();
-  // TODO: we should integrate the loading and error states below somewhere.
-  const { data: teamMembersData, loading: teamMembersLoading, error: teamMembersError } = useTeamMembers();
 
-  const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>([]);
-  
-  // Event Popover state
-  const [showNewEventPopover, setShowNewEventPopover] = useState(false);
-  const [popoverIsSaveable, setPopoverIsSaveable] = useState(false);
-  const [newEventData, setNewEventData] = useState<Partial<AvailabilityEvent>>({});
-  const [popoverTarget, setPopoverTarget] = useState<{ current: HTMLElement | null }>({ current: null });
-  const [activeEvent, setActiveEvent] = useState<AvailabilityEvent | null>(null);
-  const newEventButtonRef = useRef<HTMLButtonElement>(null);
-
-  // Initialize selected team members when data loads
-  useEffect(() => {
-    if (teamMembersData.length > 0 && selectedTeamMembers.length === 0) {
-      setSelectedTeamMembers(
-        teamMembersData.map(m => m.displayName || `${m.firstName} ${m.lastName || ''}`.trim())
-      );
-    }
-  }, [teamMembersData, selectedTeamMembers.length]);
+  // Use custom hook to get all data and handlers
+  const {
+    teamMembers,
+    availabilityEvents,
+    loading,
+    error,
+    selectedTeamMembers,
+    handleSelectionChange,
+    handleTeamMemberFilter,
+    showNewEventPopover,
+    popoverIsSaveable,
+    newEventData,
+    popoverTarget,
+    activeEvent,
+    saving,
+    newEventButtonRef,
+    handleNewEventPopoverOpen,
+    handleNewEventDataChange,
+    handleEventClickFromGrid,
+    handleClosePopover,
+    handleDayClick,
+    handleNewEventClick,
+    handleSaveEvent,
+    handleDeleteEvent,
+    setPopoverIsSaveable,
+  } = useTeamCalendarPageLogic();
 
   const handleNavigation = (path: string) => {
     router.push(path);
   };
-
-  const handleSelectionChange = (selected: string[]) => {
-    setSelectedTeamMembers(selected);
-  };
-
-  const handleTeamMemberFilter = (filter: string, filteredTeamMembers: TeamMember[]) => {
-    console.log('Team member filter changed:', filter, filteredTeamMembers);
-    // I want to make it so that the TeamCalendar automatically shows only the filtered team membrers
-    setSelectedTeamMembers(filteredTeamMembers.map(m => m.displayName || `${m.firstName} ${m.lastName || ''}`.trim()));
-  };
-
-  const handleNewEventPopoverOpen = () => {
-    if (newEventButtonRef.current) {
-      setPopoverTarget({ current: newEventButtonRef.current });
-      setShowNewEventPopover(true);
-    }
-  };
-
-  const handleNewEventDataChange = (data: Partial<AvailabilityEvent>) => {
-    setNewEventData(data);
-    console.log('New event data:', data);
-  };
-
-  const handleEventClickFromGrid = useCallback((event: AvailabilityEvent, targetEl?: HTMLElement) => {
-    if (targetEl) {
-      setPopoverTarget({ current: targetEl });
-      setActiveEvent(event);
-      setNewEventData(event);
-      setShowNewEventPopover(true);
-    }
-  }, []);
-
-  const handleClosePopover = useCallback(() => {
-    setShowNewEventPopover(false);
-    setActiveEvent(null);
-    setNewEventData({});
-    setPopoverTarget({ current: null });
-  }, []);
-
-  const handleDayClick = useCallback((date: string) => {
-    console.log('Day clicked:', date);
-  }, []);
-
-  const handleNewEventClick = useCallback((date: string, targetEl: HTMLElement) => {
-    console.log('New event clicked for date:', date, 'Target:', targetEl);
-    if (targetEl) {
-      setPopoverTarget({ current: targetEl });
-      setActiveEvent(null);
-      setNewEventData({
-        startDate: date,
-        endDate: date,
-      });
-      setShowNewEventPopover(true);
-    }
-  }, []);
 
   return (
     <AppFrame
@@ -131,7 +81,7 @@ export default function TeamCalendarPage() {
       // topBarRightContent={<div>Right</div>}
       sidebarContent={
         <TeamMemberList
-          teamMembers={teamMembersData}
+          teamMembers={teamMembers}
           selectedMembers={selectedTeamMembers}
           onSelectionChange={handleSelectionChange}
           onFilterChange={handleTeamMemberFilter}
@@ -149,6 +99,9 @@ export default function TeamCalendarPage() {
         onDayClick={handleDayClick}
         onNewEventClick={handleNewEventClick}
         activeEvent={activeEvent}
+        events={availabilityEvents}
+        loading={loading}
+        error={error || null}
       />
       
       {/* New Event Popover */}
@@ -161,6 +114,10 @@ export default function TeamCalendarPage() {
         onChange={handleNewEventDataChange}
         onSaveableChange={setPopoverIsSaveable}
         isSaveable={popoverIsSaveable}
+        onSave={handleSaveEvent}
+        onDelete={handleDeleteEvent}
+        saving={saving}
+        teamMembers={teamMembers}
       />
     </AppFrame>
   );

@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { inputText, today, additionalRules } = await request.json();
+    const { inputText, today, additionalRules, teamMembers } = await request.json();
     
     // const mockResponse = [
     //   {
@@ -52,12 +52,24 @@ Return a JSON object. The expected structure of this object is exactly as follow
 ]
 
 - Today's date is ${today}. Use this date to resolve phrases like "next Tuesday" or "3 days from now" into full ISO dates including year, month, and day.
+- IMPORTANT: If the user input does NOT mention a specific date (e.g., just says "day off", "appointment", "meeting"), DO NOT add any date fields - let the existing form values for dates remain unchanged.
 - Do NOT wrap the output in markdown code blocks (e.g. do not use \`\`\`json or \`\`\`).
 - Always return an array of objects, even if there is only one event.
 - Only include fields that are explicitly mentioned or clearly implied in the message.
 - Do NOT infer or guess ANY field values that are not clearly referenced or indicated in the prompt.
 
+Team member name matching rules:
+${teamMembers && teamMembers.length > 0 ? `- Available team members: ${teamMembers.map((tm: any) => `${tm.firstName} ${tm.lastName}`).join(', ')}
+- When a name is mentioned in the input (e.g., "ben", "delaney", "ben delaney"), match it to the closest team member from the list above.
+- For partial names, use fuzzy matching (e.g., "ben" should match "Ben Delaney", "krystn" should match "Krystn Parmley").
+- Always use the full firstName and lastName from the team members list above.` : '- No team members provided. If a team member name is mentioned, use it as given.'}
+
 Event type rules:
+- Common phrases that indicate "Not Working": "off", "not working", "day off", "time off", "out", "unavailable", "away", "sick", "vacation", "holiday"
+- Common phrases that indicate "On Vacation": "vacation", "vacay", "holiday", "trip", "traveling"
+- Common phrases that indicate "Personal Appointment": "appointment", "meeting", "dentist", "doctor", "personal"
+- Common phrases that indicate "Starts Late": "starts late", "coming in late", "late start", "delayed start"
+- Common phrases that indicate "Ends Early": "ends early", "leaving early", "early finish", "half day"
 - If you infer that "Not Working" is the event type, set the allDay field to true. 
 - If you infer that "Ends Early" is the event type, AND a specific time is mentioned, then include the "endTime" field, but do not include the "startTime field. 
 - If you infer that "Ends Early" is the event type, AND a specific time is NOT mentioned, then do not include any time fields and set the "allDay" field to true.
@@ -80,8 +92,9 @@ Recurrence rules:
 - If "Every Other Week" is mentioned, include it as the "recurrence" field, and DO NOT include the "monthlyRecurrence" field.
 
 Date rules:
-- If you infer a date at all, you MUST resolve and include the full date in YYYY-MM-DD format (e.g., "2025-04-03") even if the original message does not include it explicitly.
-- For startDate and endDate, use format "YYYY-MM-DD" without time components.
+- If a specific date is explicitly mentioned in the user input (e.g., "on the 21st", "next Tuesday", "December 15th"), include those date fields and resolve them to YYYY-MM-DD format.
+- If NO specific date is mentioned in the user input (e.g., just "day off", "appointment", "sick"), do NOT include any date fields - this allows pre-populated dates from the form context to be preserved.
+- If you do include dates, use format "YYYY-MM-DD" without time components.
 - IF the startDate and endDate would be the same date, DO NOT include the endDate field.
 
 Time rules:
