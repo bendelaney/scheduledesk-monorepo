@@ -9,16 +9,17 @@ import PlusCircle from '@/components/Icons/PlusCircle';
 import MainNavigationConfig from '@/config/MainNavigation';
 import CalendarPopover from '@/components/CalendarPopover';
 import { useTeamMemberPageLogic } from '@/lib/hooks/useTeamMemberPageLogic';
+import { CalendarUIProvider } from '@/contexts/CalendarUIContext';
 import './TeamMemberPage.scss';
 
-export default function TeamMemberPage() {
+function TeamMemberPageContent() {
   const router = useRouter();
   const pathname = usePathname();
 
   const params = useParams();
   const memberId = params.memberId as string;
 
-  // Use custom hook to get all data and handlers
+  // Use custom hook to get all data and handlers (now inside the provider)
   const {
     teamMember,
     teamMembers,
@@ -30,7 +31,6 @@ export default function TeamMemberPage() {
     popoverTarget,
     activeEvent,
     eventEditorValues,
-    saving,
     newEventButtonRef,
     handleEventClickFromGrid,
     handleClosePopover,
@@ -46,9 +46,9 @@ export default function TeamMemberPage() {
   const handleNavigation = (path: string) => {
     router.push(path);
   };
-  
+
   return (
-    <AppFrame
+      <AppFrame
       className="team-member-page"
       showSidebarToggle={false}
       topBarLeftContent={
@@ -118,9 +118,16 @@ export default function TeamMemberPage() {
         showTeamMemberId={true}
         onSave={handleSaveEvent}
         onDelete={handleDeleteEvent}
-        saving={saving}
         teamMembers={teamMembers}
       />
-    </AppFrame>
+      </AppFrame>
+  );
+}
+
+export default function TeamMemberPage() {
+  return (
+    <CalendarUIProvider>
+      <TeamMemberPageContent />
+    </CalendarUIProvider>
   );
 }

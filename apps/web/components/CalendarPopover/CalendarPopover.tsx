@@ -8,6 +8,7 @@ import TeamMemberId from '@/components/TeamMemberId';
 import Button from '@/components/Button';
 import ErrorMessage from '@/components/ErrorMessage';
 import { CheckCircle } from '@/components/Icons';
+import { useCalendarUI } from '@/contexts/CalendarUIContext';
 import './CalendarPopover.scss';
 
 type PopoverProps = React.ComponentProps<typeof Popover>;
@@ -27,7 +28,6 @@ interface CalendarPopoverProps {
   showTeamMemberId?: boolean;
   onSave?: () => Promise<void>;
   onDelete?: () => Promise<void>;
-  saving?: boolean;
   teamMembers?: { firstName: string; lastName: string; id: string }[];
 }
 
@@ -45,13 +45,19 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
   showTeamMemberId = true,
   onSave,
   onDelete,
-  saving = false,
   teamMembers = []
 }) => {
-  const [showSaveIndicator, setShowSaveIndicator] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const initialLoadRef = useRef(true);
   const lastActiveEventIdRef = useRef<string | null>(null);
+
+  // Use calendar UI context for save states
+  const { saveStates, clearSaved } = useCalendarUI();
+  const eventId = activeEvent?.id || 'new';
+  const isSaving = saveStates.saving === eventId;
+  const isSaved = saveStates.saved === eventId;
+
   
   const handleEventEditorChange = useCallback((data: Partial<AvailabilityEvent>) => {
     onChange(data);
@@ -63,38 +69,22 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
     if (error) {
       setError(null);
     }
-  }, [onChange, error]);
 
-  // Auto-save effect that runs after parent state updates
+    // Clear saved state when user makes changes
+    if (isSaved) {
+      clearSaved();
+    }
+  }, [onChange, error, isSaved, clearSaved]);
+
+  // Track when activeEvent changes to reset initial load flag
   useEffect(() => {
     const currentEventId = activeEvent?.id ?? null;
     if (currentEventId !== lastActiveEventIdRef.current) {
       lastActiveEventIdRef.current = currentEventId;
       initialLoadRef.current = true;
     }
+  }, [activeEvent?.id]);
 
-    // Skip if initial load, no active event, or already saving
-    if (initialLoadRef.current || !activeEvent || saving || !onSave) {
-      return;
-    }
-
-    const autoSave = async () => {
-      try {
-        console.log('Auto-saving existing event after state update...');
-        await onSave();
-        // Show save indicator only after successful save
-        setShowSaveIndicator(true);
-        setTimeout(() => {
-          setShowSaveIndicator(false);
-        }, 1000);
-      } catch (err: any) {
-        console.error('Auto-save failed:', err);
-        setError(err.message || 'Failed to save changes');
-      }
-    };
-
-    autoSave();
-  }, [eventEditorValues, activeEvent, onSave, saving]);
 
   // Reset initial load flag when popover opens
   useEffect(() => {
@@ -129,8 +119,8 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       // Check for Enter key with Cmd/Ctrl modifier
       if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-        // Only trigger if save button would be active (no activeEvent, saveable, not saving)
-        if (!activeEvent && isSaveable && onSave && !saving) {
+        // Only trigger if save button would be active (no activeEvent, saveable, not currently saving)
+        if (!activeEvent && isSaveable && onSave && !isSaving) {
           e.preventDefault();
           e.stopPropagation();
           handleSave();
@@ -141,7 +131,7 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
     // Add listener to capture phase to ensure we catch it
     document.addEventListener('keydown', handleKeyDown, true);
     return () => document.removeEventListener('keydown', handleKeyDown, true);
-  }, [show, activeEvent, isSaveable, onSave, saving, handleSave]);
+  }, [show, activeEvent, isSaveable, onSave, isSaving, handleSave]);
 
   if (!show || !target.current) {
     return null;
@@ -168,10 +158,6 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
       }}
       onHide={onClose}
       >
-      <div className={`calendar-popover__saved-indicator ${showSaveIndicator ? 'visible' : ''}`}>
-        <CheckCircle/>
-      </div>
-
       {activeEvent && showTeamMemberId && (
         <TeamMemberId
           teamMember={activeEvent.teamMember as TeamMember}
@@ -211,12 +197,12 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
         {/* Show save button only for new events (no activeEvent) */}
         {!activeEvent && (
           <Button
-            disabled={!isSaveable || saving}
+            disabled={!isSaveable || isSaving}
             size="small"
             onClick={handleSave}
             className="calendar-popover__save-button"
           >
-            {saving ? 'Saving...' : 'Save'}
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
         )}
       </div>
@@ -245,25 +231,33 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
       />
 
       <div className="calendar-popover__footer-actions">
+        <div className={`calendar-popover__save-indicator ${isSaving ? '-saving' : ''} ${isSaved ? '-saved' : ''}`}>
+          <div className='saving-text'>Saving...</div>
+          <div className='saved-icon'><CheckCircle/></div>
+        </div>
+
         {activeEvent && onDelete && (
           <Button
-            disabled={saving}
+            disabled={deleting || isSaving}
             size="small"
             variant="ghost"
             onClick={async () => {
               if (onDelete && confirm('Are you sure you want to delete this event?')) {
                 try {
                   setError(null);
+                  setDeleting(true);
                   await onDelete();
                 } catch (err: any) {
                   console.error('Delete failed:', err);
                   setError(err.message || 'Failed to delete event');
+                } finally {
+                  setDeleting(false);
                 }
               }
             }}
             className="calendar-popover__delete-button"
           >
-            {saving ? 'Deleting...' : 'Delete'}
+            {deleting ? 'Deleting...' : 'Delete'}
           </Button>
         )}
       </div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { TeamMember, AvailabilityEvent } from '@/types';
 import { useTeamMembers } from '@/lib/supabase/hooks/useTeamMembers';
 import { useAvailabilityEvents } from '@/lib/supabase/hooks/useAvailabilityEvents';
+import { useCalendarUI } from '@/contexts/CalendarUIContext';
 
 // Utility function to extract base UUID from recurring instance IDs
 const getBaseUuid = (id: string): string => {
@@ -28,7 +29,6 @@ interface UseTeamCalendarPageLogicResult {
   newEventData: Partial<AvailabilityEvent>;
   popoverTarget: { current: HTMLElement | null };
   activeEvent: AvailabilityEvent | null;
-  saving: boolean;
   newEventButtonRef: React.RefObject<HTMLButtonElement | null>;
 
   // Event handlers
@@ -47,6 +47,9 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
   // Data hooks
   const { data: teamMembers, loading: teamMembersLoading, error: teamMembersError } = useTeamMembers();
   const { data: availabilityEvents, createEvent, updateEvent, deleteEvent } = useAvailabilityEvents();
+
+  // Calendar UI context for save state management
+  const { setSaving, setSaved } = useCalendarUI();
 
   // Team member selection state
   const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>([]);
@@ -68,7 +71,6 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
   const [newEventData, setNewEventData] = useState<Partial<AvailabilityEvent>>({});
   const [popoverTarget, setPopoverTarget] = useState<{ current: HTMLElement | null }>({ current: null });
   const [activeEventId, setActiveEventId] = useState<string | null>(null); // Store ID instead of object
-  const [saving, setSaving] = useState(false);
   const newEventButtonRef = useRef<HTMLButtonElement>(null);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -122,7 +124,7 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
       const newValues = { ...prev, ...data };
 
       // For existing events, trigger auto-save after state update
-      if (activeEvent?.id && !saving) {
+      if (activeEvent?.id) {
         // Clear any existing timeout
         if (autoSaveTimeoutRef.current) {
           clearTimeout(autoSaveTimeoutRef.current);
@@ -131,8 +133,9 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
         // Auto-save after a debounced delay
         autoSaveTimeoutRef.current = setTimeout(async () => {
           console.log('Auto-save triggered for existing event');
+          const eventId = activeEvent.id || 'new';
           try {
-            setSaving(true);
+            setSaving(eventId);
 
             // Handle recurring event instances differently
             if (activeEvent.isInstance && activeEvent.originalEventId) {
@@ -149,10 +152,10 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
               await safeUpdateEvent(activeEvent.id!, newValues);
               console.log('Auto-save completed successfully');
             }
+            setSaved(eventId);
           } catch (err: any) {
             console.error('Auto-save failed:', err);
-          } finally {
-            setSaving(false);
+            setSaving(null);
           }
         }, 1000);
       }
@@ -161,7 +164,7 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
       console.log('Team member in data:', newValues.teamMember);
       return newValues;
     });
-  }, [activeEvent, saving, safeUpdateEvent]);
+  }, [activeEvent, safeUpdateEvent, setSaving, setSaved]);
 
   const handleEventClickFromGrid = useCallback((event: AvailabilityEvent, targetEl?: HTMLElement) => {
     if (targetEl) {
@@ -173,7 +176,7 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
   }, []);
 
   const handleClosePopover = useCallback(() => {
-    console.log('TEAM CALENDAR: handleClosePopover called - closing popover');
+    // console.log('TEAM CALENDAR: handleClosePopover called - closing popover');
     setShowNewEventPopover(false);
     setActiveEventId(null);
     setNewEventData({});
@@ -185,7 +188,7 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
   }, []);
 
   const handleNewEventClick = useCallback((date: string, targetEl: HTMLElement) => {
-    console.log('New event clicked for date:', date, 'Target:', targetEl);
+    // console.log('New event clicked for date:', date, 'Target:', targetEl);
     if (targetEl) {
       setPopoverTarget({ current: targetEl });
       setActiveEventId(null);
@@ -200,19 +203,14 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
   }, []);
 
   const handleSaveEvent = useCallback(async () => {
-    console.log('=== SAVE EVENT DEBUG ===');
-    console.log('popoverIsSaveable:', popoverIsSaveable);
-    console.log('saving:', saving);
-    console.log('newEventData:', newEventData);
-    // console.log('newEventData.teamMember:', newEventData.teamMember);
-    console.log('activeEvent:', activeEvent);
-    
     // For existing events, always allow save. For new events, require validation.
-    if (saving || (!activeEvent?.id && !popoverIsSaveable)) return;
-    
+    if (!activeEvent?.id && !popoverIsSaveable) return;
+
+    const eventId = activeEvent?.id || 'new';
+
     try {
-      setSaving(true);
-      console.log('saving:', saving);      
+      setSaving(eventId);
+
       if (activeEvent?.id) {
         // Update existing event
         console.log('Updating event with data:', newEventData);
@@ -234,10 +232,10 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
         }
       } else {
         // Create new event
-        console.log('Creating event with data:', newEventData);
         await safeCreateEvent(newEventData);
-        console.log('Event created successfully');
       }
+
+      setSaved(eventId);
 
       // Only close popover for new events, keep it open for existing event updates
       if (!activeEvent?.id) {
@@ -245,16 +243,17 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
       }
     } catch (err) {
       console.error('Failed to save event:', err);
-    } finally {
-      setSaving(false);
+      setSaving(null);
     }
-  }, [newEventData, activeEvent, safeUpdateEvent, safeCreateEvent, popoverIsSaveable, saving, handleClosePopover]);
+  }, [newEventData, activeEvent, safeUpdateEvent, safeCreateEvent, popoverIsSaveable, handleClosePopover, setSaving, setSaved]);
 
   const handleDeleteEvent = useCallback(async () => {
-    if (!activeEvent?.id || saving) return;
+    if (!activeEvent?.id) return;
+
+    const eventId = activeEvent.id;
 
     try {
-      setSaving(true);
+      setSaving(eventId);
 
       // Handle recurring event instances differently
       if (activeEvent.isInstance && activeEvent.originalEventId) {
@@ -277,9 +276,9 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
     } catch (err) {
       console.error('Failed to delete event:', err);
     } finally {
-      setSaving(false);
+      setSaving(null);
     }
-  }, [activeEvent, safeDeleteEvent, saving, handleClosePopover]);
+  }, [activeEvent, safeDeleteEvent, handleClosePopover, setSaving]);
 
   // console.log('TeamCalendarPage - All events from database:', availabilityEvents.length);
   // console.log('TeamCalendarPage - Event details:', availabilityEvents.map(e => ({
@@ -320,7 +319,6 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
     newEventData,
     popoverTarget,
     activeEvent,
-    saving,
     newEventButtonRef,
 
     // Event handlers

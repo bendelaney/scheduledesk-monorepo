@@ -36,7 +36,7 @@ export const EventTypes: EventTypeConfig[] = [
     name: "Custom",
     displayName: "Custom",
     // color: "#4babff"
-    color: "#8c8e90ff"
+    color: "#8c8e90"
   }
 ];
 
@@ -45,8 +45,37 @@ export const getEventTypeConfig = (eventType: EventTypeName): EventTypeConfig | 
   return EventTypes.find(config => config.name === eventType);
 };
 
-export const getEventTypeColor = (eventType: EventTypeName): string => {
-  return getEventTypeConfig(eventType)?.color || '#666666';
+export const getEventTypeColor = (eventType: EventTypeName): { base: string; dark: string; light: string } => {
+  // Option 1: Simple hex darkening function
+  const darkenHex = (hex: string, percent: number): string => {
+    const num = parseInt(hex.slice(1), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = (num >> 16) - amt;
+    const G = (num >> 8 & 0x00FF) - amt;
+    const B = (num & 0x0000FF) - amt;
+    return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+      (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+      (B < 255 ? B < 1 ? 0 : B : 255))
+      .toString(16).slice(1);
+  };
+
+  const lightenHex = (hex: string, percent: number): string => {
+    const num = parseInt(hex.slice(1), 16);
+    const amt = Math.round(2.55 * percent);
+    const R = (num >> 16) + amt;
+    const G = (num >> 8 & 0x00FF) + amt;
+    const B = (num & 0x0000FF) + amt;
+    return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+      (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+      (B < 255 ? B < 1 ? 0 : B : 255))
+      .toString(16).slice(1);
+  };
+
+  const baseColor = getEventTypeConfig(eventType)?.color || '#666666';
+  const darkenedColor = darkenHex(baseColor, 33); // Darken by 20%
+  const lightenedColor = lightenHex(baseColor, 20); // Lighten by 20%
+  const colors = { base: baseColor, dark: darkenedColor, light: lightenedColor };
+  return colors; 
 };
 
 export const getEventTypeDisplayName = (eventType: EventTypeName): string => {

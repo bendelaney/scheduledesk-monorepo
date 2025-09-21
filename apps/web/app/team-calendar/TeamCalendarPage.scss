@@ -15,7 +15,7 @@
     @media (max-width: 768px) {
       padding: 0;
     }
-}
+  }
 
   .team-member-list {
     margin-left: -14px;
@@ -30,12 +30,16 @@
     }
   }
 
-  .sidebar.closed {
-    .team-member-list__header {
-      opacity: 0;
+  
+  // Sidebar variants
+  &.sidebar-open {
+    .content-wrapper {
+      padding:0;
+    }
+    .team-member-list {
+      padding-left: 14px;
     }
   }
-
 }
 
 .team-calendar__new-event-popover {

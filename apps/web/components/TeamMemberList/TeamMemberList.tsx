@@ -93,11 +93,11 @@ const TeamMemberList: React.FC<TeamMemberListProps> = ({
     setFilterIsFocused(false);
   }, []);
 
-  const handleInputKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') {
-      filterInputRef.current?.blur();
-    }
-  }, []);
+  // const handleInputKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === 'Escape') {
+  //     filterInputRef.current?.blur();
+  //   }
+  // }, []);
 
   const handleClearFilter = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -106,13 +106,6 @@ const TeamMemberList: React.FC<TeamMemberListProps> = ({
     onFilterChange?.('', teamMembers);
   }, [onFilterChange, teamMembers]);
 
-  const getToggleButtonText = () => {
-    if (!togglable) return '';
-    if (isNoneSelected) return 'Show All';
-    if (isAllSelected) return 'Hide All';
-    return 'Hide All';
-  };
-
   // Handle external filter changes
   useEffect(() => {
     if (initialFilter !== filterText) {
@@ -120,12 +113,33 @@ const TeamMemberList: React.FC<TeamMemberListProps> = ({
     }
   }, [initialFilter]);
 
+  // CMD+/ always works when component is present
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        // e.stopPropagation();
+        handleToggleAll();
+        return;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleToggleAll]);
+
   useEffect(() => {
     if (!filterable) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        filterInputRef.current?.blur();
+      }
       if (e.key === '/' && document.activeElement !== filterInputRef.current) {
         e.preventDefault();
+        // e.stopPropagation();
         handleFilterFocus();
       }
     };
@@ -149,7 +163,7 @@ const TeamMemberList: React.FC<TeamMemberListProps> = ({
                 onChange={handleFilterChange}
                 onFocus={handleInputFocus}
                 onBlur={handleInputBlur}
-                onKeyDown={handleInputKeyDown}
+                // onKeyDown={handleInputKeyDown}
                 className="team-member-list__filter-input"
                 title={'Filter team members'}
               />
@@ -171,7 +185,7 @@ const TeamMemberList: React.FC<TeamMemberListProps> = ({
           )}
           {togglable && (
             <button className="team-member-list__toggle-all" onClick={handleToggleAll}>
-              {getToggleButtonText()}
+              {!togglable ? '' : isNoneSelected ? 'Show All' : isAllSelected ? 'Hide All' : 'Hide All'}
             </button>
           )}
         </div>

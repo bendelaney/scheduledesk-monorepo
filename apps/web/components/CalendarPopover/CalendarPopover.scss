@@ -9,33 +9,6 @@
     gap: 10px;
   }
 
-  // Save indicator (appears during save, positioned top-left)
-  &__saved-indicator {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background-color: $app-bg;
-    position: absolute;
-    top: 9px;
-    left: 9px;
-    opacity: 0;
-    color: $medium-dark-gray;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    pointer-events: none;
-    z-index: 1;
-    font-weight: 700;
-
-    svg {
-      color: $success-color;
-      font-size: 32px;
-    }
-
-    &.visible {
-      opacity: 1;
-    }
-  }
-
   // Team member display in event popover
   .team-member-id {
     margin-left: auto; // Push to the right
@@ -47,21 +20,65 @@
   &__footer-actions {
     display: flex;
     gap: 8px;
-    margin-left: auto; // Push to the right
     width: fit-content; // Only take up necessary space
+    align-items: center;
+  }
+  &__header-actions {
+    margin-left: auto; // Push to the right
+  }
+  &__footer-actions {
+    justify-content: space-between;
+    width: 100%;
   }
 
   &__header-actions:empty {
     display: none;
   }
   
-  // Save button for new events
-  &__save-button {
-    // position: absolute;
-    // top: 12px;
-    // right: 14px;
-    // z-index: 1;
+  &__save-indicator {
+    display: flex;
+    align-items: center;
+    // opacity: 0;
+    // transition: all 0.3s ease;
+    pointer-events: none;
+    font-size: 30px;
+    color: $success-color;
+    
+    .saving-text {
+      font-size: 14px;
+      font-weight: 700;
+      opacity: 0;
+      display:none;
+      transition: opacity 0.3s ease;
+      color: $medium-dark-gray;
+    }
+    
+    .saved-icon {
+      display: flex;
+      opacity: 0;
+      align-items: center;
+      transition: opacity 0.3s ease;
+    }
+
+    &.-saving {
+      // opacity: 1;
+      .saving-text {
+        display:inline-block;
+        opacity: 1;
+      }
+    }
+
+    &.-saved {
+      .saved-icon {
+        opacity: 1;
+      }
+      .saving-text {
+        display:none;
+        opacity: 0;
+      }
+    }
   }
+
   &__delete-button {
     &:hover {
       background: #dc3545!important;

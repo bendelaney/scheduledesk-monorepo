@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { TeamMember, AvailabilityEvent } from '@/types';
 import { useTeamMembers } from '@/lib/supabase/hooks/useTeamMembers';
 import { useAvailabilityEvents } from '@/lib/supabase/hooks/useAvailabilityEvents';
+import { useCalendarUI } from '@/contexts/CalendarUIContext';
 
 // Utility function to extract base UUID from recurring instance IDs
 const getBaseUuid = (id: string): string => {
@@ -24,7 +25,6 @@ interface UseTeamMemberPageLogicResult {
   popoverTarget: { current: HTMLElement | null };
   activeEvent: AvailabilityEvent | null;
   eventEditorValues: Partial<AvailabilityEvent>;
-  saving: boolean;
   newEventButtonRef: React.RefObject<HTMLButtonElement | null>;
 
   // Event handlers
@@ -43,6 +43,9 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
   // Data hooks
   const { data: teamMembers, loading: teamMembersLoading, error: teamMembersError } = useTeamMembers();
   const [teamMember, setTeamMember] = useState<TeamMember>();
+
+  // Calendar UI context for save state management
+  const { setSaving, setSaved } = useCalendarUI();
 
   // Find team member when data loads
   useEffect(() => {
@@ -83,7 +86,6 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
   const [popoverTarget, setPopoverTarget] = useState<{ current: HTMLElement | null }>({ current: null });
   const [activeEventId, setActiveEventId] = useState<string | null>(null); // Store ID instead of object
   const [eventEditorValues, setEventEditorValues] = useState<Partial<AvailabilityEvent>>({});
-  const [saving, setSaving] = useState(false);
   const newEventButtonRef = useRef<HTMLButtonElement>(null);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -160,7 +162,7 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
       const newValues = { ...prev, ...data };
 
       // For existing events, trigger auto-save after state update
-      if (activeEvent?.id && !saving) {
+      if (activeEvent?.id) {
         // Clear any existing timeout
         if (autoSaveTimeoutRef.current) {
           clearTimeout(autoSaveTimeoutRef.current);
@@ -169,8 +171,9 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
         // Auto-save after a debounced delay
         autoSaveTimeoutRef.current = setTimeout(async () => {
           console.log('Auto-save triggered for existing event');
+          const eventId = activeEvent.id || 'new';
           try {
-            setSaving(true);
+            setSaving(eventId);
 
             // Handle recurring event instances differently
             if (activeEvent.isInstance && activeEvent.originalEventId) {
@@ -187,34 +190,35 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
               await safeUpdateEvent(activeEvent.id!, newValues);
               console.log('Auto-save completed successfully');
             }
+            setSaved(eventId);
           } catch (err: any) {
             console.error('Auto-save failed:', err);
-          } finally {
-            setSaving(false);
+            setSaving(null);
           }
         }, 1000);
       }
 
       return newValues;
     });
-  }, [activeEvent, saving, safeUpdateEvent]);
+  }, [activeEvent, safeUpdateEvent, setSaving, setSaved]);
 
   const handleSaveEvent = useCallback(async () => {
     console.log('handleSaveEvent called');
     console.log('popoverIsSaveable:', popoverIsSaveable);
-    console.log('saving:', saving);
     console.log('eventEditorValues:', eventEditorValues);
     console.log('eventEditorValues.teamMember:', eventEditorValues.teamMember);
     console.log('eventEditorValues.teamMember.id:', eventEditorValues.teamMember?.id);
     console.log('activeEvent:', activeEvent);
 
-    if (!popoverIsSaveable || saving) {
-      console.log('Save aborted - not saveable or already saving');
+    if (!popoverIsSaveable) {
+      console.log('Save aborted - not saveable');
       return;
     }
 
+    const eventId = activeEvent?.id || 'new';
+
     try {
-      setSaving(true);
+      setSaving(eventId);
       console.log('Starting save operation...');
 
       if (activeEvent?.id) {
@@ -241,22 +245,25 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
         console.log('Event created successfully:', result);
       }
 
+      setSaved(eventId);
+
       if (!activeEvent?.id) {
         handleClosePopover();
       }
     } catch (err) {
       console.error('Failed to save event:', err);
       console.error('Error details:', err);
-    } finally {
-      setSaving(false);
+      setSaving(null);
     }
-  }, [eventEditorValues, activeEvent, safeUpdateEvent, safeCreateEvent, popoverIsSaveable, saving, handleClosePopover]);
+  }, [eventEditorValues, activeEvent, safeUpdateEvent, safeCreateEvent, popoverIsSaveable, handleClosePopover, setSaving, setSaved]);
 
   const handleDeleteEvent = useCallback(async () => {
-    if (!activeEvent?.id || saving) return;
+    if (!activeEvent?.id) return;
+
+    const eventId = activeEvent.id;
 
     try {
-      setSaving(true);
+      setSaving(eventId);
 
       // Handle recurring event instances differently
       if (activeEvent.isInstance && activeEvent.originalEventId) {
@@ -279,9 +286,9 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
     } catch (err) {
       console.error('Failed to delete event:', err);
     } finally {
-      setSaving(false);
+      setSaving(null);
     }
-  }, [activeEvent, safeDeleteEvent, saving, handleClosePopover]);
+  }, [activeEvent, safeDeleteEvent, handleClosePopover, setSaving]);
 
   console.log('TeamMemberPage - Events for', teamMember?.firstName, teamMember?.lastName, ':', availabilityEvents.length);
   console.log('TeamMemberPage - Event details:', availabilityEvents.map(e => ({
@@ -314,7 +321,6 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
     popoverTarget,
     activeEvent,
     eventEditorValues,
-    saving,
     newEventButtonRef,
 
     // Event handlers

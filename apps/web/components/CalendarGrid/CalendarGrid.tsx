@@ -627,7 +627,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   
   const renderEvent = (event: AvailabilityEvent) => {
     const isActive = activeEvent && activeEvent.id === event.id;
-
+    const eventColors = getEventTypeColor(event.eventType);
     // Build recurring event classes
     const recurringClasses = [];
     if (event.isRecurring) {
@@ -646,7 +646,19 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         className={`calendar-event calendar-event--${event.eventType.toLowerCase().replace(/\s+/g, '-')} ${isActive ? 'calendar-event--active' : ''} ${recurringClasses.join(' ')}`}
         onClick={(e) => handleEventClick(event, e)}
         title={`${event.teamMember.firstName} ${event.teamMember.lastName || ''}: ${event.eventType}${event.allDay ? '' : ` (${event.startTime} - ${event.endTime})`}${event.isInstance ? ' (recurring)' : ''}`}
-        style={{ backgroundColor: getEventTypeColor(event.eventType) }}
+        style={{ 
+          color: eventColors.dark, 
+          // backgroundColor: eventColors.base,
+          // Option 1: Use opacity to lighten
+          // opacity: 0.8,
+          
+          // Option 2: Use box-shadow for a lighter overlay effect
+          boxShadow: `inset 0 0 0 1000px ${eventColors.light}`,
+          
+          // Option 3: Use background blend modes
+          // backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3))',
+          // backgroundBlendMode: 'overlay'
+        }}
       >
         {showTeamMemberName && <span className="calendar-event__member">{event.teamMember.firstName} {/*{event.teamMember.lastName || ''}*/}</span>}
         {/* <span className="calendar-event__type">{event.eventType}</span> */}

@@ -201,17 +201,50 @@ export const useAvailabilityEvents = (teamMemberId?: string | null): UseAvailabi
         // If updating a recurring event, we need to re-expand all instances
         console.log('Updated event is recurring, re-expanding all events...');
         setData(prev => {
-          // Remove any existing instances of this recurring event
-          const filteredPrev = prev.filter(event =>
+          // Remove all instances of the event being updated
+          const withoutUpdatedEvent = prev.filter(event =>
             !(event.originalEventId === id || event.id === id)
           );
 
-          // Add the updated base event
-          const withUpdatedEvent = [...filteredPrev, updatedEvent];
+          // Group remaining events by originalEventId to reconstruct base events
+          const eventGroups = new Map<string, any[]>();
+          const nonRecurringEvents: any[] = [];
 
-          // Re-expand all recurring events including the updated one
+          for (const event of withoutUpdatedEvent) {
+            if (event.isInstance && event.originalEventId) {
+              // This is a recurring event instance
+              if (!eventGroups.has(event.originalEventId)) {
+                eventGroups.set(event.originalEventId, []);
+              }
+              eventGroups.get(event.originalEventId)!.push(event);
+            } else {
+              // This is a non-recurring event
+              nonRecurringEvents.push(event);
+            }
+          }
+
+          // Reconstruct base events from the first instance of each group
+          const baseEvents: any[] = [];
+          for (const [originalEventId, instances] of eventGroups) {
+            if (instances.length > 0) {
+              const firstInstance = instances[0];
+              const baseEvent = {
+                ...firstInstance,
+                id: originalEventId,
+                isInstance: false,
+                isRecurring: false,
+                originalEventId: undefined
+              };
+              baseEvents.push(baseEvent);
+            }
+          }
+
+          // Combine non-recurring events, reconstructed base events, and the updated event
+          const allBaseEvents = [...nonRecurringEvents, ...baseEvents, updatedEvent];
+
+          // Re-expand all recurring events
           const { startDate, endDate } = getDefaultExpansionRange();
-          return expandAllRecurringEvents(withUpdatedEvent, startDate, endDate);
+          return expandAllRecurringEvents(allBaseEvents, startDate, endDate);
         });
       } else {
         // Regular event update

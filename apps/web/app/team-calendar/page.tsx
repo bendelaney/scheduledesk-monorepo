@@ -10,12 +10,13 @@ import CalendarPopover from '@/components/CalendarPopover';
 import './TeamCalendarPage.scss';
 import PlusCircle from '@/components/Icons/PlusCircle';
 import { useTeamCalendarPageLogic } from '@/lib/hooks/useTeamCalendarPageLogic';
+import { CalendarUIProvider } from '@/contexts/CalendarUIContext';
 
-export default function TeamCalendarPage() {
+function TeamCalendarPageContent() {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Use custom hook to get all data and handlers
+  // Use custom hook to get all data and handlers (now inside the provider)
   const {
     teamMembers,
     availabilityEvents,
@@ -29,7 +30,6 @@ export default function TeamCalendarPage() {
     newEventData,
     popoverTarget,
     activeEvent,
-    saving,
     newEventButtonRef,
     handleNewEventPopoverOpen,
     handleNewEventDataChange,
@@ -47,7 +47,7 @@ export default function TeamCalendarPage() {
   };
 
   return (
-    <AppFrame
+      <AppFrame
       className="team-calendar-page"
       topBarLeftContent={
         <button
@@ -116,9 +116,16 @@ export default function TeamCalendarPage() {
         isSaveable={popoverIsSaveable}
         onSave={!activeEvent ? handleSaveEvent : undefined}
         onDelete={handleDeleteEvent}
-        saving={saving}
         teamMembers={teamMembers}
       />
-    </AppFrame>
+      </AppFrame>
+  );
+}
+
+export default function TeamCalendarPage() {
+  return (
+    <CalendarUIProvider>
+      <TeamCalendarPageContent />
+    </CalendarUIProvider>
   );
 }

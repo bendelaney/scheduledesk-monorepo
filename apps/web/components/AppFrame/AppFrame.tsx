@@ -47,6 +47,10 @@ const AppFrame: React.FC<AppFrameProps> = ({
     if (!sidebarContent) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && (!e.metaKey || !e.ctrlKey)) {
+        e.preventDefault();
+        setSidebarOpen(true);
+      }
       if (e.key === '\\' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setSidebarOpen(prev => !prev);
@@ -62,7 +66,7 @@ const AppFrame: React.FC<AppFrameProps> = ({
   }
 
   return (
-    <div className={`app-frame ${className}`}>
+    <div className={`app-frame ${className} ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
       <div className="top-bar">
         <div className="top-bar__left">
           {showSidebarToggle && (
