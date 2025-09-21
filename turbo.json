@@ -9,7 +9,17 @@
     },
     "build": {
       "dependsOn": ["^build", "type-check"],
-      "env": ["OPENAI_API_KEY"],
+      "env": [
+        "OPENAI_API_KEY",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "REACT_APP_API_URL",
+        "REACT_APP_JOBBER_API_URL",
+        "REACT_APP_REDIRECT_URL",
+        "JOBBER_APP_CLIENT_ID",
+        "MAPBOX_TOKEN",
+        "WEATHERAPI_KEY"
+      ],
       "outputs": [
         ".next/**",
         "!.next/cache/**",

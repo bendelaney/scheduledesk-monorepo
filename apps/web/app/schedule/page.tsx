@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+
+// Force dynamic rendering to prevent build-time issues
+export const dynamic = 'force-dynamic';
 import AppFrame from '@/components/AppFrame';
 import TeamMemberList from '@/components/TeamMemberList';
 import { useTeamMembers } from '@/lib/supabase/hooks/useTeamMembers';

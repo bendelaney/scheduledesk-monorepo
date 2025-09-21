@@ -18,3 +18,5 @@
 [] "All Team" events (Custom)... could either just allow NOT selecting a Team Member for generic "everyone" events.. or could include an "All Team" in the Team Member list ..?  (for things like "Yard Meeting")
 
 [] Ways to add/edit/delete Members - or an auto way to make sure they are always synced with Jobber 
+
+[] still so much to do
