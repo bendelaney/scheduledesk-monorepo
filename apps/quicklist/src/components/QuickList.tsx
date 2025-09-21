@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import QuickListLogo from './QuickListLogo';
+import type { Mode } from '@/utils/types'
+import { formatRequestList, extractAssessors } from '@/utils/requestFormatter'
+import { formatJobList, extractSalespeople } from '@/utils/jobFormatter'
 
 declare global {
   interface Window {
@@ -55,295 +58,12 @@ const DEFAULT_SETTINGS: Settings = {
 }
 
 
-// HELPER FUNCTIONS
-// Helper function to format a date string into a friendly format.
-export function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  const weekdayFormatter = new Intl.DateTimeFormat('en-US', { weekday: 'short' });
-  const weekday = weekdayFormatter.format(date);
-  const dateFormatter = new Intl.DateTimeFormat('en-US', { month: 'numeric', day: 'numeric' });
-  let formattedDate = dateFormatter.format(date);
-  formattedDate = formattedDate.replace(/(\d)(:?\d{2})\s?([AaPp][Mm])/, '$1$2$3').toLowerCase();
-  return `${weekday} ${formattedDate}`;
-}
-
-// Helper function to format a time string from a date
-export function formatTime(dateString: string): string {
-  const date = new Date(dateString);
-  const timeFormatter = new Intl.DateTimeFormat('en-US', { 
-    hour: 'numeric', 
-    minute: '2-digit',
-    hour12: true
-  });
-  return timeFormatter.format(date);
-}
-
-// Extract unique salespeople from data
-export function extractSalespeople(data: any): string[] {
-  const salespeople = new Set<string>();
-  if (data?.data?.visits?.edges) {
-    data.data.visits.edges.forEach((edge: any) => {
-      if (edge.node.job.salesperson && edge.node.job.salesperson.name.first) {
-        salespeople.add(edge.node.job.salesperson.name.first.trim());
-      }
-    });
-  }
-  return Array.from(salespeople).sort();
-}
-
-// Function to format the Jobber visits JSON into Markdown or plaintext
-export function formatJobList(
-  data: any,
-  settings: any,
-  startDate: Date | null,
-  endDate: Date | null,
-  formatType: 'markdown' | 'plaintext' = 'markdown',
-  filterText: string = ''
-): string {
-
-  let output = '';
-  let total = 0;
-  let jobCount = 0;
-  let jobLines = '';
-
-  // Handle all cases: no data, no visits structure, or empty visits
-  const visits = data?.data?.visits?.edges ? data.data.visits.edges : []
-
-  // if (visits.length === 0) {
-  //   return output;
-  // } else {
-    // Sort visits based on geo code extracted from the title
-    const getGeoCode = (edge: any): string => {
-      const titleParts = edge.node.title.match(/(^[^-]+)|(-[A-Z]+-)|([^-\s][^-\n]*[^-\s])|(-[^-\s][^-\n]*[^-\s])/g);
-      return (titleParts && titleParts[1]) ? titleParts[1].trim() : '';
-    };
-    
-    // Sort based on settings
-    switch (settings.sortBy) {
-      case "geoCode":
-        visits.sort((a: any, b: any) => getGeoCode(a).localeCompare(getGeoCode(b)));
-        break;
-      case "value":
-        visits.sort((a: any, b: any) => {
-          const valueA = a.node.job.total || 0;
-          const valueB = b.node.job.total || 0;
-          return valueB - valueA;
-        });
-        break;
-      case "geoCodeThenValue":
-        visits.sort((a: any, b: any) => {
-          const geoCodeA = getGeoCode(a);
-          const geoCodeB = getGeoCode(b);
-          const valueA = a.node.job.total || 0;
-          const valueB = b.node.job.total || 0;
-
-          const geoCodeComparison = geoCodeA.localeCompare(geoCodeB);
-          if (geoCodeComparison !== 0) {
-            return geoCodeComparison;
-          } else {
-            return valueB - valueA;
-          }
-        });
-        break;
-      case "alphabetical":
-        visits.sort((a: any, b: any) => a.node.title.localeCompare(b.node.title));
-        break;
-      case "salesperson":
-        visits.sort((a: any, b: any) => {
-          const salespersonA = a.node.job.salesperson ? a.node.job.salesperson.name.first : '';
-          const salespersonB = b.node.job.salesperson ? b.node.job.salesperson.name.first : '';
-          return salespersonA.localeCompare(salespersonB);
-        });
-        break;
-      case "date":
-      default:
-        visits.sort((a: any, b: any) => new Date(a.node.startAt).getTime() - new Date(b.node.startAt).getTime());
-        break;
-    }
-    
-    // Iterate over the visits and format them
-    visits.forEach((edge:any) => {
-      const titleParts = edge.node.title.match(/(^[^-]+)|(-[A-Z]+-)|([^-\s][^-\n]*[^-\s])|(-[^-\s][^-\n]*[^-\s])/g);
-      let salespersonName = edge.node.job.salesperson ? edge.node.job.salesperson.name.first.trim() : 'Unknown';
-      let includingLine = true;
-  
-      /* 
-      TODO: 
-      this is where we will need to get values in a more robust way,
-      instead of just relying on the title syntax.
-      We'll need get the values from the job visit object directly.
-      I think ideally, we'll want to allow the user to define the 
-      contents of each "line" by selecting tokens from a predefined 
-      list of tokens (e.g., lastName, address, customFieldX, etc.)
-      Might be nice if they could choose which of the tokens was the 
-      link-out to the visit in Jobber. ?? 
-      The following will need retooling: 
-      - jobIdentifier
-      - address
-      - geoCode (custom field)
-      - workCode (custom field)
-      */
-      const jobIdentifier = titleParts[0].trim();
-      const geoCode = titleParts[1] ? titleParts[1].trim() : '?';
-      const address = titleParts[2] ? titleParts[2].trim() : '?';
-      const workCode = titleParts[3] ? titleParts[3].trim() : '?';
-      const visitId = atob(edge.node.id).replace(/gid:\/\/Jobber\/Visit\//, '');
-      const jobberWebUri = edge.node.job.jobberWebUri + '?appointment_id=' + visitId;
-      const googleMapsUrl = `https://www.google.com/maps/place/${address.replace(/\s\/\s/g, '+').replace(/\s/g, '+')}+Spokane,WA`;
-      const jobdate = formatDate(edge.node.startAt);
-  
-      const jobStartTime = formatTime(edge.node.startAt);
-      const jobEndTime = formatTime(edge.node.endAt);
-      const jobtime = (() => {
-        if (!settings.showTime) return '';
-        let theTime = (jobStartTime && jobStartTime !== "12:00 AM") 
-          && (jobEndTime && jobEndTime !== "11:59 PM")
-          ? (jobStartTime + "-" + jobEndTime)
-          : (jobStartTime && jobStartTime !== "12:00 AM") 
-            ? jobStartTime 
-            : (jobEndTime && jobEndTime !== "11:59 PM") 
-            ? jobEndTime 
-            : '';
-        theTime = theTime.replace(/\s?(AM|PM)/gi, '').trim();
-        return theTime;
-      })();
-  
-      // Annual selector filtering
-      if (settings.annual === "exclude") {
-        if (jobIdentifier.includes('=')) {
-          includingLine = false;
-        }
-      } else if (settings.annual === "excludeUnconfirmed") {
-        if (jobIdentifier.includes('=') && jobIdentifier.startsWith('=')) {
-          includingLine = false;
-        }
-      } else if (settings.annual === "annualOnly") {
-        if (!jobIdentifier.includes('=')) {
-          includingLine = false;
-        }
-      } else if (settings.annual === "annualOnlyConfirmed") {
-        if (!jobIdentifier.includes('=') || jobIdentifier.startsWith('=')) {
-          includingLine = false;
-        }
-      } else if (settings.annual === "annualOnlyUnconfirmed") {
-        if (!jobIdentifier.includes('=') || !jobIdentifier.startsWith('=')) {
-          includingLine = false;
-        }
-      }
-  
-      // Salesperson filter
-      if (includingLine && settings.salespersonFilter === 'showSelected') {
-        if (settings.selectedSalespeople.length === 0 || !settings.selectedSalespeople.includes(salespersonName)) {
-          includingLine = false;
-        }
-      }
-
-      // Day filter
-      if (includingLine && settings.dayFilter === 'showSelected') {
-        const jobDate = new Date(edge.node.startAt);
-        const dayOfWeek = jobDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
-        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const dayName = dayNames[dayOfWeek];
-        
-        if (!settings.selectedDays || settings.selectedDays.length === 0 || !settings.selectedDays.includes(dayName)) {
-          includingLine = false;
-        }
-      }
-  
-      // Text filter
-      if (includingLine && filterText && !edge.node.title.toLowerCase().includes(filterText.toLowerCase())) {
-        includingLine = false;
-      }
-  
-      // IF WE **ARE** INCLUDING THE LINE:
-      if (includingLine) {
-        jobCount++;
-        total += edge.node.job.total || 0;
-  
-        // Format the job line
-        if (formatType === 'markdown') {
-          // Dates
-          if (settings.showDates) {
-            if (settings.dateDisplayType === "all") {
-              jobLines += ` **\`${jobdate}\`** `;
-            } else if (settings.dateDisplayType === "weekdayOnly" && !jobdate.startsWith("Sun ") && !jobdate.startsWith("Sat ")) {
-              jobLines += ` **\`${jobdate}\`** `;
-            } else if (settings.dateDisplayType === "weekendOnly" && (jobdate.startsWith("Sun ") || jobdate.startsWith("Sat "))) {
-              jobLines += ` **\`${jobdate}\`** `;
-            }
-          }
-  
-          // Format the job line as Markdown
-          jobLines += `[**${jobIdentifier}**](${jobberWebUri}) ${geoCode} [${address}](${googleMapsUrl}) - ${workCode}`;
-  
-          // Time
-          if (settings.showTime && jobtime !== '') {
-            jobLines += ` **\`${jobtime}\`**`;
-          }
-  
-          // Value and Salesperson
-          if (settings.showValue) {
-            jobLines += ` \`$${edge.node.job.total ? edge.node.job.total : '?'}\``;
-          }
-          if (settings.showSalesperson) {
-            jobLines += ` \`${salespersonName}\``;
-          }
-        } else 
-        if (formatType === 'plaintext') {
-          jobLines += `${jobIdentifier} ${geoCode} ${address} - ${workCode}`;
-          if (settings.showDates) {
-            if (settings.dateDisplayType === "all") {
-              jobLines += ` ${jobdate}`;
-            } else if (settings.dateDisplayType === "weekdayOnly" && !jobdate.startsWith("Sun ") && !jobdate.startsWith("Sat ")) {
-              jobLines += ` ${jobdate}`;
-            } else if (settings.dateDisplayType === "weekendOnly" && (jobdate.startsWith("Sun ") || jobdate.startsWith("Sat "))) {
-              jobLines += ` ${jobdate}`;
-            }
-          }
-          if (settings.showTime) {
-            jobLines += ` ${jobtime}`;
-          }
-          if (settings.showValue) {
-            jobLines += ` - $${edge.node.job.total ? edge.node.job.total : '?'}`;
-          }
-          if (settings.showSalesperson) {
-            jobLines += ` - ${salespersonName}`;
-          }
-        }
-  
-        jobLines += '\n\n';
-      }
-    });
-      
-    // Add range info header
-    if (settings.showRangeInfo && startDate && endDate) {
-      const formattedStartDate = formatDate(startDate.toISOString());
-      const formattedEndDate = formatDate(endDate.toISOString());
-      
-      if (formatType === 'markdown') {
-        if (settings.showValue) {
-          output += `# **${formattedStartDate} &ndash; ${formattedEndDate}** **\`${jobCount} Jobs\`** **\`$${total}\`**\n\n`;
-        } else {
-          output += `# **${formattedStartDate} &ndash; ${formattedEndDate}** **\`${jobCount} Jobs\`**\n\n`;
-        }
-      } else if (formatType === 'plaintext') {
-        if (settings.showValue) {
-          output += `${formattedStartDate}&ndash;${formattedEndDate}, ${jobCount} Jobs, $${total}\n\n------------------------------\n\n`;
-        } else {
-          output += `${formattedStartDate}&ndash;${formattedEndDate}, ${jobCount} Jobs\n\n------------------------------\n\n`;
-        }
-      }
-    }
-
-    output += jobLines;
-    return output;
-  // }
-}
 
 ///////////////////////////////////////////
 // The QuickList Component
 ///////////////////////////////////////////
 export default function QuickList() {
+  const [mode, setMode] = useState<Mode>('visits')
   const [showOutput, setShowOutput] = useState(false)
   const [isMarkdownPreviewing, setIsMarkdownPreviewing] = useState(true)
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
@@ -357,9 +77,31 @@ export default function QuickList() {
   const [endDate, setEndDate] = useState<Date | null>(null)
   const [salespeople, setSalespeople] = useState<string[]>([])
   const [isRefreshing, setIsRefreshing] = useState(false)
-  
+
   const dateRangeRef = useRef<HTMLDivElement>(null)
   const flatpickrInstance = useRef<any>(null)
+  const lastFetchRef = useRef<number>(0)
+
+  // Initialize mode from localStorage
+  useEffect(() => {
+    try {
+      const savedMode = localStorage.getItem('quicklist_mode')
+      if (savedMode === 'visits' || savedMode === 'requests') {
+        setMode(savedMode as Mode)
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [])
+
+  // Persist mode selection
+  useEffect(() => {
+    try {
+      localStorage.setItem('quicklist_mode', mode)
+    } catch (e) {
+      // ignore
+    }
+  }, [mode])
 
   // Toggle section visibility
   const toggleSection = (section: 'display' | 'sorting' | 'visibility') => {
@@ -368,7 +110,7 @@ export default function QuickList() {
       sorting: true,
       visibility: true
     }
-    
+
     updateSettings({
       expandedSections: {
         ...currentExpanded,
@@ -377,11 +119,11 @@ export default function QuickList() {
     })
   }
 
-  // Load settings on mount
+  // Load settings when mode changes (separate storage per mode)
   useEffect(() => {
-    const savedSettings = loadSettings()
+    const savedSettings = loadSettings(mode)
     setSettings(savedSettings)
-    
+
     // Load saved dates
     if (savedSettings.startDate && savedSettings.endDate) {
       const start = new Date(savedSettings.startDate)
@@ -395,7 +137,14 @@ export default function QuickList() {
       setStartDate(defaultStart)
       setEndDate(defaultEnd)
     }
-  }, [])
+  }, [mode])
+
+  // Sanitize unavailable sort options when in requests mode
+  useEffect(() => {
+    if (mode === 'requests' && (settings.sortBy === 'value' || settings.sortBy === 'geoCodeThenValue')) {
+      updateSettings({ sortBy: 'alphabetical' })
+    }
+  }, [mode])
 
   // Initialize flatpickr when dates are set
   useEffect(() => {
@@ -411,21 +160,34 @@ export default function QuickList() {
     }
   }, [startDate, endDate])
 
-  // Auto-save settings when they change
+  // Auto-save settings when they change (per-mode key)
   useEffect(() => {
     if (settings !== DEFAULT_SETTINGS) {
-      saveSettings()
+      saveSettings(mode)
     }
-  }, [settings])
+  }, [settings, mode])
+
+  const formatAndDisplay = useCallback(() => {
+    const formattedMarkdown =
+      mode === 'visits'
+        ? formatJobList(data, settings, startDate, endDate, 'markdown', filterText)
+        : formatRequestList(data, settings, startDate, endDate, 'markdown', filterText)
+    setMarkdownOutput(formattedMarkdown)
+  }, [data, settings, startDate, endDate, filterText, mode])
 
   // Auto-format when relevant data changes
   useEffect(() => {
     formatAndDisplay()
-  }, [data, settings, filterText, startDate, endDate])
+  }, [formatAndDisplay])
+
+  // Force re-format when selectedSalespeople changes
+  useEffect(() => {
+    formatAndDisplay()
+  }, [settings.selectedSalespeople, formatAndDisplay])
 
   // Render markdown when output changes
   useEffect(() => {
-    if (markdownOutput && window.marked && isMarkdownPreviewing) {
+    if (window.marked && isMarkdownPreviewing) {
       renderMarkdown()
     }
   }, [markdownOutput, isMarkdownPreviewing])
@@ -573,31 +335,29 @@ export default function QuickList() {
     }
   }
 
-  const saveSettings = () => {
+  const saveSettings = (currentMode: Mode) => {
     try {
       const updatedSettings = {
         ...settings,
         startDate: startDate?.toISOString() || null,
         endDate: endDate?.toISOString() || null,
-        selectedSalespeople: salespeople.filter(sp => {
-          const safeId = 'salesperson_' + sp.replace(/[^a-zA-Z0-9]/g, '_')
-          const el = document.getElementById(safeId)
-          const checkbox = (el instanceof HTMLInputElement) ? el : null
-          return checkbox ? checkbox.checked : false
-        })
       }
-      localStorage.setItem('jobberSettings', JSON.stringify(updatedSettings))
+      const key = currentMode === 'visits' ? 'jobberSettings_visits' : 'jobberSettings_requests'
+      localStorage.setItem(key, JSON.stringify(updatedSettings))
       console.log('Settings saved:', updatedSettings)
     } catch (error) {
       console.error('Error saving settings:', error)
     }
   }
 
-  const loadSettings = (): Settings => {
+  const loadSettings = (currentMode: Mode): Settings => {
     try {
-      const savedSettings = localStorage.getItem('jobberSettings')
-      if (savedSettings) {
-        return JSON.parse(savedSettings)
+      const key = currentMode === 'visits' ? 'jobberSettings_visits' : 'jobberSettings_requests'
+      const savedSettings = localStorage.getItem(key)
+      if (savedSettings) return JSON.parse(savedSettings)
+      // No saved settings for this mode; set a cheaper default for requests
+      if (currentMode === 'requests') {
+        return { ...DEFAULT_SETTINGS, showSalesperson: false }
       }
     } catch (error) {
       console.error('Error loading settings:', error)
@@ -605,18 +365,13 @@ export default function QuickList() {
     return DEFAULT_SETTINGS
   }
 
-  const formatAndDisplay = useCallback(() => {
-    // Always run formatJobList - it will handle empty data and show range summary appropriately
-    const formattedMarkdown = formatJobList(data, settings, startDate, endDate, 'markdown', filterText)
-    setMarkdownOutput(formattedMarkdown)
-  }, [data, settings, startDate, endDate, filterText])
 
   const renderMarkdown = () => {
     if (!window.marked) return
-    
-    const markdownedHTML = window.marked.parse(markdownOutput, { 
-      gfm: true, 
-      breaks: true 
+
+    const markdownedHTML = window.marked.parse(markdownOutput, {
+      gfm: true,
+      breaks: true
     })
     setRenderedMarkdown(markdownedHTML)
   }
@@ -652,34 +407,45 @@ export default function QuickList() {
     const endParam = extendedEndDate + "T00:00:00Z"
   
     try {
+      const endpoint = mode === 'visits' ? '/api/visits' : '/api/requests'
+      const includeAssignees = mode === 'requests' && (settings.showSalesperson || settings.salespersonFilter === 'showSelected')
       const response = await fetch(
-        `/api/visits?startDate=${encodeURIComponent(startParam)}&endDate=${encodeURIComponent(endParam)}`,
+        `${endpoint}?startDate=${encodeURIComponent(startParam)}&endDate=${encodeURIComponent(endParam)}${mode === 'requests' ? `&includeAssignees=${includeAssignees ? '1' : '0'}` : ''}`,
         { headers: { 'Accept': 'application/json' } }
       )
-  
+
       if (response.status === 401) {
         window.location.href = '/api/auth/jobber'
         return
       }
-  
+
       if (!response.ok) {
         throw new Error("Network response was not ok.")
       }
-  
+
       const responseData = await response.json()
       console.log('API Response data:', responseData)
-      
       setData(responseData)
-      const extractedSalespeople = extractSalespeople(responseData)
-      setSalespeople(extractedSalespeople)
+      if (mode === 'visits') {
+        const extractedSalespeople = extractSalespeople(responseData)
+        setSalespeople(extractedSalespeople)
+      } else {
+        let extractedAssessors = extractAssessors(responseData)
+        // Always include an explicit 'Unassigned' option for Requests mode
+        if (!extractedAssessors.includes('Unassigned')) {
+          extractedAssessors = [...extractedAssessors, 'Unassigned']
+        }
+        setSalespeople(extractedAssessors)
+      }
       
     } catch (error) {
       console.error("Error fetching visits:", error)
       alert("Error fetching visits. Please try again.")
     } finally {
       setIsRefreshing(false)
+      lastFetchRef.current = Date.now()
     }
-  }, [startDate, endDate])
+  }, [startDate, endDate, mode])
 
   const navigateToPanel = (panelIndex: number) => {
     setShowOutput(panelIndex === 1)
@@ -769,7 +535,9 @@ export default function QuickList() {
           alert('No data yet.')
           return
         }
-        const plain = formatJobList(data, settings, startDate, endDate, 'plaintext', filterText)
+        const plain = mode === 'visits'
+          ? formatJobList(data, settings, startDate, endDate, 'plaintext', filterText)
+          : formatRequestList(data, settings, startDate, endDate, 'plaintext', filterText)
         success = await copyToClipboard(plain)
         if (success) showCopySuccess()
       }
@@ -806,14 +574,14 @@ export default function QuickList() {
     }
   }, [copyMenuOpen])
 
-  // Fetch visits when component mounts and dates are available
+  // Fetch data when dates or mode are available/changed
   useEffect(() => {
     if (startDate && endDate) {
       setTimeout(() => {
         fetchVisits()
       }, 100)
     }
-  }, [startDate, endDate])
+  }, [startDate, endDate, mode])
 
   // Intercept outgoing links to open in new windows
   useEffect(() => {
@@ -835,10 +603,12 @@ export default function QuickList() {
     return () => document.removeEventListener('click', handleLinkClick)
   }, [])
 
-  // Refresh data when window regains focus
+  // Refresh data when window regains focus (cooldown to reduce API calls)
   useEffect(() => {
     const handleWindowFocus = () => {
-      fetchVisits()
+      if (Date.now() - lastFetchRef.current > 10000) {
+        fetchVisits()
+      }
     }
 
     window.addEventListener('focus', handleWindowFocus)
@@ -856,6 +626,24 @@ export default function QuickList() {
               <QuickListLogo />
               <span>for Jobber</span>
             </h1>
+            <div className="mode-tabs">
+              <button
+                className={`button ${mode === 'visits' ? 'active' : ''}`}
+                onClick={() => setMode('visits')}
+                aria-pressed={mode === 'visits'}
+                title="Show Job Visits"
+              >
+                Visits
+              </button>
+              <button
+                className={`button ${mode === 'requests' ? 'active' : ''}`}
+                onClick={() => setMode('requests')}
+                aria-pressed={mode === 'requests'}
+                title="Show Requests (Assessment Visits)"
+              >
+                Requests
+              </button>
+            </div>
           </header>
 
           <div id="optionsContainer">
@@ -927,15 +715,17 @@ export default function QuickList() {
                 />
                 <label htmlFor="showTimeCheckbox">Times</label>
               </p>
-              <p>
-                <input
-                  type="checkbox"
-                  id="showValueCheckbox"
-                  checked={settings.showValue}
-                  onChange={(e) => updateSettings({ showValue: e.target.checked })}
-                />
-                <label htmlFor="showValueCheckbox">$ Value</label>
-              </p>
+              {mode === 'visits' && (
+                <p>
+                  <input
+                    type="checkbox"
+                    id="showValueCheckbox"
+                    checked={settings.showValue}
+                    onChange={(e) => updateSettings({ showValue: e.target.checked })}
+                  />
+                  <label htmlFor="showValueCheckbox">$ Value</label>
+                </p>
+              )}
               <p>
                 <input
                   type="checkbox"
@@ -943,7 +733,7 @@ export default function QuickList() {
                   checked={settings.showSalesperson}
                   onChange={(e) => updateSettings({ showSalesperson: e.target.checked })}
                 />
-                <label htmlFor="showSalespersonCheckbox">Salesperson</label>
+                <label htmlFor="showSalespersonCheckbox">{mode === 'visits' ? 'Salesperson' : 'Estimator'}</label>
               </p>
               <p>
                 <input
@@ -974,10 +764,10 @@ export default function QuickList() {
                 >
                   <option value="date">Date</option>
                   <option value="alphabetical">Alphabetical</option>
-                  <option value="value">$ Value</option>
+                  {mode === 'visits' && <option value="value">$ Value</option>}
                   <option value="geoCode">GeoCode</option>
-                  <option value="geoCodeThenValue">GeoCode, then $ Value</option>
-                  <option value="salesperson">Salesperson</option>
+                  {mode === 'visits' && <option value="geoCodeThenValue">GeoCode, then $ Value</option>}
+                  <option value="salesperson">{mode === 'visits' ? 'Salesperson' : 'Estimator'}</option>
                 </select>
                   </p>
                 </div>
@@ -991,23 +781,25 @@ export default function QuickList() {
               </h4>
               {settings.expandedSections?.visibility !== false && (
               <div className="section-content">
+                {mode === 'visits' && (
+                  <p>
+                    <label htmlFor="annualSelect">Annual Jobs:</label>
+                    <select
+                      id="annualSelect"
+                      value={settings.annual}
+                      onChange={(e) => updateSettings({ annual: e.target.value })}
+                    >
+                      <option value="include">Include Annual Jobs</option>
+                      <option value="exclude">Exclude Annual Jobs</option>
+                      <option value="excludeUnconfirmed">Exclude Unconfirmed Annual Jobs</option>
+                      <option value="annualOnly">Show Only Annual Jobs</option>
+                      <option value="annualOnlyConfirmed">Show Only *Confirmed* Annual Jobs</option>
+                      <option value="annualOnlyUnconfirmed">Show Only *Unconfirmed* Annual Jobs</option>
+                    </select>
+                  </p>
+                )}
                 <p>
-                  <label htmlFor="annualSelect">Annual Jobs:</label>
-                  <select
-                    id="annualSelect"
-                    value={settings.annual}
-                    onChange={(e) => updateSettings({ annual: e.target.value })}
-                  >
-                    <option value="include">Include Annual Jobs</option>
-                    <option value="exclude">Exclude Annual Jobs</option>
-                    <option value="excludeUnconfirmed">Exclude Unconfirmed Annual Jobs</option>
-                    <option value="annualOnly">Show Only Annual Jobs</option>
-                    <option value="annualOnlyConfirmed">Show Only *Confirmed* Annual Jobs</option>
-                    <option value="annualOnlyUnconfirmed">Show Only *Unconfirmed* Annual Jobs</option>
-                  </select>
-                </p>
-                <p>
-                  <label htmlFor="salespersonFilterSelect">Salesperson:</label>
+                  <label htmlFor="salespersonFilterSelect">{mode === 'visits' ? 'Salesperson' : 'Estimator'}:</label>
                   <select
                     id="salespersonFilterSelect"
                     value={settings.salespersonFilter}
