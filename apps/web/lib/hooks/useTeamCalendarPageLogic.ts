@@ -132,11 +132,19 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
 
         // Auto-save after a debounced delay
         autoSaveTimeoutRef.current = setTimeout(async () => {
+          // Double-check that the event still exists and popover is still open
+          const currentEvent = availabilityEvents.find(e => e.id === activeEvent.id);
+          if (!currentEvent || !showNewEventPopover || activeEventId !== activeEvent.id) {
+            console.log('Auto-save skipped: event no longer exists or popover closed');
+            return;
+          }
+
           console.log('Auto-save triggered for existing event');
           const eventId = activeEvent.id || 'new';
           try {
             setSaving(eventId);
 
+            // TODO: THIS NEEDS RETHINKING 
             // Handle recurring event instances differently
             if (activeEvent.isInstance && activeEvent.originalEventId) {
               // For now, we can't update individual instances - only the whole series
@@ -164,7 +172,7 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
       console.log('Team member in data:', newValues.teamMember);
       return newValues;
     });
-  }, [activeEvent, safeUpdateEvent, setSaving, setSaved]);
+  }, [activeEvent, activeEventId, availabilityEvents, showNewEventPopover, safeUpdateEvent, setSaving, setSaved]);
 
   const handleEventClickFromGrid = useCallback((event: AvailabilityEvent, targetEl?: HTMLElement) => {
     if (targetEl) {
@@ -177,6 +185,13 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
 
   const handleClosePopover = useCallback(() => {
     // console.log('TEAM CALENDAR: handleClosePopover called - closing popover');
+
+    // Clear any pending auto-save timeout when closing popover
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+      autoSaveTimeoutRef.current = null;
+    }
+
     setShowNewEventPopover(false);
     setActiveEventId(null);
     setNewEventData({});
@@ -254,6 +269,12 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
 
     try {
       setSaving(eventId);
+
+      // Clear any pending auto-save timeout before deletion
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+        autoSaveTimeoutRef.current = null;
+      }
 
       // Handle recurring event instances differently
       if (activeEvent.isInstance && activeEvent.originalEventId) {

@@ -425,8 +425,8 @@ const EventEditor: FC<EventEditorProps> = ({
     smartEventInput: (customProps = {}) => (
       <SmartEventInput 
         onParse={(data: AvailabilityEvent[], prompt: string) => {
-          // console.log('SmartEventInput onParse prompt:', prompt);
-          // console.log('SmartEventInput onParse data:', data);
+          console.log('SmartEventInput onParse prompt:', prompt);
+          console.log('SmartEventInput onParse data:', data);
         
           // Only process if we have data
           if (data && data.length > 0) {
@@ -487,6 +487,7 @@ const EventEditor: FC<EventEditorProps> = ({
         selected={formState.teamMember && formState.teamMember.firstName ? formState.teamMember as { firstName: string; lastName?: string } : undefined}
         teamMembers={teamMembers}
         selectMenuProps={{
+          selectProps: {isSearchable: true},
           placeholder: "Team Member", 
           styles: SelectMenuStylePresets.Large,
           instanceId: "event-editor-team-member",
@@ -502,7 +503,7 @@ const EventEditor: FC<EventEditorProps> = ({
         selected={formState.eventType}
         onChange={(selected) => updateField('eventType', selected?.value)}
         selectMenuProps={{
-          isSearchable: true,
+          selectProps: {isSearchable: true},
           styles: SelectMenuStylePresets.Large,
           instanceId: "event-editor-event-type",
           ...customProps.selectMenuProps

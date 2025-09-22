@@ -32,11 +32,6 @@ const TeamMemberSelectMenu: FC<TeamMemberSelectMenuProps> = ({
   selected, 
   selectMenuProps,
 }) => {
-  const selectProps = {
-    isSearchable: true,
-    ...selectMenuProps?.selectProps,
-  };
-
   const teamMemberOptions = teamMembers.map((teamMember) => ({
     value: {
       firstName: teamMember.firstName,
@@ -57,7 +52,7 @@ const TeamMemberSelectMenu: FC<TeamMemberSelectMenuProps> = ({
       placeholder={selectMenuProps?.placeholder || "Team Member"}
       onChange={selectMenuProps?.onChange}
       {...selectMenuProps}
-      selectProps={selectProps}
+      selectProps={selectMenuProps?.selectProps}
     />
   );
 };

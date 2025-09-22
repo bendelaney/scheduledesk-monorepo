@@ -101,7 +101,7 @@ export const getEventTypeDisplayText = (event: AvailabilityEvent, isShort: boole
       return endTime ? `end: ${formatTime(endTime)}` : 'ends early';
       
     case "Not Working":
-      return isShort ? '×' : 'off';
+      return isShort ? '×' : 'Not Working';
       
     case "Vacation":
       return isShort ? '⛱️' : 'vacation';
@@ -648,16 +648,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         title={`${event.teamMember.firstName} ${event.teamMember.lastName || ''}: ${event.eventType}${event.allDay ? '' : ` (${event.startTime} - ${event.endTime})`}${event.isInstance ? ' (recurring)' : ''}`}
         style={{ 
           color: eventColors.dark, 
-          // backgroundColor: eventColors.base,
-          // Option 1: Use opacity to lighten
-          // opacity: 0.8,
-          
-          // Option 2: Use box-shadow for a lighter overlay effect
-          boxShadow: `inset 0 0 0 1000px ${eventColors.light}`,
-          
-          // Option 3: Use background blend modes
-          // backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3))',
-          // backgroundBlendMode: 'overlay'
+          background: `linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4)), ${eventColors.base}`,
         }}
       >
         {showTeamMemberName && <span className="calendar-event__member">{event.teamMember.firstName} {/*{event.teamMember.lastName || ''}*/}</span>}

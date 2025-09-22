@@ -32,10 +32,10 @@ const EventTypeSelectMenu: FC<EventTypeSelectMenuProps> = ({
       selectedOption={selectedOption}
       value={selectedOption}
       placeholder="Event Type"
-      isSearchable={true}
       options={eventTypeOptions} 
       onChange={onChange}
       {...selectMenuProps}
+      selectProps={selectMenuProps?.selectProps}
     />
   );
 };

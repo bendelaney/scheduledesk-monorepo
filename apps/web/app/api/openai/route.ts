@@ -30,31 +30,33 @@ export async function POST(request: NextRequest) {
 
     const instructions = `You are a scheduling assistant.
 Given natural language input from a user, extract structured event data for a team availability calendar.
-Return a JSON object. The expected structure of this object is exactly as follows:
+Return a JSON object with an "events" property containing an array. The expected structure of this object is exactly as follows:
 
-[
-  {
-    teamMember: object with firstName and lastName properties (e.g. { firstName: "Krystn", lastName: "Parmley" }),
-    eventType: one of ["Ends Early", "Starts Late", "Personal Appointment", "Not Working", "On Vacation", "Custom"],
-    customEventName: string (ONLY include this field when eventType is "Custom"),
-    startDate: string in ISO 8601 format (e.g. "2025-04-02T00:00:00Z"),
-    endDate: string in ISO 8601 format (e.g. "2025-04-02T00:00:00Z"),
-    allDay: boolean (true if the event lasts all day, false otherwise),
-    startTime: string in "HH:mm:ss" format,
-    endTime: string in "HH:mm:ss" format,
-    recurrence: one of ["Every Week", "Every Other Week", "Every Month"],
-    monthlyRecurrence: {
-      type: one of ["Exact Date", "Week & Day"],
-      monthlyWeek: one of ["First", "Second", "Third", "Fourth", "Last"],
-      monthlyDayOfWeek: one of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+{
+  "events": [
+    {
+      teamMember: object with firstName and lastName properties (e.g. { firstName: "Krystn", lastName: "Parmley" }),
+      eventType: one of ["Ends Early", "Starts Late", "Personal Appointment", "Not Working", "Vacation", "Custom"],
+      customEventName: string (ONLY include this field when eventType is "Custom"),
+      startDate: string in ISO 8601 format (e.g. "2025-04-02T00:00:00Z"),
+      endDate: string in ISO 8601 format (e.g. "2025-04-02T00:00:00Z"),
+      allDay: boolean (true if the event lasts all day, false otherwise),
+      startTime: string in "HH:mm:ss" format,
+      endTime: string in "HH:mm:ss" format,
+      recurrence: one of ["Every Week", "Every Other Week", "Every Month"],
+      monthlyRecurrence: {
+        type: one of ["Exact Date", "Week & Day"],
+        monthlyWeek: one of ["First", "Second", "Third", "Fourth", "Last"],
+        monthlyDayOfWeek: one of ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+      }
     }
-  }
-]
+  ]
+}
 
 - Today's date is ${today}. Use this date to resolve phrases like "next Tuesday" or "3 days from now" into full ISO dates including year, month, and day.
 - IMPORTANT: If the user input does NOT mention a specific date (e.g., just says "day off", "appointment", "meeting"), DO NOT add any date fields - let the existing form values for dates remain unchanged.
 - Do NOT wrap the output in markdown code blocks (e.g. do not use \`\`\`json or \`\`\`).
-- Always return an array of objects, even if there is only one event.
+- Always return a JSON object with an "events" array, even if there is only one event.
 - Only include fields that are explicitly mentioned or clearly implied in the message.
 - Do NOT infer or guess ANY field values that are not clearly referenced or indicated in the prompt.
 
@@ -64,16 +66,18 @@ ${teamMembers && teamMembers.length > 0 ? `- Available team members: ${teamMembe
 - For partial names, use fuzzy matching (e.g., "ben" should match "Ben Delaney", "krystn" should match "Krystn Parmley").
 - Always use the full firstName and lastName from the team members list above.` : '- No team members provided. If a team member name is mentioned, use it as given.'}
 
-Event type rules:
-- Common phrases that indicate "Not Working": "off", "not working", "day off", "time off", "out", "unavailable", "away", "sick", "vacation", "holiday"
-- Common phrases that indicate "On Vacation": "vacation", "vacay", "holiday", "trip", "traveling"
-- Common phrases that indicate "Personal Appointment": "appointment", "meeting", "dentist", "doctor", "personal"
-- Common phrases that indicate "Starts Late": "starts late", "coming in late", "late start", "delayed start"
-- Common phrases that indicate "Ends Early": "ends early", "leaving early", "early finish", "half day"
+Time and all-day rules:
+- If the input indicates an all-day event (e.g., "all day", "full day", "day off"), set the allDay field to true and do not include startTime or endTime fields.
+- If specific times are mentioned (e.g., "from 9am to 11am", "at 2pm", "3:30pm to 5pm"), include startTime and/or endTime fields in "HH:mm:ss" format.
+- If no specific times are mentioned, do not include startTime or endTime fields, unless the event type rules below specify otherwise.
+
+Event type-specific rules:
 - If you infer that "Not Working" is the event type, set the allDay field to true. 
 - If you infer that "Ends Early" is the event type, AND a specific time is mentioned, then include the "endTime" field, but do not include the "startTime field. 
 - If you infer that "Ends Early" is the event type, AND a specific time is NOT mentioned, then do not include any time fields and set the "allDay" field to true.
 - If you infer that "Starts Late" is the event type, include the "startTime" field, but do not include the endTime field. 
+- If you infer that "Starts Late" is the event type, AND a specific time is NOT mentioned, then do not include any time fields and set the "allDay" field to true.
+
 - If you infer that "Personal Appointment" is the event type, include both the "startTime" and "endTime" fields.
 - If you infer that "Personal Appointment" is the event type, AND a time is mentioned but a DURATION is NOT mentioned, assume the event lasts 1 hour and include a startTime and endTime.
 - If the event CANNOT be clearly classified as one of the other event types (Ends Early, Starts Late, Personal Appointment, Not Working, On Vacation), then classify it as "Custom" and include the "customEventName" field with a descriptive name based on the activity mentioned (e.g., "Bidding", "Training", "Meeting", "Site Visit", "Equipment Maintenance").
@@ -106,33 +110,23 @@ ${additionalRules}`;
 
 // Real OpenAI API call - uncomment when ready to use
     const response = await openai.chat.completions.create({
-      model: "gpt-4.1-nano",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: 'system',
-          content: [
-            {
-              "type": "text",
-              "text": instructions
-            }
-          ]
+          content: instructions
         },
         {
           role: 'user',
-          content: [
-            {
-              "type": "text",
-              "text": inputText
-            }
-          ]
+          content: inputText
         }
       ],
         
       response_format: {
-        "type": "text"
+        "type": "json_object"  // This enforces valid JSON
       },
       temperature: 1,
-      max_completion_tokens: 2048,
+      max_completion_tokens: 2000,
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0
@@ -143,7 +137,9 @@ ${additionalRules}`;
     
     try {
       if (resultText) {
-        const events = JSON.parse(resultText);
+        const parsedResponse = JSON.parse(resultText);
+        // OpenAI now returns an object with an "events" property
+        const events = parsedResponse.events || [];
         return NextResponse.json({ events });
       } else {
         throw new Error('OpenAI response is null or empty');

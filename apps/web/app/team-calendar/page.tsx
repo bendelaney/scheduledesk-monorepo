@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import AppFrame from '@/components/AppFrame';
 import TeamCalendar from '@/components/TeamCalendar';
@@ -46,8 +46,20 @@ function TeamCalendarPageContent() {
     router.push(path);
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'n' && (!e.metaKey || !e.ctrlKey)) {
+        e.preventDefault();
+        handleNewEventPopoverOpen();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
-      <AppFrame
+    <AppFrame
       className="team-calendar-page"
       topBarLeftContent={
         <button

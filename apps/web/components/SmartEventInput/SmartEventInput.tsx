@@ -74,28 +74,60 @@ const SmartEventInput: FC<SmartEventInputProps> = ({
           teamMembers
         }),
       });
-
+  
+      // Log response details for debugging
+      console.log('Response status:', response.status);
+      console.log('Response status text:', response.statusText);
+  
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `API request failed: ${response.status}`);
+        let errorMessage;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`;
+          console.log('Error response data:', errorData);
+        } catch (jsonError) {
+          // If JSON parsing fails, get the raw text
+          try {
+            const errorText = await response.text();
+            console.log('Raw error response:', errorText);
+            errorMessage = `HTTP ${response.status}: ${errorText || response.statusText}`;
+          } catch (textError) {
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+          }
+        }
+        throw new Error(errorMessage);
       }
-
+  
       const data = await response.json();
+      console.log('Success response:', data);
+      
       if (data.events) {
         setParsedEvents(data.events);
       } else {
-        console.error('No events in API response');
-        alert('Error processing AI response. Please try again.');
+        console.error('No events in API response:', data);
+        alert('Error: API did not return events. Please try again.');
       }
     } catch (error) {
-      console.error('Error calling API:', error);
-      alert('Error processing your request. Please try again.');
+      console.error('Full error details:', error);
+      
+      // More specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes('Failed to fetch')) {
+          alert('Network error. Please check your connection and try again.');
+        } else if (error.message.includes('500')) {
+          alert('Server error. Please check the server logs.');
+        } else {
+          alert(`Error: ${error.message}`);
+        }
+      } else {
+        alert('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setInputText(prevText);
       setLoading(false);
     }
   };
-
+  
   const handleClear = () => {
     setInputText('');
     setParsedEvents(null);

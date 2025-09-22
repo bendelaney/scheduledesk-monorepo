@@ -114,6 +114,13 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
 
   const handleClosePopover = useCallback(() => {
     console.log('handleClosePopover called - closing popover');
+
+    // Clear any pending auto-save timeout when closing popover
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+      autoSaveTimeoutRef.current = null;
+    }
+
     setShowPopover(false);
     setActiveEventId(null);
     setEventEditorValues({});
@@ -170,6 +177,13 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
 
         // Auto-save after a debounced delay
         autoSaveTimeoutRef.current = setTimeout(async () => {
+          // Double-check that the event still exists and popover is still open
+          const currentEvent = availabilityEvents.find(e => e.id === activeEvent.id);
+          if (!currentEvent || !showPopover || activeEventId !== activeEvent.id) {
+            console.log('Auto-save skipped: event no longer exists or popover closed');
+            return;
+          }
+
           console.log('Auto-save triggered for existing event');
           const eventId = activeEvent.id || 'new';
           try {
@@ -200,7 +214,7 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
 
       return newValues;
     });
-  }, [activeEvent, safeUpdateEvent, setSaving, setSaved]);
+  }, [activeEvent, activeEventId, availabilityEvents, showPopover, safeUpdateEvent, setSaving, setSaved]);
 
   const handleSaveEvent = useCallback(async () => {
     console.log('handleSaveEvent called');
@@ -265,6 +279,12 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
     try {
       setSaving(eventId);
 
+      // Clear any pending auto-save timeout before deletion
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+        autoSaveTimeoutRef.current = null;
+      }
+
       // Handle recurring event instances differently
       if (activeEvent.isInstance && activeEvent.originalEventId) {
         // For now, we can't delete individual instances - only the whole series
@@ -289,7 +309,7 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
       setSaving(null);
     }
   }, [activeEvent, safeDeleteEvent, handleClosePopover, setSaving]);
-
+  
   console.log('TeamMemberPage - Events for', teamMember?.firstName, teamMember?.lastName, ':', availabilityEvents.length);
   console.log('TeamMemberPage - Event details:', availabilityEvents.map(e => ({
     id: e.id,

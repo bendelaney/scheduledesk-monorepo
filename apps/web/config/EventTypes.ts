@@ -72,8 +72,8 @@ export const getEventTypeColor = (eventType: EventTypeName): { base: string; dar
   };
 
   const baseColor = getEventTypeConfig(eventType)?.color || '#666666';
-  const darkenedColor = darkenHex(baseColor, 33); // Darken by 20%
-  const lightenedColor = lightenHex(baseColor, 20); // Lighten by 20%
+  const darkenedColor = darkenHex(baseColor, 40); // percent to darken
+  const lightenedColor = lightenHex(baseColor, 30); // percent to lighten
   const colors = { base: baseColor, dark: darkenedColor, light: lightenedColor };
   return colors; 
 };

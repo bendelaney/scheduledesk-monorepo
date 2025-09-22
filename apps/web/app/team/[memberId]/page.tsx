@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import AppFrame from '@/components/AppFrame';
 import TeamMemberId from '@/components/TeamMemberId';
@@ -47,8 +48,21 @@ function TeamMemberPageContent() {
     router.push(path);
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'n' && (!e.metaKey || !e.ctrlKey)) {
+        e.preventDefault();
+        console.log('Key "n" pressed - opening new event popover');
+        handleNewEventPopoverOpen();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleNewEventPopoverOpen]);
+  
   return (
-      <AppFrame
+    <AppFrame
       className="team-member-page"
       showSidebarToggle={false}
       topBarLeftContent={
@@ -83,11 +97,14 @@ function TeamMemberPageContent() {
     > 
       <div className="team-member-header">
         <button aria-label="Back to team" title="Back to team" className="back-to-team" onClick={() => window.location.href = '/team'}><AngleLeft /></button>
+
         <div className="team-member-detail">
           {teamMember && 
             <TeamMemberId teamMember={teamMember} showName={true} showAvatar={true} />
           }
         </div>
+
+        <button aria-label="Edit Normal Weekly Schedule" title="Edit Normal Weekly Schedule" className="btn btn--small btn--secondary edit-weekly-schedule" onClick={()=>{}}>Edit Normal Weekly Schedule</button>
       </div>
 
       {teamMember && (

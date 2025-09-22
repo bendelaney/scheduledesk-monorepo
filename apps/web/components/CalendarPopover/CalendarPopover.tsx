@@ -49,6 +49,7 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [hasInitiallyFocused, setHasInitiallyFocused] = useState(false);
   const initialLoadRef = useRef(true);
   const lastActiveEventIdRef = useRef<string | null>(null);
 
@@ -82,14 +83,15 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
     if (currentEventId !== lastActiveEventIdRef.current) {
       lastActiveEventIdRef.current = currentEventId;
       initialLoadRef.current = true;
+      setHasInitiallyFocused(false); // Reset focus flag for new event
     }
   }, [activeEvent?.id]);
 
-
-  // Reset initial load flag when popover opens
+  // Reset initial load flag and focus flag when popover opens
   useEffect(() => {
     if (show) {
       initialLoadRef.current = true;
+      setHasInitiallyFocused(false);
     }
   }, [show, activeEvent?.id]);
 
@@ -148,13 +150,16 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
       clickOutsideToClose={false}
       {...popoverProps}
       onShow={() => {
-        // Focus the SmartEventInput after popover is shown
-        setTimeout(() => {
-          const smartEventInput = document.querySelector('.calendar-popover .smart-event-input-input');
-          if (smartEventInput) {
-            (smartEventInput as HTMLElement).focus();
-          }
-        }, 0);
+        // Only focus the SmartEventInput on initial render (for new events with smart input)
+        if (!hasInitiallyFocused && !activeEvent) {
+          setTimeout(() => {
+            const smartEventInput = document.querySelector('.calendar-popover .smart-event-input-input');
+            if (smartEventInput) {
+              (smartEventInput as HTMLElement).focus();
+              setHasInitiallyFocused(true);
+            }
+          }, 0);
+        }
       }}
       onHide={onClose}
       >
