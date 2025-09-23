@@ -225,7 +225,7 @@ export const useAvailabilityEvents = (teamMemberId?: string | null): UseAvailabi
 
           // Reconstruct base events from the first instance of each group
           const baseEvents: any[] = [];
-          for (const [originalEventId, instances] of eventGroups) {
+          for (const [originalEventId, instances] of Array.from(eventGroups)) {
             if (instances.length > 0) {
               const firstInstance = instances[0];
               const baseEvent = {
