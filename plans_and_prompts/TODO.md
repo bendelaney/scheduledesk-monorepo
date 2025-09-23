@@ -6,6 +6,10 @@
   - I think we need a new event type just called "Working" 
     So that every person can have their set schedule with their normal "Working" hours and "Not Working" days/hours
 
+[] Need caching for data that's getting fetched too much: 
+  - Team Members
+  - Events
+  
 [] Show Weekends toggle
 
 [] Team Members should be automnatically added to DB
@@ -19,4 +23,4 @@
 
 [] Ways to add/edit/delete Members - or an auto way to make sure they are always synced with Jobber 
 
-[] still so much to do
+[] Migrate EventTypes to DB. Need to create settings page first. When ready use EVENTTYPES-TO-DB_MIGRATION_PLAN.md to prompt Claude. 

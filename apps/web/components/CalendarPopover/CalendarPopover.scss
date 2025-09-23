@@ -91,6 +91,23 @@
   .event-editor {
     min-width: 320px;
   }
+
+  @media (max-width: 767px) {
+    position: fixed;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    // bottom: 0;
+    // overflow: auto;
+  }
+  @media (max-height: 767px) and (orientation: landscape) {
+    // position: fixed;
+    // top: 0 !important;
+    // bottom: 0 !important;
+    // right: 0 !important;
+    // bottom: 0;
+    // overflow: auto;
+  }
 }
 
 // Add padding for new event popover (when save button is present)

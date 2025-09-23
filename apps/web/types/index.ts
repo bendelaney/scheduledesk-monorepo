@@ -131,6 +131,7 @@ export type EventTypeName =
   | "Ends Early" 
   | "Personal Appointment" 
   | "Not Working" 
+  | "Working" 
   | "Vacation"
   | "Custom";
 

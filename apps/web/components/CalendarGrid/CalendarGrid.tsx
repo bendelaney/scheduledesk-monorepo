@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { AvailabilityEvent, TeamMember } from '@/types';
-import { getEventTypeColor } from '@/config/EventTypes';
+import { getEventTypeColor, getEventTypeCalendarDisplayText } from '@/config/EventTypes';
 import AvailabilityEventsData from '@/data/availabilityEventsData';
 import { AngleUp, AngleDown, PlusCircle } from '../Icons';
 import TeamMembersData from '@/data/teamMembersData';
@@ -67,65 +67,6 @@ const getFirstDayOfMonth = (year: number, month: number): number => {
   return new Date(year, month, 1).getDay();
 };
 
-export const getEventTypeDisplayText = (event: AvailabilityEvent, isShort: boolean = false): string => {
-  const { eventType, startTime, endTime, customEventName } = event;
-  
-  // Format time helper (remove seconds, convert to 12hr format)
-  const formatTime = (time: string, showAMPM: boolean = !isShort): string => {
-    if (!time) return '';
-    const [hours, minutes] = time.split(':');
-    const hour12 = parseInt(hours) === 0 ? 12 : parseInt(hours) > 12 ? parseInt(hours) - 12 : parseInt(hours);
-    const ampm = parseInt(hours) < 12 ? (isShort ? 'a':'AM') : (isShort ? 'p':'PM');
-    if (isShort) {
-      return `${hour12}${minutes === '00' ? '' : ':'+minutes}${showAMPM ? ampm : ''}`;
-    }
-    return `${hour12}:${minutes}`;
-  };
-  const isAM = (time: string): boolean => {
-    if (!time) return false;
-    const [hours] = time.split(':');
-    return parseInt(hours) < 12;
-  };
-  
-  switch (eventType) {
-    case "Starts Late":
-      if (isShort) {
-        return startTime ? `>${formatTime(startTime)}` : 'late';
-      }
-      return startTime ? `start: ${formatTime(startTime)}` : 'starts late';
-      
-    case "Ends Early":
-      if (isShort) {
-        return endTime ? `<${formatTime(endTime)}` : 'early';
-      }
-      return endTime ? `end: ${formatTime(endTime)}` : 'ends early';
-      
-    case "Not Working":
-      return isShort ? '×' : 'Not Working';
-      
-    case "Vacation":
-      return isShort ? '⛱️' : 'vacation';
-      
-    case "Personal Appointment":
-      if (startTime && endTime) {
-        if (isShort) {
-          if (isAM(startTime) === isAM(endTime)) {
-            return `${formatTime(startTime, false)}-${formatTime(endTime, true)}`;
-          } else {
-            return `${formatTime(startTime)}-${formatTime(endTime)}`;
-          }
-        }
-        return `appt: ${formatTime(startTime)}-${formatTime(endTime)}`;
-      }
-      return isShort ? 'appt' : 'personal appointment';
-      
-    case "Custom":
-      return customEventName || (isShort ? 'cust' : 'custom');
-      
-    default:
-      return isShort ? String(eventType).slice(0, 4) : String(eventType);
-  }
-};
 
 // Calendar utilities
 class CalendarUtils {
@@ -625,6 +566,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     onNewEventClick?.(date, targetElement);
   }, [onNewEventClick]);
   
+  // THE EVENT
   const renderEvent = (event: AvailabilityEvent) => {
     const isActive = activeEvent && activeEvent.id === event.id;
     const eventColors = getEventTypeColor(event.eventType);
@@ -648,16 +590,15 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         title={`${event.teamMember.firstName} ${event.teamMember.lastName || ''}: ${event.eventType}${event.allDay ? '' : ` (${event.startTime} - ${event.endTime})`}${event.isInstance ? ' (recurring)' : ''}`}
         style={{ 
           color: eventColors.dark, 
-          background: `linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4)), ${eventColors.base}`,
+          background: `linear-gradient(rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.45)), ${eventColors.base}`,
         }}
       >
         {showTeamMemberName && <span className="calendar-event__member">{event.teamMember.firstName} {/*{event.teamMember.lastName || ''}*/}</span>}
-        {/* <span className="calendar-event__type">{event.eventType}</span> */}
         <span className="calendar-event__eventType--full">
-          {getEventTypeDisplayText(event)}
+          {getEventTypeCalendarDisplayText(event)}
         </span>
         <span className="calendar-event__eventType--short">
-          {getEventTypeDisplayText(event, true)}
+          {getEventTypeCalendarDisplayText(event, true)}
         </span>
       </div>
     );

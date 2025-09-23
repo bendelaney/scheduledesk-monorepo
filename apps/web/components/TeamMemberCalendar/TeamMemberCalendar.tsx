@@ -59,7 +59,7 @@ const TeamMemberCalendar: React.FC<TeamMemberCalendarProps> = ({
         onNewEventClick={onNewEventClick}
         activeEvent={activeEvent}
         className="team-member-calendar__grid"
-        showWeekends={true}
+        showWeekends={false}
         showTeamMemberName={false}
       />
     </div>

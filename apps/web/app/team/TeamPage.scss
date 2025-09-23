@@ -36,4 +36,32 @@
       }
     }
   }
+
+  @media (max-width: 767px) {
+    .team-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      padding: 1.5rem;
+      max-width: 100%;
+      margin: 0 auto;
+
+      .team-member-id {
+        // border: 1px solid red;
+
+        &__avatar {
+          width:  72px;
+          height: 72px;
+          border: 2px solid $medium-gray;
+
+          &-image {
+            width:  72px;
+            height: 72px;
+          }
+        }
+        &__name {
+          font-size: 1.1rem;
+        }
+      }
+    }
+  }
 }

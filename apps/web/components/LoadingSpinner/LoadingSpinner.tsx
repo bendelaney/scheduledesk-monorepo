@@ -24,8 +24,8 @@ export default function LoadingSpinner({
       className={className}
       style={{ 
         position: 'relative', 
-        height, 
-        width: '100%' 
+        width: '100%',
+        height: '100%'
       }}
     />
   );

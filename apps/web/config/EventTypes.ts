@@ -4,38 +4,50 @@ export interface EventTypeConfig {
   name: EventTypeName;
   color: string;
   displayName: string;
+  shortDisplayName: string;
 }
 
 export const EventTypes: EventTypeConfig[] = [
   {
     name: "Starts Late",
-    displayName: "Starts Late", 
-    color: "#feb816" // 
+    displayName: "starts late",
+    shortDisplayName: "late",
+    color: "#feb816" //
   },
   {
     name: "Ends Early",
-    displayName: "Ends Early",
-    color: "#FF7F00" // 
+    displayName: "ends early",
+    shortDisplayName: "early",
+    color: "#FF7F00" //
   },
   {
     name: "Personal Appointment",
-    displayName: "Personal Appointment",
-    color: "#9D4DF2" // 
+    displayName: "personal appointment",
+    shortDisplayName: "appt",
+    color: "#9D4DF2" //
   },
   {
     name: "Not Working",
     displayName: "Not Working",
-    color: "#A87360" // 
+    shortDisplayName: "×",
+    color: "#A87360" //
   },
   {
     name: "Vacation",
-    displayName: "On Vacation",
-    color: "#2BAA2E" // 
+    displayName: "vacation",
+    shortDisplayName: "⛱️",
+    color: "#2BAA2E" //
+  },
+  {
+    name: "Working",
+    displayName: "Working",
+    shortDisplayName: "✓",
+    color: "#4babff"
   },
   {
     name: "Custom",
     displayName: "Custom",
-    // color: "#4babff"
+    shortDisplayName: "",
     color: "#8c8e90"
   }
 ];
@@ -80,4 +92,62 @@ export const getEventTypeColor = (eventType: EventTypeName): { base: string; dar
 
 export const getEventTypeDisplayName = (eventType: EventTypeName): string => {
   return getEventTypeConfig(eventType)?.displayName || eventType;
+};
+
+export const getEventTypeShortDisplayName = (eventType: EventTypeName): string => {
+  return getEventTypeConfig(eventType)?.shortDisplayName || eventType;
+};
+
+export const getEventTypeCalendarDisplayText = (event: { eventType: EventTypeName; startTime?: string; endTime?: string; customEventName?: string }, isShort: boolean = false): string => {
+  const { eventType, startTime, endTime, customEventName } = event;
+
+  // Format time helper (remove seconds, convert to 12hr format)
+  const formatTime = (time: string, showAMPM: boolean = !isShort): string => {
+    if (!time) return '';
+    const [hours, minutes] = time.split(':');
+    const hour12 = parseInt(hours) === 0 ? 12 : parseInt(hours) > 12 ? parseInt(hours) - 12 : parseInt(hours);
+    const ampm = parseInt(hours) < 12 ? (isShort ? 'a':'AM') : (isShort ? 'p':'PM');
+    if (isShort) {
+      return `${hour12}${minutes === '00' ? '' : ':'+minutes}${showAMPM ? ampm : ''}`;
+    }
+    return `${hour12}:${minutes}`;
+  };
+  const isAM = (time: string): boolean => {
+    if (!time) return false;
+    const [hours] = time.split(':');
+    return parseInt(hours) < 12;
+  };
+
+  switch (eventType) {
+    case "Starts Late":
+      if (isShort) {
+        return startTime ? `>${formatTime(startTime, true)}` : getEventTypeShortDisplayName(eventType);
+      }
+      return startTime ? `start: ${formatTime(startTime)}` : getEventTypeDisplayName(eventType);
+
+    case "Ends Early":
+      if (isShort) {
+        return endTime ? `<${formatTime(endTime, true)}` : getEventTypeShortDisplayName(eventType);
+      }
+      return endTime ? `end: ${formatTime(endTime)}` : getEventTypeDisplayName(eventType);
+
+    case "Personal Appointment":
+      if (startTime && endTime) {
+        if (isShort) {
+          if (isAM(startTime) === isAM(endTime)) {
+            return `${formatTime(startTime, false)}-${formatTime(endTime, true)}`;
+          } else {
+            return `${formatTime(startTime)}-${formatTime(endTime)}`;
+          }
+        }
+        return `appt: ${formatTime(startTime, true)}-${formatTime(endTime, true)}`;
+      }
+      return isShort ? getEventTypeShortDisplayName(eventType) : getEventTypeDisplayName(eventType);
+
+    case "Custom":
+      return customEventName || (isShort ? getEventTypeShortDisplayName(eventType) : getEventTypeDisplayName(eventType));
+
+    default:
+      return isShort ? getEventTypeShortDisplayName(eventType) : getEventTypeDisplayName(eventType);
+  }
 };
