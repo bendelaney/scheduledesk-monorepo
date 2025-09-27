@@ -1,0 +1,44 @@
+.popover {
+  position: fixed;
+  padding: 14px;
+  z-index: 10000;
+  box-shadow: 0 0 18px 0 rgba(0, 0, 0, 0.3);
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid #cdcdcd;
+  
+  // Animation properties
+  opacity: 0;
+  transform: translateY(-20px) scale(0.9);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  
+  &.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  
+  &.no-styles {
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+    background: none;
+  }
+
+  &__close-button {
+    position: absolute;
+    top:  14px;
+    left: 14px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 0;
+    color: #999;
+
+    &:hover {
+      color: #666;
+    }
+  }
+}

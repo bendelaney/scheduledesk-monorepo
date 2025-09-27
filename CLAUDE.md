@@ -6,10 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Root Level Commands
 - `pnpm dev` - Start all apps in development mode
-- `pnpm dev:web` - Start only the web app (port 3000)
+- `pnpm dev:scheduledesk` - Start only the scheduledesk app (port 3000)
 - `pnpm dev:quicklist` - Start only the QuickList app (port 3000)
 - `pnpm build` - Build all apps and packages
-- `pnpm build:web` - Build only the web app
+- `pnpm build:scheduledesk` - Build only the scheduledesk app
 - `pnpm lint` - Run ESLint on all packages
 - `pnpm lint:fix` - Run ESLint with auto-fix
 - `pnpm type-check` - Run TypeScript type checking across monorepo
@@ -18,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `pnpm format` - Format code with Prettier
 
 ### Package-specific Commands
-- `pnpm --filter=web dev` - Run development server for web app only
+- `pnpm --filter=scheduledesk dev` - Run development server for scheduledesk app only
 - `pnpm --filter=quicklist dev` - Run development server for QuickList app only
 - `pnpm --filter=quicklist build` - Build QuickList app only
 - `pnpm --filter=quicklist type-check` - Type check QuickList only
@@ -31,7 +31,7 @@ This is a **Turborepo monorepo** using **pnpm workspaces** for a ScheduleDesk pl
 ### Project Structure
 - **Root**: Contains monorepo configuration (turbo.json, pnpm-workspace.yaml)
 - **apps/**: Next.js applications
-  - `web/`: Main ScheduleDesk web application (port 3000)
+  - `scheduledesk/`: Main ScheduleDesk web application (port 3000)
   - `quicklist/`: QuickList task management application (port 3000)
 - **packages/**: Shared packages and tooling
   - `@repo/ui`: Shared React component library
@@ -64,7 +64,7 @@ Required environment variables (from turbo.json):
 - **General**: REACT_APP_API_URL
 
 Environment files are located in each app directory:
-- `apps/web/.env.local`
+- `apps/scheduledesk/.env.local`
 - `apps/quicklist/.env.local`
 
 ## Business Context
@@ -101,7 +101,7 @@ ScheduleDesk is a Jobber-integrated scheduling platform focused on:
 
 ## Application Details
 
-### Web App (apps/web)
+### ScheduleDesk App (apps/scheduledesk)
 Main ScheduleDesk application featuring:
 - **Team calendar management** with availability tracking
 - **Drag-and-drop scheduling** using @dnd-kit
@@ -126,7 +126,7 @@ Separate task management application featuring:
 
 ### Type Checking
 - Global: `pnpm type-check`
-- Web only: `pnpm --filter=web check-types`
+- ScheduleDesk only: `pnpm --filter=scheduledesk check-types`
 - QuickList only: `pnpm --filter=quicklist check-types`
 
 ### Environment Setup
@@ -135,9 +135,9 @@ Separate task management application featuring:
 - Supabase, Jobber, and API keys required for full functionality
 
 ### Testing & Development
-- **Sandbox page**: http://localhost:3000/sandbox (web app only)
+- **Sandbox page**: http://localhost:3000/sandbox (scheduledesk app only)
 - **SASS compilation**: Built into Next.js build process
-- **Webpack source maps**: Custom configuration in web app's next.config.ts
+- **Webpack source maps**: Custom configuration in scheduledesk app's next.config.ts
 
 ### Styling Guidelines
 - **Component Styles**: Co-locate SCSS files with components (`Component.tsx` + `Component.scss`)
@@ -163,7 +163,8 @@ The `_temp-migration/` directory contains a legacy SchedulePad React application
 - SASS is installed for styling (uses `page.tsx` + `page.scss` pattern, not CSS modules)
 
 ### Component Testing
-- **Sandbox Page**: Available at `/sandbox` when running the web app
+- **Sandbox Page**: Available at `/sandbox` when running the scheduledesk app
   - Navigate to http://localhost:3000/sandbox during development
   - Simple testing area for isolating and testing migrated components from legacy SchedulePad
-
+- no inline css styles
+- no fixed heights or widths unless explicitly required

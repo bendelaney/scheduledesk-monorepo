@@ -1,0 +1,145 @@
+.week-view {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  overflow: hidden;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-collapse: collapse;
+  }
+}
+
+.week-view-day {
+  border-right: 1px solid #e2e8f0;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:last-child {
+    border-right: none;
+  }
+
+  &:hover {
+    background-color: #f8fafc;
+  }
+
+  &__header {
+    padding: 8px;
+    border-bottom: 1px solid #f1f5f9;
+    background-color: #f8fafc;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 2px;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  &__short {
+    font-size: 11px;
+    color: #6b7280;
+    text-transform: uppercase;
+
+    @media (min-width: 769px) {
+      display: none;
+    }
+  }
+
+  &__content {
+    flex: 1;
+    padding: 8px 8px 24px 8px; // Add bottom padding for button
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__events {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  &__new-event-button {
+    position: absolute;
+    bottom: 0rem;
+    left: 50%;
+    transition: all 0.15s ease;
+    transform: translateX(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: #9ca3af; // $light-gray equivalent
+    opacity: 1;
+    font-size: 1.7rem;
+
+    &:hover {
+      color: #4a5568; // $medium-dark-gray equivalent
+      transform: translateX(-50%) scale(1.2);
+    }
+  }
+}
+
+.week-view-event {
+  display: flex;
+  padding: 0.175rem 0.3rem;
+  border-radius: 0.4rem;
+  font-size: 0.75rem;
+  transition: all 0.15s ease;
+  color: #fff;
+  justify-content: space-between;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+  gap: 5px;
+
+  // Normal schedule styling
+  &.normal-schedule {
+    // border: 2px dashed rgba(0, 0, 0, 0.2);
+    // opacity: 0.9;
+    // background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6)), var(--event-color, #3182ce);
+
+    &:hover {
+      // opacity: 1;
+      // border-style: solid;
+      // transform: translateY(-1px);
+      // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  &--active {
+    border-style: solid !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+  }
+
+  &__eventType--full {
+    display: block;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  &__eventType--short {
+    display: none;
+
+    @media (max-width: 768px) {
+      display: block;
+    }
+  }
+}

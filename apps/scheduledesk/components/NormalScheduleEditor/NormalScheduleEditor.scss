@@ -1,0 +1,71 @@
+.normal-schedule-editor {
+  width: 100%;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  // Slide animation
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+
+  &.collapsed {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  &.expanded {
+    max-height: 600px; // Generous max height
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &__header {
+    margin-bottom: 20px;
+    text-align: center;
+
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #2d3748;
+    }
+  }
+
+  &__description {
+    margin: 0;
+    font-size: 14px;
+    color: #718096;
+    line-height: 1.4;
+  }
+
+  &__calendar {
+    // Ensure calendar fits within the editor
+    .normal-schedule-calendar-grid {
+      // Custom styles for the template calendar
+      .calendar-grid {
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+
+      // Style normal schedule events differently
+      .calendar-event.normal-schedule {
+        background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6)), var(--event-color, #3182ce);
+        border: 2px dashed rgba(0, 0, 0, 0.2);
+        opacity: 0.9;
+
+        &:hover {
+          opacity: 1;
+          border-style: solid;
+        }
+      }
+    }
+  }
+}

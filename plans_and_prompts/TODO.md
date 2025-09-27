@@ -24,3 +24,5 @@
 [] Ways to add/edit/delete Members - or an auto way to make sure they are always synced with Jobber 
 
 [] Migrate EventTypes to DB. Need to create settings page first. When ready use EVENTTYPES-TO-DB_MIGRATION_PLAN.md to prompt Claude. 
+
+[] bug: hitting "n" in the team member filter is trigging the "n" new event shortcut. 

@@ -1,0 +1,102 @@
+.app-frame.team-member-page {
+  .new-event-button {
+    color: $primary-blue;
+    
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  .content-wrapper {
+    padding: 0 14px;
+
+    @media (max-width: 768px) {
+      padding: 0;
+    }
+  }
+
+  .main-content {
+    border-top: none !important;
+  }
+
+
+  .team-member-header {
+    // background: pink;
+    display: flex;
+    align-items: center;
+    padding: 1rem 0px;
+    flex-shrink: 0;
+
+    .team-member-id {
+      &__name {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: $medium-dark-gray;
+      }
+
+      &__avatar {
+        width:  50px;
+        height: 50px;
+        border: 2px solid $medium-gray;
+      }
+    }
+
+    .back-to-team {
+      font-size: 28px;
+      line-height: 0;;
+      &:hover {
+        color: $primary-blue;
+      }
+    }
+
+    .edit-weekly-schedule {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+  }
+
+  .team-member-schedule {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex: 1;
+
+    h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: $medium-dark-gray;
+      margin-bottom: 1.5rem;
+      flex-shrink: 0;
+    }
+  }
+
+  // Normal schedule editor wrapper
+  .normal-schedule-editor-wrapper {
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+
+    &.collapsed {
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    &.expanded {
+      max-height: 600px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  // Grayed out effect for main calendar when normal schedule editor is open
+  .team-member-calendar-wrapper {
+    transition: all 0.3s ease-in-out;
+
+    &.grayed-out {
+      opacity: 0.4;
+      pointer-events: none;
+      filter: grayscale(0.3);
+      transform: scale(0.98);
+    }
+  }
+}
