@@ -3,7 +3,7 @@
 import React, { useCallback } from 'react';
 import { AvailabilityEvent } from '@/types';
 import { getEventTypeColor, getEventTypeCalendarDisplayText } from '@/config/EventTypes';
-import { PlusCircle } from '@/components/Icons';
+import { CirclePlus } from '@/components/Icons';
 import './WeekView.scss';
 
 // Template week structure for Normal Schedule
@@ -122,7 +122,7 @@ const WeekView: React.FC<WeekViewProps> = ({
             onClick={(e) => handleNewEventClick(day.templateDate, e)}
             title={`Add normal schedule event for ${day.dayName}`}
           >
-            <PlusCircle />
+            <CirclePlus />
           </button>
         )}
       </div>

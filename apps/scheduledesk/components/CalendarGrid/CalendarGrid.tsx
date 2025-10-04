@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { AvailabilityEvent, TeamMember } from '@/types';
 import { getEventTypeColor, getEventTypeCalendarDisplayText } from '@/config/EventTypes';
 import AvailabilityEventsData from '@/data/availabilityEventsData';
-import { AngleUp, AngleDown, PlusCircle } from '../Icons';
+import { AngleUp, AngleDown, CirclePlus } from '../Icons';
 import TeamMembersData from '@/data/teamMembersData';
 import './CalendarGrid.scss';
 
@@ -630,7 +630,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           onClick={(e) => handleNewEventClick(day.date, e)}
           title={`Add new event for ${day.date}`}
         >
-          <PlusCircle />
+          <CirclePlus />
         </button>
       )}
     </div>

@@ -5,8 +5,8 @@ import { useRouter, usePathname, useParams } from 'next/navigation';
 import AppFrame from '@/components/AppFrame';
 import TeamMemberId from '@/components/TeamMemberId';
 import TeamMemberCalendar from '@/components/TeamMemberCalendar';
-import { AngleLeft } from '@/components/Icons';
-import PlusCircle from '@/components/Icons/PlusCircle';
+import { AngleLeft, AngleRight, Person } from '@/components/Icons';
+import { CirclePlus } from '@/components/Icons';
 import MainNavigationConfig from '@/config/MainNavigation';
 import CalendarPopover from '@/components/CalendarPopover';
 import { NormalScheduleEditor } from '@/components/NormalScheduleEditor';
@@ -75,7 +75,7 @@ function TeamMemberPageContent() {
           onClick={handleNewEventPopoverOpen}
           title="Add new event - N"
         >
-          <PlusCircle />
+          <CirclePlus />
         </button>
       }
       topBarMiddleContent={
@@ -85,6 +85,7 @@ function TeamMemberPageContent() {
             const isActive = pathname === navItem.path;
 
             return (
+              <>
               <button
                 key={navItem.id}
                 id={`main-nav-${navItem.id}`}
@@ -93,6 +94,13 @@ function TeamMemberPageContent() {
               >
                 <Icon />
               </button>
+              {navItem.id === 'team' && (
+                <>
+                  <AngleRight className="nav-separator" />
+                  <Person className="person-icon"/>
+                </>
+              )}
+              </>
             );
           })}
         </div>

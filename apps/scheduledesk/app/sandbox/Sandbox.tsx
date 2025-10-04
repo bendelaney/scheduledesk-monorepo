@@ -88,8 +88,8 @@ export default function Sandbox() {
           selectedMembers={selectedTeamMembers}
           onSelectionChange={handleSelectionChange}
           onFilterChange={handleTeamMemberFilter}
-          togglable={true}
-          filterable={true}
+          showToggleAll={true}
+          showFilterField={true}
         />
       }
       sidebarOpen={false}

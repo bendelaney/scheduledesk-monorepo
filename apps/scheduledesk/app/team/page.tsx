@@ -56,15 +56,21 @@ export default function TeamPage() {
             <p>{error}</p>
           </div>
         )}
-        {!loading && teamMembers.map((member) => (
-          <TeamMemberId
-            key={member.id}
-            teamMember={member}
-            avatarPlacement="top"
-            stackNames={false}
-            onClick={() => handleTeamMemberClick(member)}
-          />
-        ))}
+        {!loading && teamMembers.map((member, index) => {
+          // Debug: Check for duplicate/missing IDs
+          if (!member.id) {
+            console.warn(`Member at index ${index} has no ID:`, member);
+          }
+          return (
+            <TeamMemberId
+              key={member.id || `member-${index}`}
+              teamMember={member}
+              avatarPlacement="top"
+              stackNames={false}
+              onClick={() => handleTeamMemberClick(member)}
+            />
+          );
+        })}
       </div>
     </AppFrame>
   );

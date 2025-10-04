@@ -71,17 +71,39 @@ export const deleteTeamMember = async (id: string) => {
 };
 
 // Jobber data caching operations
-export const getJobberUsers = async () => {
+export const getJobberUsersFromCache = async () => {
   const { data, error } = await supabase
     .from('jobber_users')
     .select('*');
-    
+
   if (error) {
-    console.error('Error fetching jobber users:', error);
+    console.error('Error fetching jobber users from cache:', error);
     throw error;
   }
-  
+
   return data || [];
+};
+
+/**
+ * Fetches users from Jobber API via server route
+ * This will also update the cache in Supabase
+ */
+export const getJobberUsers = async (): Promise<any[]> => {
+  try {
+    const response = await fetch('/api/jobber/users');
+
+    if (!response.ok) {
+      console.warn('Failed to fetch from Jobber API, falling back to cache');
+      return getJobberUsersFromCache();
+    }
+
+    const result = await response.json();
+    return result.users || [];
+  } catch (error) {
+    console.error('Error fetching Jobber users from API:', error);
+    console.log('Falling back to cached data...');
+    return getJobberUsersFromCache();
+  }
 };
 
 export const syncJobberUser = async (jobberUser: {
@@ -89,23 +111,48 @@ export const syncJobberUser = async (jobberUser: {
   name: any;
   email?: string;
 }) => {
-  const { data, error } = await supabase
+  // Check if user exists
+  const { data: existing } = await supabase
     .from('jobber_users')
-    .upsert({
-      jobber_id: jobberUser.jobber_id,
-      name: jobberUser.name,
-      email: jobberUser.email,
-      last_sync: new Date().toISOString()
-    })
-    .select()
+    .select('id')
+    .eq('jobber_id', jobberUser.jobber_id)
     .single();
-    
-  if (error) {
-    console.error('Error syncing jobber user:', error);
-    throw error;
+
+  const userData = {
+    jobber_id: jobberUser.jobber_id,
+    name: jobberUser.name,
+    email: jobberUser.email,
+    last_sync: new Date().toISOString()
+  };
+
+  if (existing) {
+    // Update existing record
+    const { data, error } = await supabase
+      .from('jobber_users')
+      .update(userData)
+      .eq('jobber_id', jobberUser.jobber_id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating jobber user:', error);
+      throw error;
+    }
+    return data;
+  } else {
+    // Insert new record
+    const { data, error } = await supabase
+      .from('jobber_users')
+      .insert(userData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error inserting jobber user:', error);
+      throw error;
+    }
+    return data;
   }
-  
-  return data;
 };
 
 // Core service: Merge Jobber data with internal team member data
@@ -124,21 +171,29 @@ export const getMergedTeamMembers = async (): Promise<TeamMember[]> => {
     
     // Merge the data similar to your convertAndMergeData function
     const mergedData = jobberUsers.map((jobberUser: any) => {
+      // Normalize ID - could be from API (user.id) or cache (user.jobber_id)
+      const jobberId = jobberUser.id || jobberUser.jobber_id;
+
       // Find matching internal team member data
-      const internalData = teamMembers.find((tm: any) => tm.jobber_user_id === jobberUser.jobber_id);
-      
+      const internalData = teamMembers.find((tm: any) => tm.jobber_user_id === jobberId);
+
+      // Get email - handle both raw string and nested object
+      const emailValue = typeof jobberUser.email === 'string'
+        ? jobberUser.email
+        : jobberUser.email?.raw || '';
+
       const merged = {
-        id: jobberUser.jobber_id,
+        id: jobberId,
         firstName: internalData?.first_name || jobberUser.name?.first || '',
         lastName: internalData?.last_name || jobberUser.name?.last || '',
         displayName: internalData?.display_name || jobberUser.name?.full,
-        email: jobberUser.email || '',
+        email: emailValue,
         phone: '', // Phone not in current migration
-        jobberId: jobberUser.jobber_id,
+        jobberId: jobberId,
         avatarUri: internalData?.avatar_uri || '',
         highlightId: '', // Will add this field later
       } as TeamMember;
-      
+
       // console.log('🔗 Merged member:', merged.firstName, merged.lastName);
       return merged;
     });

@@ -1,17 +1,18 @@
 # ScheduleDesk Jobber OAuth Integration Plan
 
-**Date Created**: 2025-09-01  
-**Status**: Planning Phase - Awaiting Jobber API details  
-**Context**: Supabase integration complete, now need robust Jobber OAuth for real-time data sync
+**Date Created**: 2025-09-01
+**Date Updated**: 2025-10-04
+**Status**: ✅ Phase 1 & 2 Complete - OAuth and Live API Integration Working
+**Context**: Supabase integration complete, Jobber OAuth implemented, live data syncing active
 
 ## Project Overview
 
-With ScheduleDesk's Supabase integration successfully implemented (Phases 1-4 complete), the next major milestone is establishing a bulletproof OAuth connection with Jobber's API. This will enable:
+With ScheduleDesk's Supabase integration successfully implemented (Phases 1-4 complete), we have now established a fully functional OAuth connection with Jobber's API. This enables:
 
-1. **Secure authentication** with Jobber accounts
-2. **Real-time team member data** syncing from Jobber → Supabase
-3. **Availability events management** primarily in Supabase
-4. **Future job/visit editing** capabilities (Phase 2)
+1. ✅ **Secure authentication** with Jobber accounts
+2. ✅ **Real-time team member data** syncing from Jobber → Supabase
+3. ⏳ **Availability events management** primarily in Supabase (future)
+4. ⏳ **Job/visit display and editing** capabilities (in progress)
 
 ## Current State Summary
 
@@ -20,76 +21,106 @@ With ScheduleDesk's Supabase integration successfully implemented (Phases 1-4 co
 - Team pages (`/team`, `/team/[memberId]`, `/schedule`) using live data
 - Fallback system for graceful degradation
 - Migration scripts and data merging logic
+- **Jobber OAuth authentication flow (server-side)**
+- **Live Jobber GraphQL API integration**
+- **Real-time team member data syncing from Jobber**
+- **Data caching in Supabase with fallback support**
+- **Login page with OAuth connection**
 
-**🎯 Next Goal:**
-Replace static Jobber data cache with live OAuth-authenticated API calls
+**🎯 Next Goals:**
+- Implement token refresh logic for long-lived sessions
+- Add Jobber connection status indicator in UI
+- Fetch and display job visits from Jobber API
+- Implement availability events sync (if needed)
 
-## Critical Questions Needing Jobber API Research
+## Implementation Decisions Made
 
-### **1. OAuth Setup & Credentials**
-- Do we have a registered Jobber app with client ID/secret?
-- What OAuth scopes are required for team members and availability data?
-- Should we implement server-side OAuth flow (more secure) or client-side?
+### **1. OAuth Setup & Credentials** ✅
+- ✅ Registered Jobber app with client ID/secret configured
+- ✅ OAuth scopes: `read:users read:visits`
+- ✅ Server-side OAuth flow implemented (more secure)
 
-### **2. Authentication Architecture** 
-- Should users authenticate directly with Jobber, or ScheduleDesk login → Jobber connection?
-- Do we need to support multiple Jobber accounts/organizations?
-- Session duration and refresh token handling requirements?
+### **2. Authentication Architecture** ✅
+- ✅ Users authenticate directly with Jobber via `/login` page
+- ✅ Single Jobber account per session (stored in httpOnly cookies)
+- ✅ Access tokens stored in httpOnly cookies (1 hour expiry)
+- ✅ Refresh tokens stored separately (30 day expiry)
+- ⏳ Token refresh logic not yet implemented
 
-### **3. Data Sync Strategy**
-- **Pull frequency**: Real-time webhooks, periodic sync, or manual refresh?
-- **Data storage**: Cache all Jobber team data in Supabase vs. fetch on-demand?
-- **Conflict resolution**: How to handle Jobber data changes during user editing?
+### **3. Data Sync Strategy** ✅
+- ✅ On-demand fetching when team pages load
+- ✅ Data cached in Supabase `jobber_users` table
+- ✅ Fallback to cached data if Jobber API unavailable
+- ✅ Update cache with fresh Jobber data on each successful fetch
 
-### **4. API Architecture**
-- Build Next.js API routes (`/api/jobber/*`) or separate API server?
-- Use GraphQL client for Jobber API or create REST wrapper?
-- Rate limiting and error handling strategies for Jobber API?
+### **4. API Architecture** ✅
+- ✅ Next.js API routes: `/api/jobber/*`
+- ✅ GraphQL client for Jobber API (direct fetch with typed queries)
+- ✅ Error handling with fallback to cache
+- ⏳ Rate limiting not yet implemented
 
-### **5. User Experience Flow**
-- Login page design - separate page or embedded in main app?
-- OAuth error/disconnection handling
-- Jobber connection status visibility in UI?
+### **5. User Experience Flow** ✅
+- ✅ Separate `/login` page with Jobber OAuth button
+- ✅ Auto-redirect if already authenticated
+- ✅ OAuth callback handles token storage
+- ⏳ Connection status indicator not yet in UI
+- ⏳ Disconnection/re-auth flow needs improvement
 
-### **6. Technical Environment**
-- We have `JOBBER_APP_CLIENT_ID` - need client secret and redirect URLs
-- Any existing Jobber integration patterns to follow?
+### **6. Technical Environment** ✅
+- ✅ Environment variables configured in `.env.local`
+- ✅ Reused QuickList OAuth patterns as reference
+- ✅ Jobber API version: 2025-01-20
 
-## Proposed Implementation Phases
+## Implementation Phases
 
-### **Phase 1: OAuth Foundation**
-1. **Jobber App Configuration**
-   - Register/configure Jobber OAuth app
-   - Set up redirect URLs and scopes
-   - Secure credential management
+### **Phase 1: OAuth Foundation** ✅ COMPLETE
+1. **Jobber App Configuration** ✅
+   - ✅ Configured Jobber OAuth app credentials
+   - ✅ Set up redirect URLs and scopes (`read:users read:visits`)
+   - ✅ Secure credential management in `.env.local`
 
-2. **Authentication Flow**
-   - Login page with Jobber OAuth
-   - Token storage and refresh handling
-   - Session management middleware
+2. **Authentication Flow** ✅
+   - ✅ Login page at `/login` with Jobber OAuth
+   - ✅ Token storage in httpOnly cookies
+   - ⏳ Token refresh handling (TODO)
+   - ⏳ Session management middleware (TODO)
 
-3. **API Infrastructure** 
-   - Next.js API routes for Jobber integration
-   - GraphQL client setup
-   - Error handling and rate limiting
+3. **API Infrastructure** ✅
+   - ✅ Next.js API routes: `/api/auth/jobber/*`, `/api/jobber/users`
+   - ✅ GraphQL client setup in `/lib/jobber/client.ts`
+   - ✅ Error handling with cache fallback
+   - ⏳ Rate limiting (TODO)
 
-### **Phase 2: Team Data Integration**
-1. **Replace Static Cache**
-   - Convert current static `jobberData` to live API calls
-   - Update `getMergedTeamMembers` service
-   - Maintain fallback for offline scenarios
+### **Phase 2: Team Data Integration** ✅ COMPLETE
+1. **Replace Static Cache** ✅
+   - ✅ Converted to live API calls via `/api/jobber/users`
+   - ✅ Updated `getMergedTeamMembers` service
+   - ✅ Maintains fallback to cached Supabase data
 
-2. **Real-time Sync**
-   - Implement team member data fetching
-   - Update Supabase cache with fresh Jobber data  
-   - Handle data merging conflicts
+2. **Real-time Sync** ✅
+   - ✅ Team member data fetched from Jobber GraphQL API
+   - ✅ Supabase cache updated with fresh Jobber data
+   - ✅ Data merging handles both API and cache formats
+   - ✅ Normalized ID and email field handling
 
-3. **UI Integration**
-   - Add OAuth connection status to UI
-   - Handle authentication state in components
-   - Loading states for API calls
+3. **UI Integration** ✅
+   - ✅ Login page with authentication check
+   - ✅ Loading states in team pages
+   - ⏳ OAuth connection status indicator (TODO)
+   - ⏳ Re-authentication flow (TODO)
 
-### **Phase 3: Availability Events** 
+### **Phase 3: Job Visits Integration** ⏳ TODO
+1. **Visits API Route**
+   - Create `/api/jobber/visits` endpoint
+   - Fetch visits from Jobber GraphQL API
+   - Cache visits in `jobber_visits` table
+
+2. **Visits Display**
+   - Show visits on team calendar
+   - Display visit details and client info
+   - Handle visit status and scheduling
+
+### **Phase 4: Availability Events** ⏳ FUTURE
 1. **Availability Data Model**
    - Map Jobber availability to Supabase schema
    - Bi-directional sync strategy
@@ -100,49 +131,100 @@ Replace static Jobber data cache with live OAuth-authenticated API calls
    - Sync relevant changes back to Jobber
    - Real-time updates across sessions
 
-## Files That Will Need Updates
+## Files Created/Modified
 
-### **New Files:**
-- `/app/login/page.tsx` - Jobber OAuth login page
-- `/app/api/auth/jobber/route.ts` - OAuth callback handler
-- `/app/api/jobber/team-members/route.ts` - Team member API endpoint
-- `/lib/jobber/client.ts` - Jobber API client setup
-- `/lib/jobber/oauth.ts` - OAuth flow management
-- `/lib/auth/middleware.ts` - Authentication middleware
+### **New Files Created:** ✅
+- ✅ `/app/login/page.tsx` - Jobber OAuth login page
+- ✅ `/app/login/page.scss` - Login page styles
+- ✅ `/app/api/auth/jobber/route.ts` - OAuth initiation handler
+- ✅ `/app/api/auth/jobber/callback/route.ts` - OAuth callback handler
+- ✅ `/app/api/auth/jobber/check/route.ts` - Authentication status check
+- ✅ `/app/api/jobber/users/route.ts` - Team member API endpoint
+- ✅ `/lib/jobber/client.ts` - Jobber GraphQL API client
 
-### **Updated Files:**
-- `/lib/supabase/services/teamMembers.ts` - Replace static data with API calls
-- `/app/team/page.tsx` - Add OAuth state handling
-- `/app/schedule/page.tsx` - Add authentication checks
-- `.env.local` - Add Jobber client secret and redirect URLs
+### **Updated Files:** ✅
+- ✅ `/lib/supabase/services/teamMembers.ts` - Live API integration with cache fallback
+- ✅ `/app/team/page.tsx` - Added key normalization for team member rendering
+- ✅ `.env.local` - Added Jobber OAuth credentials and API configuration
+
+### **Files for Future Updates:** ⏳
+- ⏳ `/lib/auth/middleware.ts` - Authentication middleware (TODO)
+- ⏳ `/app/api/jobber/visits/route.ts` - Job visits API endpoint (TODO)
+- ⏳ `/app/schedule/page.tsx` - Add authentication checks (TODO)
+- ⏳ `/components/JobberStatus.tsx` - Connection status indicator (TODO)
 
 ## Context for Future Sessions
 
 **To resume this project, reference:**
-1. This planning document
+1. This planning document (current status tracker)
 2. `SUPABASE_SETUP_PLAN.md` (completed foundation)
-3. Current working code in `/lib/supabase/services/teamMembers.ts`
-4. Existing static data structure in `/data/teamMembersData.ts`
+3. Working OAuth implementation in `/app/api/auth/jobber/`
+4. Jobber API client in `/lib/jobber/client.ts`
+5. Team member service in `/lib/supabase/services/teamMembers.ts`
 
 **Key implementation details:**
-- Supabase integration is complete and working
-- Team pages are live with database data
-- Need to replace static Jobber cache with OAuth API calls
-- Focus on TeamMembers and AvailabilityEvents (not job editing yet)
+- ✅ Supabase integration complete and working
+- ✅ Jobber OAuth authentication fully functional
+- ✅ Team pages fetching live Jobber data via GraphQL API
+- ✅ Data caching and fallback system working
+- ✅ Users synced from Jobber → Supabase on each fetch
+- ✅ Merged data structure combines Jobber + internal team member data
 
 **Important environment context:**
 - Monorepo structure with Next.js 15 + React 19
 - TypeScript throughout
 - Supabase client configured and working
-- Development server: `pnpm --filter=web dev`
+- Jobber GraphQL API version: 2025-01-20
+- Development server: `pnpm --filter=scheduledesk dev`
+
+**Authentication Flow:**
+1. User visits `/login` → checks if already authenticated
+2. Clicks "Connect with Jobber" → redirects to Jobber OAuth
+3. Jobber callback → stores tokens in httpOnly cookies
+4. Team pages call `/api/jobber/users` → fetches live data
+5. Data cached in Supabase, merged with internal team members
+
+## Known Issues & Improvements Needed
+
+1. **Token Refresh** ⚠️
+   - Access tokens expire after 1 hour
+   - Need to implement automatic refresh token logic
+   - Should refresh before expiry to prevent interruptions
+
+2. **Database Sync Warnings** ⚠️
+   - Duplicate key errors during cache sync (non-critical)
+   - Using Promise.allSettled to handle gracefully
+   - Consider debouncing or single upsert transaction
+
+3. **UI Improvements** ⏳
+   - Add Jobber connection status indicator
+   - Show "Reconnect to Jobber" button if auth expires
+   - Better error messaging for API failures
+
+4. **Rate Limiting** ⏳
+   - No rate limiting on Jobber API calls yet
+   - Should implement request throttling/caching
 
 ## Next Actions
 
-1. **Research Jobber OAuth requirements** using questions above
-2. **Get missing credentials** (client secret, redirect URLs, scopes)
-3. **Review Jobber GraphQL API documentation** for team member endpoints
-4. **Return to Claude with answers** and proceed with implementation
+### **Immediate Priority:**
+1. ✅ ~~Implement Jobber OAuth flow~~ COMPLETE
+2. ✅ ~~Fetch live team member data from Jobber API~~ COMPLETE
+3. ⏳ Implement token refresh logic
+4. ⏳ Add connection status UI indicator
+
+### **Medium Priority:**
+1. ⏳ Fetch job visits from Jobber API
+2. ⏳ Display visits on team calendar
+3. ⏳ Add authentication middleware for protected routes
+4. ⏳ Implement rate limiting and request caching
+
+### **Future Enhancements:**
+1. ⏳ Availability events sync (if needed)
+2. ⏳ Webhook integration for real-time updates
+3. ⏳ Multi-account support (if needed)
+4. ⏳ Offline mode improvements
 
 ---
 
-**Status**: Awaiting Jobber API research. Ready to implement once OAuth details are confirmed.
+**Status**: ✅ Phase 1 & 2 Complete - OAuth and live data integration working successfully!

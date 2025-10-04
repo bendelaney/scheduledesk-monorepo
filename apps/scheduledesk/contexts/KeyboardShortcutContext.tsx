@@ -27,7 +27,7 @@ export function KeyboardShortcutProvider({ children }: { children: React.ReactNo
     const updated = [...filtered, { handler, priority, id, exclusive }].sort((a, b) => b.priority - a.priority);
     shortcuts.current.set(key, updated);
 
-    console.log(`[KeyboardShortcut] Registered '${key}' for ${id} (priority ${priority}, exclusive: ${exclusive})`);
+    // console.log(`[KeyboardShortcut] Registered '${key}' for ${id} (priority ${priority}, exclusive: ${exclusive})`);
   }, []);
 
   const unregisterShortcut = useCallback((key: string, id: string) => {
@@ -40,7 +40,7 @@ export function KeyboardShortcutProvider({ children }: { children: React.ReactNo
       shortcuts.current.set(key, filtered);
     }
 
-    console.log(`[KeyboardShortcut] Unregistered '${key}' for ${id}`);
+    // console.log(`[KeyboardShortcut] Unregistered '${key}' for ${id}`);
   }, []);
 
   useEffect(() => {
@@ -81,13 +81,13 @@ export function KeyboardShortcutProvider({ children }: { children: React.ReactNo
         if (hasExclusiveHandler) {
           // Current behavior: run only highest priority
           const topPriority = shortcutList[0];
-          console.log(`[KeyboardShortcut] Executing '${keySignature}' for ${topPriority.id} (priority ${topPriority.priority}, exclusive)`);
+          // console.log(`[KeyboardShortcut] Executing '${keySignature}' for ${topPriority.id} (priority ${topPriority.priority}, exclusive)`);
           topPriority.handler(event);
         } else {
           // New behavior: run all non-exclusive handlers in priority order
-          console.log(`[KeyboardShortcut] Executing '${keySignature}' for ${shortcutList.length} non-exclusive handlers`);
+          // console.log(`[KeyboardShortcut] Executing '${keySignature}' for ${shortcutList.length} non-exclusive handlers`);
           shortcutList.forEach(shortcut => {
-            console.log(`[KeyboardShortcut] - Running ${shortcut.id} (priority ${shortcut.priority})`);
+            // console.log(`[KeyboardShortcut] - Running ${shortcut.id} (priority ${shortcut.priority})`);
             shortcut.handler(event);
           });
         }

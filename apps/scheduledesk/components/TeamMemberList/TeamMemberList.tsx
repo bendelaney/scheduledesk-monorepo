@@ -4,7 +4,6 @@ import React, { useCallback, useState, useMemo, useRef, useEffect } from 'react'
 import { TeamMember } from '@/types';
 import TeamMemberId from '@/components/TeamMemberId';
 import { SearchIcon } from '@/components/Icons';
-// import { Filter } from '@/components/Icons';
 import { useKeyboardShortcut, useEscapeKey } from '@/hooks/useKeyboardShortcut';
 import './TeamMemberList.scss';
 
@@ -13,9 +12,10 @@ interface TeamMemberListProps {
   selectedMembers?: string[];
   onSelectionChange?: (selected: string[]) => void;
   onFilterChange?: (filter: string, filteredTeamMembers: TeamMember[]) => void;
-  togglable?: boolean;
-  filterable?: boolean;
+  showToggleAll?: boolean;
+  showFilterField?: boolean;
   initialFilter?: string;
+  selectionMode?: 'toggle' | 'filter';
 }
 
 const TeamMemberList: React.FC<TeamMemberListProps> = ({
@@ -23,64 +23,88 @@ const TeamMemberList: React.FC<TeamMemberListProps> = ({
   selectedMembers = [],
   onSelectionChange,
   onFilterChange,
-  togglable = false,
-  filterable = false,
-  initialFilter = ''
+  showToggleAll = false,
+  showFilterField = false,
+  initialFilter = '',
+  selectionMode = 'toggle'
 }) => {
   const [filterText, setFilterText] = useState(initialFilter);
   const [filterIsFocused, setFilterIsFocused] = useState(false);
   const filterInputRef = useRef<HTMLInputElement>(null);
 
-  const allMemberNames = teamMembers.map(member => 
+  const allMemberNames = teamMembers.map(member =>
     member.displayName || `${member.firstName} ${member.lastName || ''}`.trim()
   );
 
   const filteredTeamMembers = useMemo(() => {
-    if (!filterable || !filterText.trim()) {
+    if (!showFilterField || !filterText.trim()) {
       return teamMembers;
     }
     return teamMembers.filter(member => {
       const memberName = member.displayName || `${member.firstName} ${member.lastName || ''}`.trim();
       return memberName.toLowerCase().includes(filterText.toLowerCase());
     });
-  }, [teamMembers, filterText, filterable]);
+  }, [teamMembers, filterText, showFilterField]);
 
-  const isAllSelected = togglable && selectedMembers.length === allMemberNames.length && 
+  const isAllSelected = showToggleAll && selectedMembers.length === allMemberNames.length &&
     allMemberNames.every(name => selectedMembers.includes(name));
-  const isNoneSelected = togglable && selectedMembers.length === 0;
+  const isNoneSelected = showToggleAll && selectedMembers.length === 0;
 
   const handleToggleAll = useCallback(() => {
-    if (!togglable || !onSelectionChange) return;
-    if (isAllSelected || (!isNoneSelected && selectedMembers.length > 0)) {
+    if (!showToggleAll || !onSelectionChange) return;
+    if (isAllSelected) {
       onSelectionChange([]);
     } else {
       onSelectionChange(allMemberNames);
     }
-  }, [isAllSelected, isNoneSelected, selectedMembers.length, allMemberNames, onSelectionChange, togglable]);
+  }, [isAllSelected, allMemberNames, onSelectionChange, showToggleAll]);
 
   const handleMemberToggle = useCallback((memberName: string) => {
-    if (!togglable || !onSelectionChange) return;
+    if (!onSelectionChange) return;
     const isSelected = selectedMembers.includes(memberName);
-    if (isSelected) {
-      onSelectionChange(selectedMembers.filter(name => name !== memberName));
+    const isAllSelected = selectedMembers.length === allMemberNames.length;
+
+    if (selectionMode === 'filter') {
+      // Filter mode: solo when all selected, otherwise additive/remove
+      if (isAllSelected) {
+        // If all are selected, solo this member
+        onSelectionChange([memberName]);
+      } else if (isSelected) {
+        // Deselect this member
+        const newSelection = selectedMembers.filter(name => name !== memberName);
+        // If nothing is selected, select all
+        if (newSelection.length === 0) {
+          onSelectionChange(allMemberNames);
+        } else {
+          onSelectionChange(newSelection);
+        }
+      } else {
+        // Add to existing selection
+        onSelectionChange([...selectedMembers, memberName]);
+      }
     } else {
-      onSelectionChange([...selectedMembers, memberName]);
+      // Toggle mode: simple add/remove
+      if (isSelected) {
+        onSelectionChange(selectedMembers.filter(name => name !== memberName));
+      } else {
+        onSelectionChange([...selectedMembers, memberName]);
+      }
     }
-  }, [selectedMembers, onSelectionChange, togglable]);
+  }, [selectedMembers, onSelectionChange, allMemberNames, selectionMode]);
 
   const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
   const newFilter = e.target.value;
   setFilterText(newFilter);
-  
+
   // Calculate filtered members inline to avoid stale closure
-  const filtered = !filterable || !newFilter.trim() 
-    ? teamMembers 
+  const filtered = !showFilterField || !newFilter.trim()
+    ? teamMembers
     : teamMembers.filter(member => {
         const memberName = member.displayName || `${member.firstName} ${member.lastName || ''}`.trim();
         return memberName.toLowerCase().includes(newFilter.toLowerCase());
       });
     onFilterChange?.(newFilter, filtered);
-  }, [onFilterChange, teamMembers, filterable]);
+  }, [onFilterChange, teamMembers, showFilterField]);
 
   const handleFilterFocus = useCallback(() => {
     filterInputRef.current?.focus();
@@ -122,12 +146,12 @@ const TeamMemberList: React.FC<TeamMemberListProps> = ({
   // Escape to blur filter input (Priority 60)
   useEscapeKey(
     () => {
-      if (filterable) {
+      if (showFilterField) {
         filterInputRef.current?.blur();
       }
     },
     60,
-    [filterable],
+    [showFilterField],
     'team-member-list-escape'
   );
 
@@ -135,20 +159,20 @@ const TeamMemberList: React.FC<TeamMemberListProps> = ({
   useKeyboardShortcut(
     '/',
     () => {
-      if (filterable && document.activeElement !== filterInputRef.current) {
+      if (showFilterField && document.activeElement !== filterInputRef.current) {
         handleFilterFocus();
       }
     },
     60,
-    [filterable, handleFilterFocus],
+    [showFilterField, handleFilterFocus],
     { id: 'team-member-list-filter-focus', exclusive: false }
   );
 
   return (
     <div className="team-member-list">
-      {(togglable || filterable) && (
+      {(showToggleAll || showFilterField) && (
         <div className="team-member-list__header">
-          {filterable && (
+          {showFilterField && (
             <div className="team-member-list__filter" onClick={handleFilterFocus}>
               <SearchIcon className="team-member-list__filter-icon"/>
               <input
@@ -159,7 +183,6 @@ const TeamMemberList: React.FC<TeamMemberListProps> = ({
                 onChange={handleFilterChange}
                 onFocus={handleInputFocus}
                 onBlur={handleInputBlur}
-                // onKeyDown={handleInputKeyDown}
                 className="team-member-list__filter-input"
                 title={'Filter team members'}
               />
@@ -173,40 +196,40 @@ const TeamMemberList: React.FC<TeamMemberListProps> = ({
               </button>
               )}
               {(!filterText && !filterIsFocused) && (
-                <span 
+                <span
                   className="team-member-list__filter-key-tip"
                   title={'Hit the \'/\' key to start searching'}>/</span>
               )}
             </div>
           )}
-          {togglable && (
+          {showToggleAll && (
             <button
               className="team-member-list__toggle-all"
               onClick={handleToggleAll}
               title="Toggle all team members - CMD+/"
               aria-label="Toggle all team members - CMD+/"
             >
-              {!togglable ? '' : isNoneSelected ? 'Show All' : isAllSelected ? 'Hide All' : 'Hide All'}
+              {isAllSelected ? 'Hide All' : 'Show All'}
             </button>
           )}
         </div>
       )}
-      
+
       <div className="team-member-list__list">
-        {filteredTeamMembers.length === 0 && filterable && filterText ? (
+        {filteredTeamMembers.length === 0 && showFilterField && filterText ? (
           <div className="team-member-list__empty">
             No team members match "{filterText}"
           </div>
         ) : (
           filteredTeamMembers.map((member) => {
             const memberName = member.displayName || `${member.firstName} ${member.lastName || ''}`.trim();
-            const isSelected = togglable && selectedMembers.includes(memberName);
-            
+            const isSelected = showToggleAll && selectedMembers.includes(memberName);
+
             return (
-              <div 
+              <div
                 key={member.id}
-                className={`team-member-list__item ${isSelected ? 'team-member-list__item--selected' : ''} ${togglable ? 'team-member-list__item--toggleable' : ''}`}
-                onClick={togglable ? () => handleMemberToggle(memberName) : undefined}
+                className={`team-member-list__item ${isSelected ? 'team-member-list__item--selected' : ''} ${showToggleAll ? 'team-member-list__item--toggleable' : ''}`}
+                onClick={showToggleAll ? () => handleMemberToggle(memberName) : undefined}
               >
                 <TeamMemberId
                   teamMember={member}

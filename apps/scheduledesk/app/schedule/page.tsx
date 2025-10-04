@@ -78,8 +78,8 @@ export default function SchedulePage() {
             selectedMembers={selectedTeamMembers}
             onSelectionChange={handleSelectionChange}
             onFilterChange={handleTeamMemberFilter}
-            togglable={true}
-            filterable={true}
+            showToggleAll={true}
+            showFilterField={true}
           />
         </div>
       }

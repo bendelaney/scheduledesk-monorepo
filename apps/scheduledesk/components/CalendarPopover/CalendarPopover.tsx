@@ -7,7 +7,7 @@ import EventEditor from '@/components/EventEditor';
 import TeamMemberId from '@/components/TeamMemberId';
 import Button from '@/components/Button';
 import ErrorMessage from '@/components/ErrorMessage';
-import { CheckCircle } from '@/components/Icons';
+import { CircleCheck } from '@/components/Icons';
 import { useCalendarUI } from '@/contexts/CalendarUIContext';
 import { useEnterKey } from '@/hooks/useKeyboardShortcut';
 import './CalendarPopover.scss';
@@ -220,7 +220,7 @@ const CalendarPopover: React.FC<CalendarPopoverProps> = ({
       <div className="calendar-popover__footer-actions">
         <div className={`calendar-popover__save-indicator ${isSaving ? '-saving' : ''} ${isSaved ? '-saved' : ''}`}>
           <div className='saving-text'>Saving...</div>
-          <div className='saved-icon'><CheckCircle/></div>
+          <div className='saved-icon'><CircleCheck/></div>
         </div>
 
         {isExistingEvent && onDelete && (

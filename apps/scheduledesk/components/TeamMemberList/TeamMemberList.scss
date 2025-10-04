@@ -3,14 +3,15 @@
   flex-direction: column;
   height: 100%;
   padding: 12px 0 0 0;
-  min-width: 0; // Allow container to shrink
+  min-width: 0;
 
   &__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 8px;
-    min-width: 0; // Allow header to shrink
+    min-width: 0;
+    padding-bottom: 0.75rem;
   }
 
   &__filter {
@@ -27,13 +28,15 @@
     background: rgba(255, 255, 255, 0.5);
     font-size: 14px;
     transition: border-color 0.2s ease;
-    
+    color: $dark-gray;
+    font-weight: 600;
+
     &:focus {
       outline: none;
       background: white;
-      border-color: #999;;
+      border-color: #999;
     }
-    
+
     &::placeholder {
       color: #999;
     }
@@ -55,7 +58,7 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    
+
     &:hover {
       background: #f5f5f5;
       color: $medium-dark-gray;
@@ -80,7 +83,7 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    
+
     &:hover {
       background: #f5f5f5;
       color: #666;
@@ -107,21 +110,11 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    
+
     &:hover {
       background: #f5f5f5;
       color: #666;
     }
-  }
-
-  &__title {
-    font-size: 18px;
-    font-weight: 900;
-    margin: 0;
-    color: #333;
-    white-space: nowrap; // Prevent title wrapping
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   &__toggle-all {
@@ -139,7 +132,6 @@
 
     &:hover {
       background: #f5f5f5;
-      // border-color: #bbb;
     }
 
     &:active {
@@ -153,7 +145,7 @@
     gap: 0px;
     flex: 1;
     overflow-y: auto;
-    min-width: 0; // Allow list to shrink
+    min-width: 0;
   }
 
   &__empty {
@@ -171,11 +163,11 @@
     border-radius: 10px;
     opacity: 0.3;
     transition: all 0.2s ease;
-    min-width: 0; // Allow items to shrink
+    min-width: 0;
 
     &--toggleable {
       cursor: pointer;
-      
+
       &:hover {
         background: #f8f8f8;
       }
@@ -185,66 +177,14 @@
   &__item-content {
     display: flex;
     align-items: center;
-    // gap: 12px;
     flex: 1;
-    min-width: 0; // Critical for proper shrinking
-    overflow: hidden; // Hide overflow content
-  }
-
-  &__avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 14px;
-    font-weight: 700;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    min-width: 0;
     overflow: hidden;
-    flex-shrink: 0; // Avatar never shrinks - maintains fixed size
-    position: relative; // For proper image positioning
-  }
-
-  &__avatar-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; // Maintain aspect ratio, crop if needed
-    object-position: center; // Center the image
-    border-radius: 50%;
-    position: absolute; // Prevent any stretching
-    top: 0;
-    left: 0;
-  }
-
-  &__name {
-    font-size: 18px;
-    font-weight: 700;
-    color: $dark-gray;
-    white-space: nowrap; // Prevent text wrapping
-    overflow: hidden; // Hide overflow text
-    text-overflow: ellipsis; // Show ellipsis for long names
-    flex: 1; // Take remaining space
-    min-width: 0; // Allow shrinking
+    user-select: none;
   }
 
   &__item--selected {
     opacity: 1;
     color: $dark-gray;
   }
-
-  // Hide names completely when sidebar gets very narrow
-  // Uncomment if you want names to disappear instead of ellipsis
-  /*
-  @media (max-width: 350px) {
-    &__name {
-      display: none;
-    }
-    
-    &__item-content {
-      justify-content: center;
-    }
-  }
-  */
 }

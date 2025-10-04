@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import ScheduleList from "../ScheduleList";
-import { PlusCircle, Archive, Gear } from "../Icons";
+import { CirclePlus, Archive, Gear } from "../Icons";
 import "./Sidebar.scss";
 
 interface SidebarProps {
@@ -20,7 +20,7 @@ const Sidebar: React.FC<SidebarProps> = (props) => {
   return (
     <div className={`sidebar ${props.isSidebarOpen ? 'open' : 'closed'}`}>
       <button className="new-schedule" onClick={handleNewSchedule}>
-        <PlusCircle/>New Schedule
+        <CirclePlus/>New Schedule
       </button>
       <ScheduleList />
       <div className="utility-actions">

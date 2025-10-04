@@ -8,7 +8,7 @@ import TeamMemberList from '@/components/TeamMemberList';
 import MainNavigationConfig from '@/config/MainNavigation';
 import CalendarPopover from '@/components/CalendarPopover';
 import './TeamCalendarPage.scss';
-import PlusCircle from '@/components/Icons/PlusCircle';
+import { CirclePlus } from '@/components/Icons';
 import { useTeamCalendarPageLogic } from '@/lib/hooks/useTeamCalendarPageLogic';
 import { CalendarUIProvider } from '@/contexts/CalendarUIContext';
 import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
@@ -68,7 +68,7 @@ function TeamCalendarPageContent() {
           onClick={() => handleNewEventPopoverOpen()}
           title="Add new event - N"
         >
-          <PlusCircle />
+          <CirclePlus />
         </button>
       }
       topBarMiddleContent={
@@ -97,8 +97,9 @@ function TeamCalendarPageContent() {
           selectedMembers={selectedTeamMembers}
           onSelectionChange={handleSelectionChange}
           onFilterChange={handleTeamMemberFilter}
-          togglable={true}
-          filterable={true}
+          showToggleAll={true}
+          showFilterField={true}
+          selectionMode="filter"
         />
       }
       sidebarOpen={false}
@@ -126,7 +127,7 @@ function TeamCalendarPageContent() {
         onChange={handleNewEventDataChange}
         onSaveableChange={setPopoverIsSaveable}
         isSaveable={popoverIsSaveable}
-        onSave={!activeEvent ? handleSaveEvent : undefined}
+        onSave={handleSaveEvent}
         onDelete={handleDeleteEvent}
         teamMembers={teamMembers}
       />
