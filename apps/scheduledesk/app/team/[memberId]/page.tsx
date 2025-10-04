@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import AppFrame from '@/components/AppFrame';
 import TeamMemberId from '@/components/TeamMemberId';
@@ -85,22 +85,21 @@ function TeamMemberPageContent() {
             const isActive = pathname === navItem.path;
 
             return (
-              <>
-              <button
-                key={navItem.id}
-                id={`main-nav-${navItem.id}`}
-                className={`main-nav-button ${navItem.className} ${isActive ? 'active' : ''}`}
-                onClick={() => handleNavigation(navItem.path)}
-              >
-                <Icon />
-              </button>
-              {navItem.id === 'team' && (
-                <>
-                  <AngleRight className="nav-separator" />
-                  <Person className="person-icon"/>
-                </>
-              )}
-              </>
+              <React.Fragment key={navItem.id}>
+                <button
+                  id={`main-nav-${navItem.id}`}
+                  className={`main-nav-button ${navItem.className} ${isActive ? 'active' : ''}`}
+                  onClick={() => handleNavigation(navItem.path)}
+                >
+                  <Icon />
+                </button>
+                {navItem.id === 'team' && (
+                  <>
+                    <AngleRight className="nav-separator" />
+                    <Person className="person-icon"/>
+                  </>
+                )}
+              </React.Fragment>
             );
           })}
         </div>
