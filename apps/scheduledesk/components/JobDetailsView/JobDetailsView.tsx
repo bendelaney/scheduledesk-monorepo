@@ -2,7 +2,7 @@
 
 import React, { useEffect, useCallback, useRef, useState } from "react";
 import { DateTime } from 'luxon';
-import { JobVisit } from '@/types';
+import { JobVisit, JobVisitConfirmationStatus } from '@/types';
 import DateSelector from '@/components/DateSelector';
 import { LinkOut } from '@/components/Icons';
 import './JobDetailsView.scss';
@@ -14,7 +14,7 @@ interface JobDetailsViewProps {
   onAnimationEnd?: React.AnimationEventHandler<HTMLDivElement>;
   onDateChange?: (date: Date | null) => void;
   onTimeChange?: (startTime: string | undefined, endTime: string | undefined) => void;
-  onStatusChange?: (status: string) => void;
+  onStatusChange?: (status: JobVisitConfirmationStatus) => void;
 }
 
 const JobDetailsView: React.FC<JobDetailsViewProps> = ({ 
@@ -182,4 +182,4 @@ const JobDetailsView: React.FC<JobDetailsViewProps> = ({
   );
 };
 
-export { JobDetailsView };
+export default JobDetailsView;

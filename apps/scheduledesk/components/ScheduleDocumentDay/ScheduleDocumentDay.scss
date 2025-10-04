@@ -1,0 +1,69 @@
+.add-team-member-select-menu {
+  &:hover {
+    cursor: pointer !important;
+    .selectmenu__placeholder {
+      color: var(--primary-blue) !important;
+    }
+  }
+}
+
+.empty-member-drop-zone {
+  min-height: 2px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px 38px 4px 38px; // Match team member block margin
+  transition: all 0.2s ease;
+  position: relative;
+
+  // Show blue insertion line when dragging over
+  &.insert-before::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: var(--primary-blue);
+    border-radius: 2px;
+    transition: all 0.18s ease;
+    z-index: 5000;
+  }
+  &.insert-before::before { top: -2px; }
+
+
+  // Show as droppable when member is being dragged
+  &.droppable-active {
+    border-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.05);
+
+    .drop-hint {
+      color: #007bff;
+    }
+  }
+
+  // Drag over states
+  &.drag-over {
+    border-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+
+    .drop-hint {
+      color: #007bff;
+    }
+  }
+
+  &.invalid-drop {
+    border-color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+
+    .drop-hint {
+      color: #dc3545;
+    }
+  }
+}
+
+// Hide drop hint when dragging is active to reduce visual clutter
+.drag-in-progress .empty-member-drop-zone .drop-hint {
+  opacity: 0.7;
+}

@@ -1,0 +1,18 @@
+.map-view-modal-container {
+  height: 75vh;
+  // height: calc(100vh - (var(--modal-padding) * 2) - 50px);
+  width: 70vw;
+
+  @media (max-width: 767px) {
+    width: calc(100vw - (var(--modal-padding) * 2) - 50px);;
+  }
+  @media (max-width: 390px) {
+    width: calc(100vw - var(--modal-padding) * 2);
+    height: 90vh;
+  }
+
+  .map-view {
+    height: 100%;
+    width: 100%;
+  }
+}

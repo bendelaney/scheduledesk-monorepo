@@ -1,0 +1,224 @@
+@use '@/app/styles/mixins.scss' as *;
+@use '@/app/styles/jobHighlights.scss' as *;
+
+.job-block {
+  z-index: 1;
+  border-radius: 5px;
+  position: relative;
+
+  .job-block-line {
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    padding-right: 18px;
+    user-select: none;
+    cursor: grab;
+
+    // &:active {
+    //   cursor: grabbing;
+    //   @include activeBlock;
+    // }
+  }
+
+  &.active {
+    @include activeBlock;
+  }
+  &.selected {
+    .job-block-line {
+      @include selectedBlock;
+    }
+  }
+
+  // &:hover {
+  //   background-color: rgb(245, 245, 242);
+  // }
+
+  .job-title-wrap {
+    display: flex;
+    flex: 1 0 0;
+    text-overflow: ellipsis;
+  }
+
+  .job-title {
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+    font-size: 15px;
+    letter-spacing: -0.3px;
+    font-weight: 400;
+    line-height: 20px;
+    padding: 6px;
+    border-radius: 5px;
+    white-space: nowrap;
+
+    .client-last-name, .map-link {
+      border-bottom-style: solid;
+      border-bottom-width: 1.7px;
+      border-bottom-color: var(--light-gray);
+      transition: border-bottom-color 140ms, box-shadow 140ms;
+
+      &:hover {
+        box-shadow: 0 1.3px 0 0 var(--light-gray);
+      }
+    }
+
+    .client-last-name {
+      font-weight: 700;
+      cursor: help;
+
+      &:hover {
+        border-bottom-color: var(--jobber-green);
+        box-shadow: 0 1.3px 0 0 var(--jobber-green);
+      }
+    }
+
+    .map-link {
+      cursor: zoom-in;
+
+      &:hover {
+        border-bottom-color: var(--primary-blue);
+        box-shadow: 0 1.3px 0 0 var(--primary-blue);
+      }
+    }
+
+    .custom-fields {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+
+      .field {
+        font-size: calc(1em - 3px);
+        font-weight: 500;
+        border: 1px solid var(--medium-gray);
+        background-color: var(--extra-light-gray);
+        border-radius: 4px;
+        padding: 2px 3px;
+        line-height: 1;
+        -webkit-text-fill-color: var(--dark-gray);
+      }
+    }
+  }
+  @each $id, $highlight in $jobHighlights {
+    &.highlight-#{$id} .job-title {
+      @if $id == 1 {
+        color: var(--text-default);
+        background: $highlight;
+      } @else {
+        background: $highlight;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        -webkit-box-decoration-break: clone;
+      }
+    }
+  }
+
+  .time-inputs {
+    margin-left: auto;
+    display: flex;
+    flex-wrap: nowrap;
+    margin-right: 14px;
+    min-width: 210px; // TODO: adjust this for different screen sizes
+
+    input[type="time"] {
+      background: var(--extra-light-gray);
+      border: 1px solid var(--light-gray);
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: Inter, sans-serif;
+      text-align: right;
+      font-weight: 640;
+      letter-spacing: -0.5px;
+      word-spacing: -2px;
+      color: var(--dark-gray);
+      cursor: pointer;
+
+      &:hover {
+        background: var(--light-gray);
+      }
+
+      &:focus {
+        background: #ffffff;
+        color: var(--dark-gray);
+      }
+
+      &::selection {
+        background-color: var(--extra-light-gray);
+      }
+    }
+    span {
+      font-weight: 640;
+      padding: 0 2px;
+    }
+  }
+
+  .job-info-button {
+    position: absolute;
+    right: 30px;
+    color: var(--medium-gray);
+    width:  20px;
+    height: 20px;
+    transition: color 0.2s;
+
+    &:hover {
+      color: var(--primary-blue);
+    }
+
+    svg {
+      @include svgIcon;
+    }
+  }
+
+  .job-highlight-toggle {
+    position: absolute;
+    color: var(--medium-gray);
+    right: 6px;
+    width:  16px;
+    height: 16px;
+    transition: color 0.2s;
+    cursor: context-menu;
+
+    &:hover {
+      color: var(--dark-gray);
+    }
+
+    svg {
+      @include svgIcon;
+    }
+
+    &.menu-active {
+      color: var(--dark-gray);
+    }
+  }
+
+  .job-block-team-members {
+    &:not(:empty) {
+      padding-bottom: 10px;
+    }
+  }
+
+  .selectmenu__input {
+    min-width: 40px !important;
+  }
+
+  .empty-member-drop-zone {
+    // Drag over states
+    &.drag-over {
+      border-color: #007bff;
+      background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    &.invalid-drop {
+      border-color: #dc3545;
+      background-color: rgba(220, 53, 69, 0.1);
+
+      .drop-hint {
+        color: #dc3545;
+      }
+    }
+  }
+
+  // Hide drop hint when dragging is active to reduce visual clutter
+  .drag-in-progress .empty-member-drop-zone .drop-hint {
+    opacity: 0.7;
+  }
+}

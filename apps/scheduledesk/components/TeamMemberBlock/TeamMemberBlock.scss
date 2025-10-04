@@ -1,0 +1,134 @@
+@use '@/app/styles/mixins.scss' as *;
+@use '@/app/styles/teamMemberHighlights.scss' as *;
+
+.is-initially-hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important; // Also good to prevent interaction
+}
+
+.team-member-block {
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 4px;
+  margin-left: 38px;
+  border-radius: 5px;
+  box-sizing: content-box;
+  border: 1px solid transparent;
+
+  .team-member-name {
+    font-size: 15px;
+    font-weight: 350;
+    user-select: none;
+    cursor: text;
+    display: inline-block;
+  }
+
+  .team-member-highlight-toggle {
+    margin-left: 4px;
+    opacity: 0.25;
+    cursor: context-menu;
+
+    svg {
+      width: 12px;
+      position: relative;
+      top: 1px;
+    }
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .action-buttons {
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 4px;
+    // transition: opacity 0.2s ease-in-out;
+
+    button {
+      cursor: pointer;
+      opacity: 0.25;
+      margin-left: 4px;
+      transition: opacity 0.2s ease-in-out;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  &:hover {
+    @include hoverBlock;
+    cursor: grab;
+
+    .action-buttons {
+      opacity: 1;
+    }
+  }
+  &.active {
+    @include activeBlock;
+    // box-shadow: 0 0 0 2px rgba(75, 75, 73, 0.5);
+
+    .team-member-name {
+      font-weight: 600;
+      color: var(--darker-gray);
+    }
+  }
+  // &:active {
+  //   cursor: grabbing;
+  //   @include activeBlock;
+  // }
+  &.selected {
+    @include selectedBlock;
+  }
+
+  // Loop through the highlights and apply the color to the name
+  @each $id, $highlight in $teamMemberHighlights {
+    &.highlight-#{$id} .team-member-name,
+    &.highlight-#{$id} input
+    {
+      color: $highlight;
+    }
+
+  }
+
+  &.editable {
+    &.editable {
+      padding: 4px 4px 6px 4px;
+      margin-left: 38px;
+
+      .input-wrap {
+        display: inline;
+        // background: pink;
+
+        input {
+          caret-color: red;
+          padding: 0px;
+          font-size: 15px;
+          position: relative;
+          height: 15px;
+          border: none;
+          background: transparent;
+          font-weight: 500;
+
+          &:focus {
+            outline: none;
+          }
+        }
+      }
+
+      .team-member-highlight-toggle {
+        display: none;
+      }
+    }
+  }
+
+  &.menu-active {
+    .team-member-highlight-toggle {
+      opacity: 1;
+    }
+  }
+}

@@ -1,0 +1,468 @@
+@use '@/app/styles/mixins.scss' as *;
+
+.schedule-document {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px;
+  padding-right: 14px;
+
+  section.document-head {
+    display: flex;
+    align-items: center;
+    padding-bottom: 20px;
+
+    h1.document-title {
+      font-size: 28px;
+      font-weight: 750;
+      letter-spacing: -0.2px;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .settings-button {
+      font-size: 20px;
+      margin-left: auto;
+      margin-right: 0px;
+      font-weight: 540;
+      color: var(--medium-gray);
+
+      &:hover {
+        color: var(--primary-blue);
+      }
+    }
+  }
+
+  section {
+    margin-bottom: 15px;
+
+    header {
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 8px;
+      cursor: pointer;
+      
+      .toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 10px 0 0;
+        width: 20px;
+        height: 20px;
+  
+        svg {
+          display: block;
+          width: 10px;
+          height: 10px;
+        }
+      }
+    
+      h2 {
+        display: flex;
+        align-items: center;
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.2px;
+
+        a {
+          color: var(--dark-gray);
+        }
+
+        .weather-icon {
+          display: inline-block;
+          margin-left: 6px;
+          width:  calc(1em + 8px);
+          height: calc(1em + 8px);
+          border-bottom: none;
+
+          &:hover {
+            box-shadow: none;
+          }
+  
+          img {
+            display: inline-block;
+            width: 100%;
+            height: 100%;
+          }
+        }
+      }
+
+    }
+  
+    .section-inner {
+      width: 100%;
+      border-left: 3px solid var(--extra-light-gray);
+      margin-left: 3px;
+      transition-duration: 100ms, 180ms;
+      transition-property: opacity, max-height;
+      transition-timing-function: ease-out;
+
+      &.closed {
+        opacity: 0;
+        max-height: 0;
+        overflow: hidden;
+      }
+      
+      &.open {
+        opacity: 1;
+        // max-height: 1000px;
+      }
+    }
+  }
+
+  .block-group {
+    display: inline-flex;
+    flex-direction: column;
+    background: var(--extra-light-gray);
+    margin-left: 10px;
+    margin-bottom: 6px;
+    border-radius: 5px;
+    padding: 10px 10px 4px 10px;
+    width: 400px;
+    
+    .block-group-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+      user-select: none;
+      cursor: pointer;
+
+      .toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+  
+        svg {
+          display: block;
+          width:  8px;
+          height: 8px;
+        }
+      }
+
+      .block-group-name {
+        padding: 0 4px;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1;
+      }
+    }
+
+    .block-group-inner {
+      transition-duration: 180ms;
+      transition-property: opacity, max-height;
+      max-height: 600px;
+
+      .team-member-block,
+      .job-block {
+        margin-left: 0;
+
+        &:hover {
+          background: var(--light-gray);
+        }
+      }
+    }
+    
+    &.closed {
+      .block-group-inner {
+        opacity: 0;
+        max-height: 0;
+        padding-top: 0;
+        overflow: hidden;
+        transition-timing-function: ease-out;
+      }
+    }
+    
+    &.open {
+      .block-group-inner {
+        opacity: 1;
+        max-height: 600px;
+
+        transition-timing-function: ease-out;
+      }
+    }
+
+    &.empty {
+      .empty-msg {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--medium-gray);
+        padding: 6px 0;
+        display: inline-block;
+      }
+      &.closed {
+        background: transparent;
+  
+        .block-group-name {
+          color: var(--medium-gray);
+        }
+  
+        svg path {
+          fill: var(--medium-gray);
+        }
+      }
+    }
+  }
+}
+
+// DRAG AND DROP STYLES ////////////////////////
+
+// Disable hover completely until real mouse movement after drag
+body.disable-hover {
+  // Specifically target the team member block hover that's causing issues
+  .team-member-block:hover {
+    background: initial !important;
+    border: 1px solid transparent !important;
+    box-shadow: none !important;
+    cursor: initial !important;
+    
+    .action-buttons {
+      opacity: 0 !important;
+    }
+  }
+  
+  // Also target job blocks
+  .job-block:hover {
+    background: initial !important;
+    border: initial !important;
+    box-shadow: none !important;
+  }
+  
+  // Target other common hover elements but NOT universal selector
+  button:hover,
+  .settings-button:hover,
+  .block-group-header:hover,
+  section header:hover {
+    background: initial !important;
+    box-shadow: none !important;
+    color: inherit !important;
+  }
+}
+
+body.drag-in-progress {
+  * {
+    // pointer-events: none;
+    cursor: grabbing !important;
+    
+    // Disable ALL hover effects during drag
+    &:hover {
+      // background-color: initial !important;
+      // background: initial !important;
+      border-bottom-color: transparent !important;
+      box-shadow: none !important;
+      color: inherit !important;
+      opacity: inherit !important;
+      transform: none !important;
+      filter: none !important;
+    }
+  }
+  
+  // When dragging over invalid drop zone, show not-allowed cursor
+  &.no-drop * {
+    cursor: not-allowed !important;
+  }
+  
+  .draggable, .droppable {
+    pointer-events: auto;
+  }
+
+  &.no-drop {
+    * {
+      cursor: not-allowed !important;
+    }
+  }
+
+  .block-group.unassigned-members,
+  .job-block-team-members {
+    .team-member-block:hover {
+      background-color: transparent !important;
+    }
+  }
+
+  .add-team-member-select-menu {
+    &:hover {
+      cursor: pointer !important;
+      .selectmenu__placeholder {
+        color: #bdbdbd !important;
+        opacity: 0.5 !important;
+      }
+    }
+  }
+}
+
+// Unassigned Members Group
+.block-group.unassigned-members {
+  &.droppable-over {
+    background-color: rgba(74, 144, 226, 0.2) !important;
+  }
+  
+  .team-member-block .remove-button {
+    display: none;
+  }
+}
+
+// This is the item "left behind" when dragging
+.job-draggable,
+.team-member-draggable {
+  will-change: transform;
+  transform: translateZ(0);
+  cursor: grab;
+  
+  &.dragging {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: grabbing !important;
+  }
+}
+
+// This is the wrapper for the clone item that follows the mouse
+.drag-overlay {
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  opacity: 0;
+  // transition: opacity 0.18s ease-out;
+  pointer-events: none;
+  z-index: 5000 !important;
+
+  &.active {
+    opacity: 1;
+  }
+  
+  .team-member-block-clone,
+  .job-block-clone {
+    .is-clone {
+      @include hoverBlock;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+
+    .job-block {
+      .jobvisit-confirmation-status-selector,
+      .time-inputs,
+      .job-highlight-toggle {
+        display: none;
+      }
+    }
+
+    .team-member-block {
+      .team-member-highlight-toggle {
+        display: none;
+      }
+    }  
+  }
+  
+  .job-block-clone .job-block {
+    margin: 0;
+  }
+}
+
+
+.job-droppable,
+.team-member-droppable {
+  transition: all 0.2s ease;
+  display: block;
+  position: relative;
+  
+  // insertion indicators
+  &.insert-before::before,
+  &.insert-after::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: var(--primary-blue);
+    border-radius: 2px;
+    transition: all 0.18s ease;
+    z-index: 5000;
+  }
+  &.insert-before::before { top: -2px; }
+  &.insert-after::after { bottom: -2px; }
+
+  &.droppable-over {
+    .team-member-block,
+    .job-block {
+      background-color: transparent !important;
+    }
+  }
+  
+  &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+}
+// adjust for team members
+.team-member-droppable {
+  &.insert-before::before,
+  &.insert-after::after {
+    left: 35px;
+    right: 0;
+  }
+}
+
+// .job-block-clone {
+//   opacity: 0.8;
+//   transform: scale(0.95);
+//   width: 100%;
+//   max-width: 400px;
+//   pointer-events: none;
+// }
+
+/* Hide team member elements during drag animation to prevent flash */
+body.animating-member-drop [data-member-id]:not(.animation-clone) {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Ensure animation clones are always visible */
+.animation-clone {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+// Drag source styling
+.drag-source {
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+  
+  // Ensure the semi-transparent state is visible
+  &.job-draggable,
+  &.team-member-draggable {
+    opacity: 0.5;
+  }
+  
+  // Slightly different styling for different block types if needed
+  &.job-draggable {
+    filter: grayscale(0.3);
+  }
+  
+  &.team-member-draggable {
+    filter: grayscale(0.2);
+  }
+}
+
+// Reset opacity when drag ends
+.job-draggable,
+.team-member-draggable {
+  transition: opacity 0.2s ease, filter 0.2s ease;
+  
+  &:not(.drag-source) {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+// Dragging source visual feedback
+.dragging-source {
+  transition: opacity 0.2s ease;
+  pointer-events: none; // Prevent interaction while dragging
+}
+
+// Team member FLIP animations
+.team-member-droppable {
+  // Ensure transforms don't interfere with FLIP
+  transform-origin: top left;
+}

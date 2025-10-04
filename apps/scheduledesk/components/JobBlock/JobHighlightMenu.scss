@@ -1,0 +1,53 @@
+@use '@/app/styles/mixins.scss' as *;
+@use '@/app/styles/jobHighlights.scss' as *;
+
+.job-highlight-menu {
+  padding: 5px;
+  position: absolute;
+  z-index: var(--menu-zindex);
+  right: -7px;
+  top: 27px;
+  background: #ffffff;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 18px 0 rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+
+  li {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    justify-content: flex-end;
+    padding: 5px 6px;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: var(--extra-light-gray);
+    }
+
+    span {
+      @include menuItemText;
+    }
+
+    .highlight-box {
+      margin-left: 6px;
+      height: 20px;
+      width: 26px;
+      border-radius: 4px;
+    }
+
+    &.selected .highlight-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+    }
+  }
+
+  // Loop through the highlights and apply the color to the highlight-box
+  @each $id, $highlight in $jobHighlights {
+    .highlight-#{$id} .highlight-box {
+      background: $highlight;
+    }
+  }
+}

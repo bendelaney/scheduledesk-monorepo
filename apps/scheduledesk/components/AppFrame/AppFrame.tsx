@@ -87,7 +87,7 @@ const AppFrame: React.FC<AppFrameProps> = ({
     <div className={`app-frame ${className} ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
       <div className="top-bar">
         <div className="top-bar__left">
-          {showSidebarToggle && (
+          {showSidebarToggle && sidebarContent && (
             <button
               className="sidebar-toggle-button"
               onClick={handleToggleSidebar}

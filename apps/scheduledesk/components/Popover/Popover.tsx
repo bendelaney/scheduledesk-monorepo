@@ -87,7 +87,7 @@ interface PopoverHandle {
 
 interface PopoverProps {
   className?: string;
-  targetRef: React.RefObject<HTMLElement> | null;
+  targetRef: React.RefObject<HTMLElement | null> | null;
   children: ReactNode;
   height?: number | string;
   width?: number | string;
@@ -101,7 +101,7 @@ interface PopoverProps {
   exclusive?: boolean;
   clickOutsideToClose?: boolean;
   noStyles?: boolean;
-  scrollContainerRef?: React.RefObject<HTMLDivElement>;
+  scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
   onShow?: () => void;
   onHide?: () => void;
 }
@@ -134,7 +134,7 @@ const Popover = forwardRef<PopoverHandle, PopoverProps>(({
   const { scrollContainerRef } = useContext(PopoverContext);
 
   if (clickOutsideToClose == true) {
-    useClickOutside(popoverRef as React.RefObject<HTMLElement>, onHide, targetRef||undefined);
+    useClickOutside(popoverRef as React.RefObject<HTMLElement>, onHide, targetRef as React.RefObject<HTMLElement> | undefined);
   }
 
   // Add escape key handler for popover with high priority (95)

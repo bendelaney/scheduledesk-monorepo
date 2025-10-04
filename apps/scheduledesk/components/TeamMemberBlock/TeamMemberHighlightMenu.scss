@@ -1,0 +1,54 @@
+@use '@/app/styles/mixins.scss' as *;
+@use '@/app/styles/teamMemberHighlights.scss' as *;
+
+.team-member-highlight-menu {
+  left: 6px;
+  padding: 5px;
+  z-index: 1000;
+  background: #ffffff;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 18px 0 rgba(0, 0, 0, 0.25);
+
+  li {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+
+    &:hover {
+      background-color: var(--extra-light-gray);
+    }
+
+    .highlight-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      margin-right: 6px;
+      height: 20px;
+      width: 26px;
+      border-radius: 4px;
+    }
+
+    &.selected .highlight-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+    }
+
+    span {
+      @include menuItemText;
+    }
+  }
+
+  // Loop through the highlights and apply the color to the highlight-box
+  @each $id, $highlight in $teamMemberHighlights {
+    .highlight-#{$id} .highlight-box {
+      background: $highlight;
+    }
+  }
+}
