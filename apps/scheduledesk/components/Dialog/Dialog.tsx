@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react';
-import { Modal } from '@/components/Modal';
+import Modal from '@/components/Modal';
 
 interface DialogProps {
   title: string;

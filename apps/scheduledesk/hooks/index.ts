@@ -1,2 +1,2 @@
 export { useClickOutside } from './useClickOutside';
-export { default as useFlipAnimation, useFlipAnimation } from './useFlipAnimation';
+export { default as useFlipAnimation } from './useFlipAnimation';

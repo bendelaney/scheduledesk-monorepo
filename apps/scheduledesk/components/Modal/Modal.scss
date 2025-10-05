@@ -11,7 +11,7 @@
 
 .modal {
   position: fixed;
-  padding: 20px;
+  padding: 1.5rem;
   z-index: 10000;
   box-shadow: 0 0px 40px 0 rgba(0, 0, 0, 0.4);
   background: #fff;
@@ -21,10 +21,10 @@
   .close-x {
     position: absolute;
     top:   0;
-    right: 0;
+    left: 0;
     border-radius: 0 5px 0 20px;
     background: transparent;
-    padding: 18px 18px 12px 12px;
+    padding: 1rem;
     cursor: pointer;
     color: #999999;
     transition: color 0.2s;

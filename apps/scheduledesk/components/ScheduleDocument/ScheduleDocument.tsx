@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, FC, useEffect, useRef, useCallback } from "react";
+import React, { useState, FC, useEffect, useRef, useCallback, use } from "react";
 import { createPortal } from 'react-dom';
 import { ScheduleDay, ScheduleDocument as ScheduleDocumentTYPE, TeamMemberInstance } from "@/types";
 import { ScheduleProvider } from "@/contexts/ScheduleContext";
@@ -130,17 +130,24 @@ const ScheduleDocument: FC<ScheduleDocumentProps> = ({
   isLoading = false
 }) => {
   const [scheduleDays, setScheduleDays] = useState(scheduleData?.scheduleDays || []);
+  const [haveJobQueue, setHaveJobQueue] = useState(false);
   const [foldState, setFoldState] = useState<GroupFoldState>(buildInitialFoldState(scheduleDays || []));
-  
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Update scheduleDays when scheduleData prop changes
   useEffect(() => {
     if (scheduleData) {
+      console.log('Updating schedule days from props');
       setScheduleDays(scheduleData.scheduleDays);
       setFoldState(buildInitialFoldState(scheduleData.scheduleDays || []));
+
+      setHaveJobQueue((scheduleData.jobQueue && scheduleData.jobQueue.length > 0));
     }
   }, [scheduleData]);
+
+  useEffect(() => {
+    console.log('job queue state:', haveJobQueue);
+  }, [haveJobQueue]);
 
   // Initialize FLIP animation hook
   const { flipAnimate, captureState, animateFromState, cancelAnimation, isAnimating } = useFlipAnimation();
@@ -1334,7 +1341,7 @@ const ScheduleDocument: FC<ScheduleDocumentProps> = ({
         onDragEnd={isModalOpen ? undefined : handleDragEnd}
         onDragCancel={isModalOpen ? undefined : handleDragCancel}
       >
-        <div className="schedule-document">
+        <div className={`schedule-document ${haveJobQueue ? 'has-job-queue' : 'no-job-queue'}`}>
           <section className="document-head">
             <h1 className="document-title">{title}</h1>
             {/* <button className="settings-button" onClick={() => { alert("edit schedule settings") }}>
@@ -1343,7 +1350,7 @@ const ScheduleDocument: FC<ScheduleDocumentProps> = ({
           </section>
 
           {/* JOB QUEUE */}
-          {scheduleData.jobQueue && scheduleData.jobQueue.length > 0 && (
+          {haveJobQueue && (
           <section className="job-queue">
             <header onClick={() => toggleGroupFold("jobQueue")}>
               <div className="toggle">

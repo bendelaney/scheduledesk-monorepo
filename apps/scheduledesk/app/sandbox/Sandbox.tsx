@@ -185,7 +185,7 @@ export default function Sandbox() {
     <AppFrame sidebarContent={sidebarContent}>
       <DragLockProvider>
         <PopoverProvider scrollContainerRef={{ current: null }}>
-          <ScheduleDocument scheduleDocument={scheduleData} isLoading={isLoading} />
+          <ScheduleDocument scheduleData={scheduleData} isLoading={isLoading} />
         </PopoverProvider>
       </DragLockProvider>
     </AppFrame>

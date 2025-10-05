@@ -14,10 +14,16 @@
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-columns: 40% 1fr; // job-queue fixed width, days take remaining
   grid-template-rows: auto 1fr; // header auto, content fills remaining space
   padding: 1.5rem 0 0 1.5rem;
   // gap: 0 20px; // horizontal gap between columns
+  
+  &.has-job-queue {
+    grid-template-columns: 40% 1fr; // job-queue fixed width, days take remaining
+  }
+  &.no-job-queue {
+    grid-template-columns: 0px 1fr;  // schedule-days takes full width
+  }
 
   section.document-head {
     display: flex;

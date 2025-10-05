@@ -25,20 +25,20 @@ const JobberReauthModal: React.FC<JobberReauthModalProps> = ({ onClose, onReauth
 
   return (
     <Modal
-      closeButton={true}
-      clickOutsideToClose={true}
+      closeButton={false}
+      clickOutsideToClose={false}
       escToClose={true}
       onClose={onClose}
     >
       <div className="jobber-reauth-modal">
         <h2>Reconnect to Jobber</h2>
-        <p>Your Jobber session has expired. Please reconnect to continue.</p>
+        <p>Your Jobber session has expired.<br/>Reconnect to continue.</p>
 
         <button
           onClick={handleConnect}
           className="connect-button"
         >
-          Connect with Jobber
+          Authorize with Jobber
         </button>
       </div>
     </Modal>
