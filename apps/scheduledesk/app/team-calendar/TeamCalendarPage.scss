@@ -10,13 +10,25 @@
   }
 
   .content-wrapper {
-    padding: 0 14px;
+    padding: 0 1rem;
 
     @media (max-width: 768px) {
       padding: 0;
     }
   }
 
+  .main-content {
+    flex: 1 1;
+    background: #ffffff;
+    border: 1px solid #cacac7;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: rgb(202, 202, 199);
+    border-bottom: 0;
+    border-radius: 6px 6px 0 0;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+  }
   .team-member-list {
     margin-left: -14px;
     
@@ -47,18 +59,18 @@
   
   // Sidebar variants
   &.sidebar-open {
-    .content-wrapper {
-      padding:0;
-    }
+    // .content-wrapper {
+    //   padding:0 1rem 0 0;
+    // }
     .team-member-list {
-      padding-left: 14px;
+      // padding-left: 14px;
     }
   }
 
   @media (max-height: 767px) and (orientation: landscape) {
-    .content-wrapper {
-      padding: 0;
-    }
+    // .content-wrapper {
+    //   padding: 0;
+    // }
     // flex-direction: row;
     // .top-bar {
     //   width: auto;

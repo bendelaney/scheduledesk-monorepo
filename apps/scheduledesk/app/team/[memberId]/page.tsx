@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import AppFrame from '@/components/AppFrame';
+import JobberReauthModal from '@/components/JobberReauthModal';
 import TeamMemberId from '@/components/TeamMemberId';
 import TeamMemberCalendar from '@/components/TeamMemberCalendar';
 import { AngleLeft, AngleRight, Person } from '@/components/Icons';
@@ -31,6 +32,8 @@ function TeamMemberPageContent() {
     availabilityEvents,
     loading,
     error,
+    needsJobberReauth,
+    refetch,
     showPopover,
     popoverIsSaveable,
     popoverTarget,
@@ -175,7 +178,13 @@ function TeamMemberPageContent() {
         teamMembers={teamMembers}
         isNormalSchedule={eventEditorValues.startDate?.startsWith('template-')}
       />
-      </AppFrame>
+      {needsJobberReauth && (
+        <JobberReauthModal
+          onClose={() => {}}
+          onReauthSuccess={refetch}
+        />
+      )}
+    </AppFrame>
   );
 }
 

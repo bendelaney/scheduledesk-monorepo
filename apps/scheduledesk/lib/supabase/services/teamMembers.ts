@@ -87,10 +87,18 @@ export const getJobberUsersFromCache = async () => {
 /**
  * Fetches users from Jobber API via server route
  * This will also update the cache in Supabase
+ * Throws with status code if authentication fails (401)
  */
 export const getJobberUsers = async (): Promise<any[]> => {
   try {
     const response = await fetch('/api/jobber/users');
+
+    // Handle 401 specially - throw to trigger reauth
+    if (response.status === 401) {
+      const error = new Error('Jobber authentication required');
+      (error as any).status = 401;
+      throw error;
+    }
 
     if (!response.ok) {
       console.warn('Failed to fetch from Jobber API, falling back to cache');
@@ -99,7 +107,12 @@ export const getJobberUsers = async (): Promise<any[]> => {
 
     const result = await response.json();
     return result.users || [];
-  } catch (error) {
+  } catch (error: any) {
+    // Re-throw 401 errors to trigger reauth modal
+    if (error.status === 401) {
+      throw error;
+    }
+
     console.error('Error fetching Jobber users from API:', error);
     console.log('Falling back to cached data...');
     return getJobberUsersFromCache();

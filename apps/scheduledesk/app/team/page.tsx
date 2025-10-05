@@ -4,6 +4,7 @@ import { TeamMember } from "@/types";
 import AppFrame from '@/components/AppFrame';
 import TeamMemberId from '@/components/TeamMemberId';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import JobberReauthModal from '@/components/JobberReauthModal';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTeamMembers } from '@/lib/supabase/hooks/useTeamMembers';
 import MainNavigationConfig from '@/config/MainNavigation';
@@ -12,7 +13,7 @@ import './TeamPage.scss';
 function TeamPage() {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: teamMembers, loading, error } = useTeamMembers();
+  const { data: teamMembers, loading, error, needsJobberReauth, refetch } = useTeamMembers();
 
   const handleTeamMemberClick = (member: TeamMember) => {
     // Navigate using member ID or create a slug
@@ -50,17 +51,7 @@ function TeamPage() {
     >
       <LoadingSpinner isLoading={loading} />
       <div className="team-grid">
-        {error && (
-          <div style={{ padding: '20px', background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', marginBottom: '20px' }}>
-            <h4>⚠️ Database Connection Issue</h4>
-            <p>{error}</p>
-          </div>
-        )}
         {!loading && teamMembers.map((member, index) => {
-          // Debug: Check for duplicate/missing IDs
-          if (!member.id) {
-            console.warn(`Member at index ${index} has no ID:`, member);
-          }
           return (
             <TeamMemberId
               key={member.id || `member-${index}`}
@@ -72,6 +63,14 @@ function TeamPage() {
           );
         })}
       </div>
+      {needsJobberReauth && (
+        <JobberReauthModal
+          onClose={() => {}}
+          onReauthSuccess={refetch}
+        />
+      )}
     </AppFrame>
   );
 }
+
+export default TeamPage;

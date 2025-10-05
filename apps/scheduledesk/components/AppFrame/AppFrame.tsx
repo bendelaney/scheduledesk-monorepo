@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { SidebarClosed, SidebarOpen } from "../Icons";
 // import TopBar from "../TopBar";
 import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
@@ -15,35 +15,27 @@ interface AppFrameProps {
   showSidebarToggle?: boolean;
   sidebarContent?: React.ReactNode;
   sidebarOpen?: boolean;
+  onSidebarToggle?: (isOpen: boolean) => void;
   sidebarWidth?: string;
 }
 
-const AppFrame: React.FC<AppFrameProps> = ({ 
+const AppFrame: React.FC<AppFrameProps> = ({
   className,
-  children, 
+  children,
   showSidebarToggle = true,
   sidebarContent,
-  sidebarOpen,
+  sidebarOpen = true,
+  onSidebarToggle,
   sidebarWidth = "240px",
   topBarLeftContent,
   topBarMiddleContent,
   topBarRightContent
 }) => {
-  const [isSidebarOpen, setSidebarOpen] = useState(sidebarOpen ?? true);
+  const isSidebarOpen = sidebarOpen;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    // Load sidebar state from localStorage on client side
-    const savedSidebarState = localStorage.getItem('sidebarState');
-    if (savedSidebarState) {
-      setSidebarOpen(JSON.parse(savedSidebarState));
-    }
-  }, []);
 
+  // When sidebar closes, blur the team member filter field if it's focused
   useEffect(() => {
-    localStorage.setItem('sidebarState', JSON.stringify(isSidebarOpen));
-
-    // When sidebar closes, blur the team member filter field if it's focused
     if (!isSidebarOpen) {
       const filterInput = document.querySelector('.team-member-list__filter input') as HTMLInputElement;
       if (filterInput && document.activeElement === filterInput) {
@@ -57,12 +49,12 @@ const AppFrame: React.FC<AppFrameProps> = ({
     '/',
     () => {
       // Open sidebar if it's closed
-      if (sidebarContent && !isSidebarOpen) {
-        setSidebarOpen(true);
+      if (sidebarContent && !isSidebarOpen && onSidebarToggle) {
+        onSidebarToggle(true);
       }
     },
     40,
-    [sidebarContent, isSidebarOpen],
+    [sidebarContent, isSidebarOpen, onSidebarToggle],
     { id: 'app-frame-open-sidebar', exclusive: false }
   );
 
@@ -70,17 +62,19 @@ const AppFrame: React.FC<AppFrameProps> = ({
   useKeyboardShortcut(
     '\\',
     () => {
-      if (sidebarContent) {
-        setSidebarOpen(prev => !prev);
+      if (sidebarContent && onSidebarToggle) {
+        onSidebarToggle(!isSidebarOpen);
       }
     },
     40,
-    [sidebarContent],
+    [sidebarContent, isSidebarOpen, onSidebarToggle],
     { meta: true, id: 'app-frame-toggle-sidebar' }
   );
 
   const handleToggleSidebar = () => {
-    setSidebarOpen(!isSidebarOpen);
+    if (onSidebarToggle) {
+      onSidebarToggle(!isSidebarOpen);
+    }
   }
 
   return (

@@ -3,6 +3,7 @@
 import React, {useEffect} from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import AppFrame from '@/components/AppFrame';
+import JobberReauthModal from '@/components/JobberReauthModal';
 import TeamCalendar from '@/components/TeamCalendar';
 import TeamMemberList from '@/components/TeamMemberList';
 import MainNavigationConfig from '@/config/MainNavigation';
@@ -12,10 +13,12 @@ import { CirclePlus } from '@/components/Icons';
 import { useTeamCalendarPageLogic } from '@/lib/hooks/useTeamCalendarPageLogic';
 import { CalendarUIProvider } from '@/contexts/CalendarUIContext';
 import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
+import { useSidebarState } from '@/hooks/useSidebarState';
 
 function TeamCalendarPageContent() {
   const router = useRouter();
   const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useSidebarState('sidebar:team-calendar', false);
 
   // Use custom hook to get all data and handlers (now inside the provider)
   const {
@@ -23,6 +26,8 @@ function TeamCalendarPageContent() {
     availabilityEvents,
     loading,
     error,
+    needsJobberReauth,
+    refetch,
     selectedTeamMembers,
     handleSelectionChange,
     handleTeamMemberFilter,
@@ -61,6 +66,8 @@ function TeamCalendarPageContent() {
   return (
     <AppFrame
       className="team-calendar-page"
+      sidebarOpen={sidebarOpen}
+      onSidebarToggle={setSidebarOpen}
       topBarLeftContent={
         <button
           ref={newEventButtonRef}
@@ -102,7 +109,7 @@ function TeamCalendarPageContent() {
           selectionMode="filter"
         />
       }
-      sidebarOpen={false}
+      // sidebarOpen={false}
       // sidebarWidth="240px"
     >
       <TeamCalendar
@@ -131,7 +138,13 @@ function TeamCalendarPageContent() {
         onDelete={handleDeleteEvent}
         teamMembers={teamMembers}
       />
-      </AppFrame>
+      {needsJobberReauth && (
+        <JobberReauthModal
+          onClose={() => {}}
+          onReauthSuccess={refetch}
+        />
+      )}
+    </AppFrame>
   );
 }
 

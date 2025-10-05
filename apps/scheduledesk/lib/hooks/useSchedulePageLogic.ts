@@ -28,7 +28,8 @@ interface UseSchedulePageLogicResult {
   scheduleData: ScheduleDocument | null;
   isLoading: boolean;
   error: string | null;
-  
+  needsJobberReauth: boolean;
+
   // Handlers
   handleDateChange: (newStartDate: Date, newEndDate: Date) => void;
   handleRefresh: () => void;
@@ -40,6 +41,7 @@ export const useSchedulePageLogic = (): UseSchedulePageLogicResult => {
   const [scheduleData, setScheduleData] = useState<ScheduleDocument | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsJobberReauth, setNeedsJobberReauth] = useState(false);
   const lastFetchRef = useRef<number>(0);
 
   // Initialize with default Sunday-Friday range
@@ -53,6 +55,7 @@ export const useSchedulePageLogic = (): UseSchedulePageLogicResult => {
   const fetchScheduleData = useCallback(async (start: Date, end: Date) => {
     setIsLoading(true);
     setError(null);
+    setNeedsJobberReauth(false);
 
     // Format dates for API call using UTC
     const formatUTCDate = (date: Date): string => {
@@ -80,7 +83,8 @@ export const useSchedulePageLogic = (): UseSchedulePageLogicResult => {
       );
 
       if (response.status === 401) {
-        setError('Not authenticated. Please connect to Jobber first.');
+        setNeedsJobberReauth(true);
+        setError('Jobber authentication required');
         setIsLoading(false);
         return;
       }
@@ -94,16 +98,31 @@ export const useSchedulePageLogic = (): UseSchedulePageLogicResult => {
 
       if (responseData.errors) {
         console.error('GraphQL Errors:', responseData.errors);
+
+        // Check if it's a throttling error
+        const isThrottled = responseData.errors.some(
+          (err: any) => err.extensions?.code === 'THROTTLED'
+        );
+
+        if (isThrottled) {
+          console.log('Rate limited - retrying in 4 seconds...');
+          // Keep loading state, wait 4 seconds, then retry
+          setTimeout(() => {
+            fetchScheduleData(start, end);
+          }, 4000);
+          return;
+        }
+
         setError('Error fetching schedule data from Jobber.');
         setIsLoading(false);
         return;
       }
-      
+
       // Transform Jobber data to ScheduleDocument format
       const transformedData = transformJobberToScheduleDocument(responseData, start, end);
       console.log('Transformed Schedule Data:', transformedData);
       setScheduleData(transformedData);
-      
+
     } catch (error) {
       console.error("Error fetching schedule data:", error);
       setError("Error fetching schedule data. Please try again.");
@@ -139,7 +158,8 @@ export const useSchedulePageLogic = (): UseSchedulePageLogicResult => {
     scheduleData,
     isLoading,
     error,
-    
+    needsJobberReauth,
+
     // Handlers
     handleDateChange,
     handleRefresh,

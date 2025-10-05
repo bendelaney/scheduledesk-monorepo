@@ -5,11 +5,11 @@
 
   .team-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 2.2rem;
     background-color: $app-bg;
     padding: 2rem;
-    max-width: 680px;
+    max-width: 75%;
     margin: 0 auto;
   }
 
@@ -39,11 +39,11 @@
 
   @media (max-width: 767px) {
     .team-grid {
-      grid-template-columns: repeat(2, 1fr);
+      // grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
       padding: 1.5rem;
-      max-width: 100%;
-      margin: 0 auto;
+      max-width: 90%;
+      // margin: 0 auto;
 
       .team-member-id {
         // border: 1px solid red;

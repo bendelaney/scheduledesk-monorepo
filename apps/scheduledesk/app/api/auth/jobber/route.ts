@@ -19,13 +19,22 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
 
+    // Get returnUrl from query params (defaults to '/')
+    const returnUrl = request.nextUrl.searchParams.get('returnUrl') || '/'
+
+    // Encode returnUrl in state parameter
+    const state = JSON.stringify({
+      returnUrl,
+      timestamp: Date.now()
+    })
+
     // Redirect to Jobber OAuth
     const authUrl = new URL(process.env.JOBBER_AUTHORIZATION_URL!)
     authUrl.searchParams.set('client_id', process.env.JOBBER_CLIENT_ID!)
     authUrl.searchParams.set('redirect_uri', process.env.JOBBER_CALLBACK_URL!)
     authUrl.searchParams.set('scope', process.env.JOBBER_SCOPE!)
     authUrl.searchParams.set('response_type', 'code')
-    authUrl.searchParams.set('state', 'random-state-string') // Should be random in production
+    authUrl.searchParams.set('state', Buffer.from(state).toString('base64'))
 
     console.log('Redirecting to:', authUrl.toString())
     return NextResponse.redirect(authUrl.toString())

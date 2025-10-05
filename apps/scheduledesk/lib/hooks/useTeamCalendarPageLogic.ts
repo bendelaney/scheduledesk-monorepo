@@ -17,6 +17,8 @@ interface UseTeamCalendarPageLogicResult {
   availabilityEvents: AvailabilityEvent[];
   loading: boolean;
   error: string | null;
+  needsJobberReauth: boolean;
+  refetch: () => Promise<void>;
 
   // Team member selection
   selectedTeamMembers: string[];
@@ -45,7 +47,7 @@ interface UseTeamCalendarPageLogicResult {
 
 export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
   // Data hooks
-  const { data: teamMembers, loading: teamMembersLoading, error: teamMembersError } = useTeamMembers();
+  const { data: teamMembers, loading: teamMembersLoading, error: teamMembersError, needsJobberReauth, refetch } = useTeamMembers();
   const { data: availabilityEvents, createEvent, updateEvent, deleteEvent } = useAvailabilityEvents();
 
   // Calendar UI context for save state management
@@ -329,6 +331,8 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
     availabilityEvents,
     loading: teamMembersLoading,
     error: teamMembersError,
+    needsJobberReauth,
+    refetch,
 
     // Team member selection
     selectedTeamMembers,

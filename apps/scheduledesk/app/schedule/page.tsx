@@ -4,11 +4,13 @@ import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import AppFrame from '@/components/AppFrame';
+import JobberReauthModal from '@/components/JobberReauthModal';
 import { DragLockProvider } from '@/components/DragDrop/DragDrop';
 import { PopoverProvider } from '@/components/Popover';
 import MainNavigationConfig from '@/config/MainNavigation';
 import ScheduleDocument from '@/components/ScheduleDocument/ScheduleDocument';
 import { useSchedulePageLogic } from '@/lib/hooks/useSchedulePageLogic';
+import { useSidebarState } from '@/hooks/useSidebarState';
 import './SchedulePage.scss';
 
 // Dynamically import CalendarDateRangePicker to avoid SSR issues with Flatpickr
@@ -20,6 +22,7 @@ const CalendarDateRangePicker = dynamic(
 function SchedulePage() {
   const router = useRouter();
   const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useSidebarState('sidebar:schedule', false);
 
   // Use custom hook to get all data and handlers
   const {
@@ -28,6 +31,7 @@ function SchedulePage() {
     scheduleData,
     isLoading,
     error,
+    needsJobberReauth,
     handleDateChange,
     handleRefresh,
   } = useSchedulePageLogic();
@@ -37,8 +41,10 @@ function SchedulePage() {
   };
 
   return (
-    <AppFrame 
+    <AppFrame
       className="schedule-page"
+      sidebarOpen={sidebarOpen}
+      onSidebarToggle={setSidebarOpen}
       sidebarWidth="340px"
       sidebarContent={
         <div className="schedule-page--sidebar">
@@ -51,21 +57,6 @@ function SchedulePage() {
               />
             )}
           </div>
-          
-          {error && (
-            <div className="sidebar-section error">
-              <p>{error}</p>
-              {error.includes('Not authenticated') && (
-                <button 
-                  className="refresh-button"
-                  onClick={() => window.location.href = '/api/auth/jobber'}
-                  style={{ marginTop: '0.5rem' }}
-                >
-                  Connect to Jobber
-                </button>
-              )}
-            </div>
-          )}
         </div>
       }
       topBarMiddleContent={
@@ -93,6 +84,12 @@ function SchedulePage() {
           <ScheduleDocument scheduleData={scheduleData} isLoading={isLoading} />
         </PopoverProvider>
       </DragLockProvider>
+      {needsJobberReauth && (
+        <JobberReauthModal
+          onClose={() => {}}
+          onReauthSuccess={handleRefresh}
+        />
+      )}
     </AppFrame>
   );
 }

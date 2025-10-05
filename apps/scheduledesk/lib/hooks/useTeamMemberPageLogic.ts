@@ -19,6 +19,8 @@ interface UseTeamMemberPageLogicResult {
   availabilityEvents: AvailabilityEvent[];
   loading: boolean;
   error: string | null;
+  needsJobberReauth: boolean;
+  refetch: () => Promise<void>;
 
   // Popover state
   showPopover: boolean;
@@ -42,7 +44,7 @@ interface UseTeamMemberPageLogicResult {
 
 export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogicResult => {
   // Data hooks
-  const { data: teamMembers, loading: teamMembersLoading, error: teamMembersError } = useTeamMembers();
+  const { data: teamMembers, loading: teamMembersLoading, error: teamMembersError, needsJobberReauth, refetch } = useTeamMembers();
   const [teamMember, setTeamMember] = useState<TeamMember>();
 
   // Normal schedule hook (will be used when teamMember is set)
@@ -557,6 +559,8 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
     availabilityEvents: mergedAvailabilityEvents,
     loading: teamMembersLoading || eventsLoading || normalScheduleHook.loading,
     error: teamMembersError || eventsError || normalScheduleHook.error,
+    needsJobberReauth,
+    refetch,
 
     // Popover state
     showPopover,

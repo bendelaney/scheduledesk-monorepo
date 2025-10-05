@@ -9,6 +9,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Authorization code not provided' }, { status: 400 })
   }
 
+  // Decode state to get returnUrl
+  let returnUrl = '/'
+  if (state) {
+    try {
+      const decodedState = JSON.parse(Buffer.from(state, 'base64').toString('utf-8'))
+      returnUrl = decodedState.returnUrl || '/'
+    } catch (err) {
+      console.warn('Failed to decode state parameter:', err)
+    }
+  }
+
   try {
     // Exchange code for access token
     const tokenData = new URLSearchParams({
@@ -44,8 +55,9 @@ export async function GET(request: NextRequest) {
 
     // Store tokens in httpOnly cookies
     const baseUrl = request.nextUrl.origin
-    console.log('Redirecting to:', `${baseUrl}/`)
-    const response = NextResponse.redirect(`${baseUrl}/`)
+    const redirectUrl = `${baseUrl}${returnUrl}`
+    console.log('Redirecting to:', redirectUrl)
+    const response = NextResponse.redirect(redirectUrl)
     response.cookies.set('jobber_access_token', access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
