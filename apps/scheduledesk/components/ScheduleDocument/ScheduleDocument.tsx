@@ -31,8 +31,7 @@ import ScheduleDocumentDay from "@/components/ScheduleDocumentDay";
 import RotatingIcon from "@/components/RotatingIcon";
 import "./ScheduleDocument.scss";
 
-// TEMPORARY DATA
-import ScheduleDocumentData from "@/data/scheduleDocumentData";
+import LoadingSpinner from "../LoadingSpinner";
 
 // Optimized helper functions
 const findAndRemoveMemberFromJob = (updatedScheduleDay: ScheduleDay, sourceAssignment: string, memberId: string): TeamMemberInstance | undefined => {
@@ -121,19 +120,27 @@ const buildInitialFoldState = (scheduleDays: ScheduleDay[]): GroupFoldState => {
 };
 
 interface ScheduleDocumentProps {
-  title?: string | null;
   dates?: [string, string];
-  scheduleDocument: ScheduleDocumentTYPE;
+  scheduleData?: ScheduleDocumentTYPE | null;
+  isLoading?: boolean;
 }
 
 const ScheduleDocument: FC<ScheduleDocumentProps> = ({
-  title = "Untitled Schedule",
-  scheduleDocument = ScheduleDocumentData
+  scheduleData = null,
+  isLoading = false
 }) => {
-  const [scheduleDays, setScheduleDays] = useState(scheduleDocument.scheduleDays);
+  const [scheduleDays, setScheduleDays] = useState(scheduleData?.scheduleDays || []);
   const [foldState, setFoldState] = useState<GroupFoldState>(buildInitialFoldState(scheduleDays || []));
   
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Update scheduleDays when scheduleData prop changes
+  useEffect(() => {
+    if (scheduleData) {
+      setScheduleDays(scheduleData.scheduleDays);
+      setFoldState(buildInitialFoldState(scheduleData.scheduleDays || []));
+    }
+  }, [scheduleData]);
 
   // Initialize FLIP animation hook
   const { flipAnimate, captureState, animateFromState, cancelAnimation, isAnimating } = useFlipAnimation();
@@ -1292,6 +1299,32 @@ const ScheduleDocument: FC<ScheduleDocumentProps> = ({
     };
   }, []);
 
+  // Show loading or empty state
+  if (isLoading) {
+    return (
+      <div className={"loading-view"}>
+        <LoadingSpinner isLoading={isLoading} />
+      </div>
+    );
+  }
+
+  // Only show "no data" message if we have a scheduleData that's explicitly empty
+  // (not just null on initial load)
+  if (!scheduleData || !scheduleDays || scheduleDays.length === 0) {
+    // If scheduleData is null and we're not loading, this is likely initial state
+    // Show a neutral message
+    return (
+      <div className="schedule-document">
+        <div className={"loading-message"}>
+          {/* <h3>Select a date range to load schedule data</h3> */}
+        </div>
+      </div>
+    );
+  }
+
+  // At this point, scheduleData is guaranteed to exist
+  const title = `Scheduling ${scheduleData.scheduleDays[0].shortDate} - ${scheduleData.scheduleDays[scheduleData.scheduleDays.length - 1].shortDate}`;
+
   return (
     <ScheduleProvider>
       <DndContext
@@ -1303,22 +1336,23 @@ const ScheduleDocument: FC<ScheduleDocumentProps> = ({
       >
         <div className="schedule-document">
           <section className="document-head">
-            <h1 className="document-title">Scheduling 3/4-7</h1>
-            <button className="settings-button" onClick={() => { alert("edit schedule settings") }}>
+            <h1 className="document-title">{title}</h1>
+            {/* <button className="settings-button" onClick={() => { alert("edit schedule settings") }}>
               <Gear/>
-            </button>
+            </button> */}
           </section>
 
           {/* JOB QUEUE */}
+          {scheduleData.jobQueue && scheduleData.jobQueue.length > 0 && (
           <section className="job-queue">
             <header onClick={() => toggleGroupFold("jobQueue")}>
               <div className="toggle">
                 <RotatingIcon rotate={foldState.jobQueue} icon={<FoldCaret />} />
               </div>
-              <h2>Job Queue</h2>
+              <h2>Job Queue ({APP_SETTINGS.jobQueueDay})</h2>
             </header>
             <div className={`section-inner ${foldState["jobQueue"] ? 'open' : 'closed'}`}>
-              {ScheduleDocumentData.jobQueue?.map((job) => {
+              {scheduleData.jobQueue?.map((job) => {
                 const jobBlockId = createJobBlockId("queue", job.id.toString());
                 return (
                   <Draggable
@@ -1331,6 +1365,7 @@ const ScheduleDocument: FC<ScheduleDocumentProps> = ({
                       id={job.id.toString()}
                       key={`job-${job.id}`}
                       job={job}
+                      showTimeInputs={false}
                       onModalStateChange={handleModalStateChange}
                     />
                   </Draggable>
@@ -1338,39 +1373,42 @@ const ScheduleDocument: FC<ScheduleDocumentProps> = ({
               })}
             </div>
           </section>
+          )}  
 
-          {/* DAYS */}
-          {scheduleDays
-            .filter((day: ScheduleDay) => day.name !== APP_SETTINGS.jobQueueDay)
-            .map((day: ScheduleDay) => {
-              return (
-                <ScheduleDocumentDay
-                  key={day.date}
-                  scheduleDay={day}
-                  availableTeamMembers={day.teamMembers}
-                  foldState={foldState[day.date]}
-                  unassignedGroupState={foldState[day.date + "unassignedGroup"]}
-                  onFoldStateChange={(currentState: boolean, event: React.MouseEvent) => {
-                    if (event.metaKey) {
-                      toggleAllGroups(currentState);
-                    } else {
-                      toggleGroupFold(day.date);
-                    }
-                  }}
-                  onDayUpdate={handleScheduleDayDataChange}
-                  onUnassignedGroupFoldStateChange={(state: boolean) => {
-                    console.log(`Unassigned group fold state changed to: ${state}`);
-                  }}
-                  onModalStateChange={handleModalStateChange}
-                  memberDragTarget={dragState.memberDragTarget}
-                  jobDragTarget={dragState.jobDragTarget}
-                  activeDragItem={dragState.activeDragItem}
-                  isInvalidDropZone={dragState.isInvalidDropZone}
-                />
-              );
-            }
-          )}
-        </div>
+          <section className="schedule-days">
+            {/* DAYS */}
+            {scheduleDays
+              .filter((day: ScheduleDay) => day.name !== APP_SETTINGS.jobQueueDay)
+              .map((day: ScheduleDay) => {
+                return (
+                  <ScheduleDocumentDay
+                    key={day.date}
+                    scheduleDay={day}
+                    availableTeamMembers={day.teamMembers}
+                    foldState={foldState[day.date]}
+                    unassignedGroupState={foldState[day.date + "unassignedGroup"]}
+                    onFoldStateChange={(currentState: boolean, event: React.MouseEvent) => {
+                      if (event.metaKey) {
+                        toggleAllGroups(currentState);
+                      } else {
+                        toggleGroupFold(day.date);
+                      }
+                    }}
+                    onDayUpdate={handleScheduleDayDataChange}
+                    onUnassignedGroupFoldStateChange={(state: boolean) => {
+                      console.log(`Unassigned group fold state changed to: ${state}`);
+                    }}
+                    onModalStateChange={handleModalStateChange}
+                    memberDragTarget={dragState.memberDragTarget}
+                    jobDragTarget={dragState.jobDragTarget}
+                    activeDragItem={dragState.activeDragItem}
+                    isInvalidDropZone={dragState.isInvalidDropZone}
+                  />
+                );
+              }
+            )}
+          </section>
+      </div>
         
         {typeof window !== 'undefined' && createPortal(
           <DragOverlay className={`drag-overlay ${dragState.draggedContent ? 'active' : ''}`}>

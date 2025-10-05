@@ -16,14 +16,13 @@ const MainNavigation: MainNavigationItem[] = [
     path: '/team',
     icon: People
   },
-  // holding off for now...
-  // {
-  //   id: 'schedule',
-  //   className: 'schedule',
-  //   label: 'Schedule',
-  //   path: '/schedule',
-  //   icon: Checklist
-  // },
+  {
+    id: 'schedule',
+    className: 'schedule',
+    label: 'Schedule',
+    path: '/schedule',
+    icon: Checklist
+  },
 ];
 
 export default MainNavigation;

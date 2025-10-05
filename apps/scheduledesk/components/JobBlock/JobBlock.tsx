@@ -27,6 +27,7 @@ interface JobBlockProps {
   isClone?: boolean;
   className?: string;
   highlightId?: string;
+  showTimeInputs?: boolean;
   onSelected?: (id: string) => void;
   onActive?: (id: string) => void;
   onHighlightChange?: (id: string, highlightId: string) => void;
@@ -51,6 +52,7 @@ const JobBlock: FC<JobBlockProps> = ({
   isClone=false,
   className,
   highlightId,
+  showTimeInputs,
   onSelected,
   onActive,
   onHighlightChange,
@@ -248,6 +250,7 @@ const JobBlock: FC<JobBlockProps> = ({
           </div>
         </div>
 
+        {showTimeInputs && (
         <div className="time-inputs">
           <TimeRangeSelectMenu
             startTime={startTime}
@@ -259,6 +262,7 @@ const JobBlock: FC<JobBlockProps> = ({
             selectMenuProps={{styles: SelectMenuStylePresets.Medium}}
           />
         </div>
+        )}
 
         <button
           ref={menuToggleRef}

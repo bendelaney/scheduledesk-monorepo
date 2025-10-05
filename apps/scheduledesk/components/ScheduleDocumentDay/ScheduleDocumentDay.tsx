@@ -15,7 +15,7 @@ import TeamMemberSelectMenu from "@/components/SelectMenu/TeamMemberSelectMenu";
 import { SelectMenuStylePresets } from '@/components/SelectMenu/SelectMenu';
 import { FoldCaret } from "@/components/Icons";
 import RotatingIcon from "@/components/RotatingIcon";
-import WeatherIcon from "@/components/WeatherIcon";
+// import WeatherIcon from "@/components/WeatherIcon";
 import TeamMemberBlock from "@/components/TeamMemberBlock";
 import {
   MemberDragTarget,
@@ -194,7 +194,7 @@ const ScheduleDocumentDay: FC<ScheduleDocumentDayProps> = ({
         </div>
         <h2>
           {/* <a href={`https://secure.getjobber.com/calendar#day/${scheduleDay.date.replace(/-/g, "/")}`} target="_blank"> */}
-            {scheduleDay.name} {scheduleDay.shortDate}
+            {scheduleDay.name}, {scheduleDay.shortDate}
           {/* </a> */}
           {/* This is the weather icon. currently broken. */}
           {/* {scheduleDay.date > currentDate.toISOString().split('T')[0] ? <WeatherIcon date={scheduleDay.date} linkOut={true} postalCode={APP_SETTINGS.weatherPostalCode} /> : null} */}
@@ -383,7 +383,7 @@ const ScheduleDocumentDay: FC<ScheduleDocumentDayProps> = ({
                       placeholder: "+ Add Team Member",
                       resetOnSelect: true,
                       styles: {
-                        ...SelectMenuStylePresets.Small,
+                        ...SelectMenuStylePresets.Medium,
                         control: () => ({
                           backgroundColor: 'none',
                           border: '0',

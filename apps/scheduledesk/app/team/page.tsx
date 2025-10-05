@@ -9,7 +9,7 @@ import { useTeamMembers } from '@/lib/supabase/hooks/useTeamMembers';
 import MainNavigationConfig from '@/config/MainNavigation';
 import './TeamPage.scss';
 
-export default function TeamPage() {
+function TeamPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { data: teamMembers, loading, error } = useTeamMembers();

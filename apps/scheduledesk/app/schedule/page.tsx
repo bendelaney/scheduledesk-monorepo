@@ -1,90 +1,73 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import AppFrame from '@/components/AppFrame';
-import TeamMemberList from '@/components/TeamMemberList';
-import { useTeamMembers } from '@/lib/supabase/hooks/useTeamMembers';
+import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import AppFrame from '@/components/AppFrame';
+import { DragLockProvider } from '@/components/DragDrop/DragDrop';
+import { PopoverProvider } from '@/components/Popover';
 import MainNavigationConfig from '@/config/MainNavigation';
+import ScheduleDocument from '@/components/ScheduleDocument/ScheduleDocument';
+import { useSchedulePageLogic } from '@/lib/hooks/useSchedulePageLogic';
+import './SchedulePage.scss';
 
-export default function SchedulePage() {
+// Dynamically import CalendarDateRangePicker to avoid SSR issues with Flatpickr
+const CalendarDateRangePicker = dynamic(
+  () => import('@/components/CalendarDateRangePicker'),
+  { ssr: false }
+);
+
+function SchedulePage() {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: teamMembers, loading, error } = useTeamMembers();
-  const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>([]);
-  
-  // Update selected team members when data loads
-  useEffect(() => {
-    if (teamMembers.length > 0) {
-      setSelectedTeamMembers(
-        teamMembers.map(m => m.displayName || `${m.firstName} ${m.lastName || ''}`.trim())
-      );
-    }
-  }, [teamMembers]);
 
-  const handleSelectionChange = (selected: string[]) => {
-    setSelectedTeamMembers(selected);
-  };
-
-  const handleTeamMemberFilter = (filter: string) => {
-    console.log('Team member filter changed:', filter);
-  };
+  // Use custom hook to get all data and handlers
+  const {
+    startDate,
+    endDate,
+    scheduleData,
+    isLoading,
+    error,
+    handleDateChange,
+    handleRefresh,
+  } = useSchedulePageLogic();
 
   const handleNavigation = (path: string) => {
     router.push(path);
   };
 
-  if (loading) {
-    return (
-      <AppFrame 
-        sidebarOpen={false} 
-        sidebarWidth="260px"
-        topBarMiddleContent={
-          <div className="top-bar__navigation">
-            {MainNavigationConfig.map((navItem) => {
-              const Icon = navItem.icon;
-              const isActive = pathname === navItem.path;
-              
-              return (
-                <button
-                  key={navItem.id}
-                  id={`main-nav-${navItem.id}`}
-                  className={`main-nav-button ${navItem.className} ${isActive ? 'active' : ''}`}
-                  onClick={() => handleNavigation(navItem.path)}
-                >
-                  <Icon />
-                </button>
-              );
-            })}
-          </div>
-        }
-      >
-        <div>Loading team members...</div>
-      </AppFrame>
-    );
-  }
-
   return (
     <AppFrame 
+      className="schedule-page"
+      sidebarWidth="340px"
       sidebarContent={
-        <div>
+        <div className="schedule-page--sidebar">
+          <div className="sidebar-section">
+            {startDate && endDate && (
+              <CalendarDateRangePicker
+                startDate={startDate}
+                endDate={endDate}
+                onChange={handleDateChange}
+              />
+            )}
+          </div>
+          
           {error && (
-            <div style={{ padding: '10px', background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '4px', marginBottom: '10px' }}>
-              <small>{error}</small>
+            <div className="sidebar-section error">
+              <p>{error}</p>
+              {error.includes('Not authenticated') && (
+                <button 
+                  className="refresh-button"
+                  onClick={() => window.location.href = '/api/auth/jobber'}
+                  style={{ marginTop: '0.5rem' }}
+                >
+                  Connect to Jobber
+                </button>
+              )}
             </div>
           )}
-          <TeamMemberList 
-            teamMembers={teamMembers}
-            selectedMembers={selectedTeamMembers}
-            onSelectionChange={handleSelectionChange}
-            onFilterChange={handleTeamMemberFilter}
-            showToggleAll={true}
-            showFilterField={true}
-          />
         </div>
       }
-      sidebarOpen={false}
-      sidebarWidth="260px"
       topBarMiddleContent={
         <div className="top-bar__navigation">
           {MainNavigationConfig.map((navItem) => {
@@ -105,10 +88,13 @@ export default function SchedulePage() {
         </div>
       }
     >
-      <div>SchedulePad goes here</div>
+      <DragLockProvider>
+        <PopoverProvider scrollContainerRef={{ current: null }}>
+          <ScheduleDocument scheduleData={scheduleData} isLoading={isLoading} />
+        </PopoverProvider>
+      </DragLockProvider>
     </AppFrame>
   );
 }
 
-// Force dynamic rendering to prevent build-time issues
-export const dynamic = 'force-dynamic';
+export default SchedulePage;

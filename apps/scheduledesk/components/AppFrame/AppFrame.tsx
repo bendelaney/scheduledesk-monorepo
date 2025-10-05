@@ -111,7 +111,7 @@ const AppFrame: React.FC<AppFrameProps> = ({
         {sidebarContent && (
           <div
             className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}
-            // style={{ width: isSidebarOpen ? sidebarWidth : '0' }}
+            style={{ width: isSidebarOpen ? sidebarWidth : '0' }}
           >
             {sidebarContent}
           </div>

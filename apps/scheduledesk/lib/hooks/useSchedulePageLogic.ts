@@ -1,18 +1,6 @@
-'use client';
-
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import dynamic from 'next/dynamic';
-import AppFrame from '@/components/AppFrame';
-import { DragLockProvider } from '@/components/DragDrop/DragDrop';
-import { PopoverProvider } from '@/components/Popover';
-import ScheduleDocument from '@/components/ScheduleDocument/ScheduleDocument';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { transformJobberToScheduleDocument } from '@/utils/jobberTransform';
-
-// Dynamically import CalendarDateRangePicker to avoid SSR issues with Flatpickr
-const CalendarDateRangePicker = dynamic(
-  () => import('@/components/CalendarDateRangePicker'),
-  { ssr: false }
-);
+import { ScheduleDocument } from '@/types';
 
 // Helper functions for date handling
 const getNextSunday = (): Date => {
@@ -33,10 +21,23 @@ const getFollowingFriday = (fromSunday: Date): Date => {
   return friday;
 };
 
-export default function Sandbox() {
+interface UseSchedulePageLogicResult {
+  // Data
+  startDate: Date | null;
+  endDate: Date | null;
+  scheduleData: ScheduleDocument | null;
+  isLoading: boolean;
+  error: string | null;
+  
+  // Handlers
+  handleDateChange: (newStartDate: Date, newEndDate: Date) => void;
+  handleRefresh: () => void;
+}
+
+export const useSchedulePageLogic = (): UseSchedulePageLogicResult => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  const [scheduleData, setScheduleData] = useState<any>(null);
+  const [scheduleData, setScheduleData] = useState<ScheduleDocument | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const lastFetchRef = useRef<number>(0);
@@ -97,6 +98,7 @@ export default function Sandbox() {
         setIsLoading(false);
         return;
       }
+      
       // Transform Jobber data to ScheduleDocument format
       const transformedData = transformJobberToScheduleDocument(responseData, start, end);
       console.log('Transformed Schedule Data:', transformedData);
@@ -118,76 +120,28 @@ export default function Sandbox() {
     }
   }, [startDate, endDate, fetchScheduleData]);
 
-  // Refresh data when window regains focus (cooldown to reduce API calls)
-  // useEffect(() => {
-  //   const handleWindowFocus = () => {
-  //     if (startDate && endDate && Date.now() - lastFetchRef.current > 10000) {
-  //       fetchScheduleData(startDate, endDate);
-  //     }
-  //   };
-
-  //   window.addEventListener('focus', handleWindowFocus);
-  //   return () => window.removeEventListener('focus', handleWindowFocus);
-  // }, [startDate, endDate, fetchScheduleData]);
-
-  const handleDateChange = (newStartDate: Date, newEndDate: Date) => {
+  // Handlers
+  const handleDateChange = useCallback((newStartDate: Date, newEndDate: Date) => {
     setStartDate(newStartDate);
     setEndDate(newEndDate);
-  };
+  }, []);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     if (startDate && endDate) {
       fetchScheduleData(startDate, endDate);
     }
+  }, [startDate, endDate, fetchScheduleData]);
+
+  return {
+    // Data
+    startDate,
+    endDate,
+    scheduleData,
+    isLoading,
+    error,
+    
+    // Handlers
+    handleDateChange,
+    handleRefresh,
   };
-
-  const sidebarContent = (
-    <div className="sandbox-sidebar">
-      <div className="sidebar-section">
-        <h3 className="sidebar-section-title">Date Range</h3>
-        {startDate && endDate && (
-          <CalendarDateRangePicker
-            startDate={startDate}
-            endDate={endDate}
-            onChange={handleDateChange}
-          />
-        )}
-      </div>
-      
-      {/* <div className="sidebar-section">
-        <button 
-          className={`refresh-button ${isLoading ? 'loading' : ''}`}
-          onClick={handleRefresh}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Loading...' : 'Refresh Data'}
-        </button>
-      </div> */}
-
-      {error && (
-        <div className="sidebar-section error">
-          <p>{error}</p>
-          {error.includes('Not authenticated') && (
-            <button 
-              className="refresh-button"
-              onClick={() => window.location.href = '/api/auth/jobber'}
-              style={{ marginTop: '0.5rem' }}
-            >
-              Connect to Jobber
-            </button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-
-  return (
-    <AppFrame sidebarContent={sidebarContent}>
-      <DragLockProvider>
-        <PopoverProvider scrollContainerRef={{ current: null }}>
-          <ScheduleDocument scheduleDocument={scheduleData} isLoading={isLoading} />
-        </PopoverProvider>
-      </DragLockProvider>
-    </AppFrame>
-  );
-}
+};

@@ -5,33 +5,21 @@
   z-index: 1;
   border-radius: 5px;
   position: relative;
-
+  
   .job-block-line {
     display: flex;
     align-items: center;
     padding-left: 10px;
-    padding-right: 18px;
+    // padding-right: 18px;
     user-select: none;
     cursor: grab;
+    // background-color: lightgreen;
 
     // &:active {
     //   cursor: grabbing;
     //   @include activeBlock;
     // }
   }
-
-  &.active {
-    @include activeBlock;
-  }
-  &.selected {
-    .job-block-line {
-      @include selectedBlock;
-    }
-  }
-
-  // &:hover {
-  //   background-color: rgb(245, 245, 242);
-  // }
 
   .job-title-wrap {
     display: flex;
@@ -60,11 +48,11 @@
       &:hover {
         box-shadow: 0 1.3px 0 0 var(--light-gray);
       }
-    }
 
+    }
     .client-last-name {
       font-weight: 700;
-      cursor: help;
+      cursor: pointer;
 
       &:hover {
         border-bottom-color: var(--jobber-green);
@@ -151,31 +139,31 @@
     }
   }
 
-  .job-info-button {
-    position: absolute;
-    right: 30px;
-    color: var(--medium-gray);
-    width:  20px;
-    height: 20px;
-    transition: color 0.2s;
+  // .job-info-button {
+  //   position: absolute;
+  //   right: 30px;
+  //   color: var(--medium-gray);
+  //   width:  20px;
+  //   height: 20px;
+  //   transition: color 0.2s;
 
-    &:hover {
-      color: var(--primary-blue);
-    }
+  //   &:hover {
+  //     color: var(--primary-blue);
+  //   }
 
-    svg {
-      @include svgIcon;
-    }
-  }
+  //   svg {
+  //     @include svgIcon;
+  //   }
+  // }
 
   .job-highlight-toggle {
-    position: absolute;
+    display: flex;
     color: var(--medium-gray);
-    right: 6px;
-    width:  16px;
-    height: 16px;
-    transition: color 0.2s;
+    padding: 8px;    
+    align-items: center;
+    transition: all 0.2s;
     cursor: context-menu;
+    opacity: 0;
 
     &:hover {
       color: var(--dark-gray);
@@ -220,5 +208,21 @@
   // Hide drop hint when dragging is active to reduce visual clutter
   .drag-in-progress .empty-member-drop-zone .drop-hint {
     opacity: 0.7;
+  }
+
+  // .job-block states
+  &.active {
+    @include activeBlock;
+  }
+  &.selected {
+    .job-block-line {
+      @include selectedBlock;
+    }
+  }
+  &:hover {
+    background-color: rgba(245, 245, 242, 0.8);
+    .job-highlight-toggle {
+      opacity: 1;
+    }
   }
 }
