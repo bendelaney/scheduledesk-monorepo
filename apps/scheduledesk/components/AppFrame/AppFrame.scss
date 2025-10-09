@@ -75,17 +75,17 @@
       align-items: center;
       justify-content: center;
       display: flex;
-      gap: 10px;
+      gap: 20px;
       font-size: 32px;
       color: $medium-dark-gray;
 
       .nav-separator {
         font-size: 22px;
-        margin: 0 -5px;
+        margin: 0px -26px 0 -22px;
       }
 
       .person-icon {
-        color: $primary-blue
+        color: $primary-blue;
       }
     }
   }

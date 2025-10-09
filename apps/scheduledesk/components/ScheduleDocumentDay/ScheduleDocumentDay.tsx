@@ -380,7 +380,7 @@ const ScheduleDocumentDay: FC<ScheduleDocumentDayProps> = ({
                   <TeamMemberSelectMenu
                     teamMembers={TeamMembersData}
                     selectMenuProps={{
-                      placeholder: "+ Add Team Member",
+                      placeholder: "+ Add Member",
                       resetOnSelect: true,
                       styles: {
                         ...SelectMenuStylePresets.Medium,

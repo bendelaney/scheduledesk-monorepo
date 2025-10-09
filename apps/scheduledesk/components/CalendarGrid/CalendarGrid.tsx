@@ -620,7 +620,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       className={`calendar-day ${day.isCurrentMonth ? 'calendar-day--current-month' : 'calendar-day--other-month'} ${day.isToday ? 'calendar-day--today' : ''}`}
       onClick={() => handleDayClick(day)}
     >
-      <div className="calendar-day__number">{day.day}</div>
+      <div className="calendar-day__number"><span>{day.day}</span></div>
       <div className="calendar-day__events">
         {day.events.map(renderEvent)}
       </div>

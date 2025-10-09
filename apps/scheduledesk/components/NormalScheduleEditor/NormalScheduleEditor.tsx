@@ -69,7 +69,7 @@ const NormalScheduleEditor: React.FC<NormalScheduleEditorProps> = ({
   return (
     <div className="normal-schedule-editor">
       <div className="normal-schedule-editor__header">
-        <h3>Normal Schedule for {teamMember.firstName}</h3>
+        <h3>Normal Weekly Schedule for {teamMember.firstName}</h3>
         <p className="normal-schedule-editor__description">
           Click on any day to add working hours, appointments, or other recurring schedule items.
         </p>

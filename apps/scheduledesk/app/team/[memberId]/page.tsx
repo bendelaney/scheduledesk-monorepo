@@ -69,8 +69,9 @@ function TeamMemberPageContent() {
   
   return (
     <AppFrame
-      className="team-member-page"
+      className={`team-member-page ${showNormalScheduleEditor ? 'normal-schedule-editor-open' : 'normal-schedule-editor-closed'}`}
       showSidebarToggle={false}
+      sidebarOpen={false}
       topBarLeftContent={
         <button
           ref={newEventButtonRef}
@@ -120,7 +121,7 @@ function TeamMemberPageContent() {
         <button
           aria-label={`Edit ${teamMember?.firstName}'s Weekly Schedule`}
           title={`Edit ${teamMember?.firstName}'s Weekly Schedule`}
-          className="btn btn--small btn--secondary edit-weekly-schedule"
+          className={`btn btn--small edit-weekly-schedule ${showNormalScheduleEditor ? 'btn--primary' : 'btn--secondary'}`}
           onClick={() => {
             if (showNormalScheduleEditor) {
               // Save logic here - for now just hide

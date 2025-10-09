@@ -533,15 +533,7 @@ export const useTeamMemberPageLogic = (memberId: string): UseTeamMemberPageLogic
     }
   }, [activeEvent, safeDeleteEvent, handleClosePopover, setSaving]);
   
-  console.log('TeamMemberPage - Events for', teamMember?.firstName, teamMember?.lastName, ':', mergedAvailabilityEvents.length);
-  console.log('TeamMemberPage - Event details:', mergedAvailabilityEvents.map(e => ({
-    id: e.id,
-    teamMember: `${e.teamMember.firstName} ${e.teamMember.lastName}`,
-    eventType: e.eventType,
-    startDate: e.startDate,
-    isNormalSchedule: e.isNormalSchedule,
-    isExpandedNormalSchedule: e.isExpandedNormalSchedule
-  })));
+  // Removed excessive logging for performance
 
   // Cleanup auto-save timeout on unmount
   useEffect(() => {

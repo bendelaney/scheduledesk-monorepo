@@ -4,8 +4,11 @@ import React, { useEffect, useCallback, useRef, useState } from "react";
 import { DateTime } from 'luxon';
 import { JobVisit, JobVisitConfirmationStatus } from '@/types';
 import DateSelector from '@/components/DateSelector';
+import { TimeRangeSelectMenu } from '@/components/SelectMenu';
+import { SelectMenuStylePresets } from '@/components/SelectMenu/SelectMenu';
 import { LinkOut } from '@/components/Icons';
 import './JobDetailsView.scss';
+import { DatePicker } from "react-datepicker";
 
 interface JobDetailsViewProps {
   id?: string;
@@ -85,18 +88,42 @@ const JobDetailsView: React.FC<JobDetailsViewProps> = ({
           <div className="scheduling-details-container">
             <div className="date-time">
               <div className="date">
-                <DateSelector
+                {/* <DateSelector
                   date={date}
                   value={dateSelectorValue || "Start Date"}
                   onChange={handleDateChange}
+                /> */}
+                <DatePicker
+                  calendarClassName="date-selector_calendar"
+                  selected={date}        
+                  onChange={handleDateChange}
+                  selectsStart
+                  startDate={date}
+                  endDate={date}
+                  // maxDate={theEndDate || undefined}
+                  // customInput={<StartDateSelectorButton />}
+                  popperPlacement='top-start'
+                  // onCalendarClose={() => handleStartCalOpenState(false)}
+                  // onCalendarOpen={() => handleStartCalOpenState(true)}
+                  // {...sharedProps}
                 />
               </div>
               <div className="time-inputs">
-                {/* Placeholder for TimeRangeSelectMenu - would need to be implemented separately */}
-                <div className="time-range-placeholder">
-                  <span>Start: {startTime || 'Not set'}</span>
-                  <span>End: {endTime || 'Not set'}</span>
-                </div>
+                <TimeRangeSelectMenu
+                  startTime={startTime}
+                  endTime={endTime}
+                  onChange={(newStartTime, newEndTime) => {
+                    setStartTime(newStartTime);
+                    setEndTime(newEndTime);
+                    onTimeChange && onTimeChange(newStartTime, newEndTime);
+                  }}
+                  interval={30}
+                  selectMenuProps={{
+                    isSearchable: true,
+                    styles: SelectMenuStylePresets.Large,
+                    instanceId: "job-details-time-range"
+                  }}
+                />
               </div>
             </div>
 
@@ -151,7 +178,8 @@ const JobDetailsView: React.FC<JobDetailsViewProps> = ({
                 {job.assignedMembers.map((member, index: number) => (
                   <li className="team-member" key={index}>
                     <div className="avatar">
-                      <img src={`/images/avatars/${member.member.firstName.toLowerCase()}.png`} alt={member.member.firstName} />
+                      {/* TODO: We'll need to replace these images with the actual image paths for the images that we are storing in Supabase.  */}
+                      <img src={`/data/teamMemberAvatars/${member.member.firstName.toLowerCase()}.jpg`} alt={member.member.firstName} />
                     </div>
                     <span className="name">{member.member.firstName}</span>
                   </li>

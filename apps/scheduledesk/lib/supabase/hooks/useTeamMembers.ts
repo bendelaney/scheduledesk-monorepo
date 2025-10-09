@@ -10,6 +10,11 @@ interface UseTeamMembersResult {
   refetch: () => Promise<void>;
 }
 
+// Simple cache with 5-minute TTL
+let teamMembersCache: TeamMember[] | null = null;
+let cacheTimestamp: number = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 export const useTeamMembers = (): UseTeamMembersResult => {
   const [data, setData] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,10 +23,20 @@ export const useTeamMembers = (): UseTeamMembersResult => {
 
   const fetchTeamMembers = async () => {
     try {
+      // Check cache first
+      const now = Date.now();
+      if (teamMembersCache && (now - cacheTimestamp) < CACHE_TTL) {
+        setData(teamMembersCache);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
       setNeedsJobberReauth(false);
       const teamMembers = await getMergedTeamMembers();
+      teamMembersCache = teamMembers;
+      cacheTimestamp = Date.now();
       setData(teamMembers);
     } catch (err: any) {
       console.error('useTeamMembers error:', err);

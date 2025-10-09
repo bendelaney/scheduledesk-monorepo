@@ -32,8 +32,10 @@ function timeRangeOptionsArray(startTime: string, endTime: string, interval: num
 
 // This will always return a TimeOption object, which has the "simple time" ('h:mm a' or '1:30 PM') format as both value and label
 const getTimeOptionFrom = (isoTimeString: string | undefined): TimeOption | null => {
-  if (isoTimeString === undefined) return null;
-  const simpleTime = DateTime.fromISO(isoTimeString).toLocaleString(DateTime.TIME_SIMPLE) as string;
+  if (!isoTimeString) return null;
+  const dt = DateTime.fromISO(isoTimeString);
+  if (!dt.isValid) return null;
+  const simpleTime = dt.toLocaleString(DateTime.TIME_SIMPLE) as string;
   const timeOption = {
     value: simpleTime,
     label: simpleTime,

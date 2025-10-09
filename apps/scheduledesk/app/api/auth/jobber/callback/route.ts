@@ -21,6 +21,21 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Validate required environment variables
+    const missingVars = []
+    if (!process.env.JOBBER_CALLBACK_URL) missingVars.push('JOBBER_CALLBACK_URL')
+    if (!process.env.JOBBER_CLIENT_ID) missingVars.push('JOBBER_CLIENT_ID')
+    if (!process.env.JOBBER_CLIENT_SECRET) missingVars.push('JOBBER_CLIENT_SECRET')
+    if (!process.env.JOBBER_TOKEN_URL) missingVars.push('JOBBER_TOKEN_URL')
+
+    if (missingVars.length > 0) {
+      console.error('Missing environment variables:', missingVars)
+      return NextResponse.json({
+        error: 'Server configuration error',
+        details: `Missing environment variables: ${missingVars.join(', ')}`
+      }, { status: 500 })
+    }
+
     // Exchange code for access token
     const tokenData = new URLSearchParams({
       grant_type: 'authorization_code',

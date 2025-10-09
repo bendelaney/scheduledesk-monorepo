@@ -137,7 +137,8 @@ export const useSchedulePageLogic = (): UseSchedulePageLogicResult => {
     if (startDate && endDate) {
       fetchScheduleData(startDate, endDate);
     }
-  }, [startDate, endDate, fetchScheduleData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startDate, endDate]);
 
   // Handlers
   const handleDateChange = useCallback((newStartDate: Date, newEndDate: Date) => {

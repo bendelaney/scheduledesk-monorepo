@@ -224,16 +224,26 @@
       margin-bottom: 0.25rem;
       color: $medium-dark-gray;
       text-align: center;
+      
+      span {
+        padding: 0.15rem 0;
+        margin: 0.15rem;
+        display: block;
+      }
     }
 
     &--today {
       background-color: color-mix(in srgb, $primary-blue 10%, #fff 90%);
-      .calendar-day__number {
-        font-size: 0.875rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        color: $primary-blue;
-        text-align: right;
+
+      .calendar-day__number span {
+        border-radius: 4px;
+        padding: 0.15rem 0.35rem;
+        background-color: $primary-blue;
+        // padding: 0.8rem;
+        font-weight: 900;
+        color: #fff;
+        // color: $primary-blue;
+        // text-align: right;
       }
     }
 
@@ -321,30 +331,13 @@
       }
     }
     
-    // For now they are hardcoded here and in EventTypes.ts
-    // If you change the colors in EventTypes.ts, make sure to update them here too
-    // We'll be moving these to the DB soon anyway as user-configurable options.
-    $eventtype-starts-late: #feb816;
-    $eventtype-ends-early: #FF7F00;
-    $eventtype-personal-appointment: #9D4DF2;
-    $eventtype-not-working: #A87360;
-    $eventtype-on-vacation: #2BAA2E;
-    $eventtype-working: #4babff;
-    $eventtype-custom: #8c8e90;
-
     // These colors get set in the component. These are just here in case
     //  tweaking is needed.
-    &--starts-late {
-      
-    }
+    &--starts-late {}
     
-    &--ends-early {
-      
-    }
+    &--ends-early {}
     
-    &--personal-appointment {
-      
-    }
+    &--personal-appointment {}
     
     &--not-working {
       .calendar-event__eventType--short {
@@ -367,13 +360,9 @@
       }
     }
 
-    &--vacation {
+    &--vacation {}
 
-    }
-
-    &--custom {
-
-    }
+    &--custom {}
 
     @media (max-width: 767px) {
       font-size: 0.80rem;
@@ -385,23 +374,7 @@
 
   // Normal schedule event styles
   .normal-schedule-event {
-    // border: 2px dashed rgba(0, 0, 0, 0.2);
-    // border-radius: 0.3rem !important;
     position: relative;
-
-    // &::before {
-    //   display: flex;
-    //   align-items: center;
-    //   justify-content: center;
-    //   position: absolute;
-    //   content: "🔁";
-    //   top:   3px;
-    //   right: 3px;
-    //   font-size: 11px;
-    // }
-
-    // Slightly different opacity for normal schedule events
-    // opacity: 0.85;
 
     &:hover {
       opacity: 1;

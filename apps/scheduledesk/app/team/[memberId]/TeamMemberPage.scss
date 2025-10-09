@@ -89,14 +89,11 @@
   }
 
   // Grayed out effect for main calendar when normal schedule editor is open
-  .team-member-calendar-wrapper {
-    transition: all 0.3s ease-in-out;
-
-    &.grayed-out {
+  &.normal-schedule-editor-open {
+    .team-member-calendar {
       opacity: 0.4;
       pointer-events: none;
-      filter: grayscale(0.3);
-      transform: scale(0.98);
+      filter: grayscale(1);
     }
   }
 }
