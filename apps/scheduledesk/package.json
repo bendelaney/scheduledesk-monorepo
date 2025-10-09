@@ -13,11 +13,12 @@
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@react-spring/web": "^10.0.1",
-    "@repo/components": "*",
-    "@repo/ui": "*",
+    "@repo/components": "workspace:*",
+    "@repo/ui": "workspace:*",
     "@supabase/supabase-js": "^2.56.1",
     "@types/luxon": "^3.7.1",
     "@types/react-datepicker": "^7.0.0",
+    "@vercel/analytics": "^1.5.0",
     "dotenv": "^17.2.1",
     "framer-motion": "^12.23.12",
     "gsap": "^3.13.0",
@@ -33,8 +34,8 @@
     "spin.js": "^4.1.2"
   },
   "devDependencies": {
-    "@repo/eslint-config": "*",
-    "@repo/typescript-config": "*",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",

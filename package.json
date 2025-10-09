@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "description": "ScheduleDesk monorepo - scheduling and project management platform",
-  "packageManager": "pnpm@8.15.0",
+  "packageManager": "pnpm@10.18.1",
   "scripts": {
     "dev": "turbo dev",
     "dev:scheduledesk": "pnpm --filter=scheduledesk dev",
