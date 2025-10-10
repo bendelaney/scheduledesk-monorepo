@@ -1,0 +1,3 @@
+One of the next big tasks now that we basically have both the Team Calendar and the Scheduler in place... is to combine their data so that the Team Members' availability is actually accurately reflected on the ScheduleDocument. Team Members should appear correctly on the schedule days based on their Normal Weekly Schedule settings and any specific or recurring availability events that they may have. They should of course not appear as available on days that they are "Not Working" or "On Vacation". Basically: all the AvailabilityEvent data needs to make its way onto the ScheduleDocument. 
+
+Give this some thought and ask me any questions that come up. I'd like a clean efficient plan for integrating 

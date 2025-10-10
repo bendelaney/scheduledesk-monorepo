@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, FC, useEffect, useRef, useCallback, use } from "react";
 import { createPortal } from 'react-dom';
-import { ScheduleDay, ScheduleDocument as ScheduleDocumentTYPE, TeamMemberInstance } from "@/types";
+import { ScheduleDay, ScheduleDocument as ScheduleDocumentType, TeamMemberInstance } from "@/types";
 import { ScheduleProvider } from "@/contexts/ScheduleContext";
 import { 
   DndContext, 
@@ -121,7 +121,7 @@ const buildInitialFoldState = (scheduleDays: ScheduleDay[]): GroupFoldState => {
 
 interface ScheduleDocumentProps {
   dates?: [string, string];
-  scheduleData?: ScheduleDocumentTYPE | null;
+  scheduleData?: ScheduleDocumentType | null;
   isLoading?: boolean;
 }
 
