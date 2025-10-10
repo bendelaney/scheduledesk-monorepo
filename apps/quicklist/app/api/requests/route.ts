@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
 
   const makeQueryBody = (withAssignees: boolean, assignedToIds: string[] | null) => ({
     query: baseQuery(withAssignees),
-    variables: { start: startDate, end: endDate, first: 50, assignedTo: assignedToIds, includeUnassigned: true }
+    variables: { start: startDate, end: endDate, first: 150, assignedTo: assignedToIds, includeUnassigned: true }
   })
 
   const doFetch = async (withAssignees: boolean, assignedToIds: string[] | null) => {
