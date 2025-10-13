@@ -3,12 +3,12 @@
 [] Need to deal with NORMAL WEEKLY SCHEDULE
   - visibility (or not) on /team-calendar
   - edit and visibility on teammembercalendar
-  [√] I think we need a new event type just called "Working" 
+  [✓] I think we need a new event type just called "Working" 
     So that every person can have their set schedule with their normal "Working" hours and "Not Working" days/hours
 
-[] Need caching for data that's getting fetched too much: 
+[✓] Need caching for data that's getting fetched too much: 
   - Team Members
-  - Events
+  - Events [?]
   
 [] Show Weekends toggle
 
