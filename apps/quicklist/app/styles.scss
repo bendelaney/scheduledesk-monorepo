@@ -117,7 +117,8 @@ h1 {
   border-radius: $boxRadius;
   border: 1px solid #ccc;
   width: 100%;
-  color: #333;
+  color: #333 !important;
+  -webkit-text-fill-color: #333 !important;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -129,6 +130,11 @@ h1 {
   background-size: 16px;
   background-color: white;
   cursor: pointer;
+}
+
+#optionsContainer select option {
+  color: #333 !important;
+  -webkit-text-fill-color: #333 !important;
 }
 
 #optionsContainer select:focus {
@@ -251,6 +257,12 @@ h1 {
   width: auto !important;
   padding: 4px 10px 4px 9px !important;
   color: #333 !important;
+  -webkit-text-fill-color: #333 !important;
+}
+
+.flatpickr-calendar select option {
+  color: #333 !important;
+  -webkit-text-fill-color: #333 !important;
 }
 
 /* .flatpickr-months { padding-top: 30px; } */
