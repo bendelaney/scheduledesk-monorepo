@@ -4,6 +4,12 @@ import "./styles.scss";
 export const metadata: Metadata = {
   title: "QuickList, for Jobber",
   description: "The fastest way to view your Jobber Visits.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "QuickList",
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', type: 'image/x-icon' },
@@ -23,7 +29,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1.0,
   userScalable: false,
-  maximumScale: 1.0
+  maximumScale: 1.0,
+  themeColor: "#0066cc"
 };
 
 export default function RootLayout({
