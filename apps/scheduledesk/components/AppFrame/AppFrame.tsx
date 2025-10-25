@@ -79,8 +79,8 @@ const AppFrame: React.FC<AppFrameProps> = ({
 
   return (
     <div className={`app-frame ${className} ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-      <div className="top-bar">
-        <div className="top-bar__left">
+      <div className="app-frame__top-bar">
+        <div className="app-frame__top-bar-left">
           {showSidebarToggle && sidebarContent && (
             <button
               className="sidebar-toggle-button"
@@ -93,29 +93,27 @@ const AppFrame: React.FC<AppFrameProps> = ({
           )}
           {topBarLeftContent}
         </div>
-        <div className="top-bar__middle">
+        <div className="app-frame__top-bar-middle">
           {topBarMiddleContent}
         </div>
-        <div className="top-bar__right">
+        <div className="app-frame__top-bar-right">
           {topBarRightContent}
         </div>
       </div>
 
-      <div className="content-wrapper">
+      <div className="app-frame__content-wrapper">
         {sidebarContent && (
           <div
-            className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}
+            className={`app-frame__sidebar ${isSidebarOpen ? 'open' : 'closed'}`}
             style={{ width: isSidebarOpen ? sidebarWidth : '0' }}
           >
             {sidebarContent}
           </div>
         )}
 
-        {/* <PopoverProvider scrollContainerRef={scrollContainerRef}> */}
-          <div className="main-content" ref={scrollContainerRef}>
-            {children}
-          </div>
-        {/* </PopoverProvider> */}
+        <div className="app-frame__main-content" ref={scrollContainerRef}>
+          {children}
+        </div>
       </div>
     </div>
   );

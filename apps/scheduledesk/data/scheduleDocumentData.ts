@@ -1,10 +1,11 @@
-import { 
-  JobVisit, 
-  ScheduleDay, 
-  ScheduleDocument, 
-  JobVisitConfirmationStatus, 
-  TeamMemberInstance 
+import {
+  JobVisit,
+  ScheduleDay,
+  ScheduleDocument,
+  JobVisitConfirmationStatus,
+  TeamMemberInstance
 } from "types";
+import { format, parseISO } from 'date-fns';
 import TeamMembersData from "./teamMembersData";
 import APP_SETTINGS from "./appSettings";
 
@@ -1407,11 +1408,11 @@ const rawVisitsDATA = {
 //////////////////////////////////////////
 const transformVisitData = (visit: any): JobVisit => {
   const v = visit.node;
-  const date = new Date(v.startAt).toISOString().split('T')[0];
-  const shortDate = new Date(v.startAt).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', timeZone: 'UTC' });
+  const date = format(parseISO(v.startAt), 'yyyy-MM-dd');
+  const shortDate = format(parseISO(v.startAt), 'M/d');
   const startTime = v.startAt ? v.startAt.split('T')[1] : undefined;
   const endTime = v.endAt ? v.endAt.split('T')[1] : undefined;
-  const dayName = new Date(v.startAt).toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+  const dayName = format(parseISO(v.startAt), 'EEEE');
 
   const returnVisitData = {
     id: v.id,
@@ -1502,18 +1503,18 @@ const transformDateRangeData = (data: any): ScheduleDocument => {
 
   // This is where we loop through the visits and create the jobQueue, scheduleDays, and teamMember availability
   data.data.visits.edges.forEach((visit: any) => {
-    const date = new Date(visit.node.startAt).toISOString().split('T')[0];
-    const dateName = new Date(date).toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
-    
-    // Here's where we grab the visits on our user-selectable "Job Queue" day, 
+    const date = format(parseISO(visit.node.startAt), 'yyyy-MM-dd');
+    const dateName = format(parseISO(visit.node.startAt), 'EEEE');
+
+    // Here's where we grab the visits on our user-selectable "Job Queue" day,
     // which defaults to Sunday, and put them in the Job Queue.
     if (dateName === APP_SETTINGS.jobQueueDay) {
       jobQueue.push(transformVisitData(visit));
     }
-    
+
     let scheduleDay = scheduleDays.find(day => day.date === date);
     if (!scheduleDay) {
-      const shortDate = new Date(date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', timeZone: 'UTC' });
+      const shortDate = format(parseISO(visit.node.startAt), 'M/d');
       
       /////////////////////////////////////////////////////////////
       // Fake AVAILABILITY data for the team members... 
@@ -1537,10 +1538,10 @@ const transformDateRangeData = (data: any): ScheduleDocument => {
   return {
     id: 'SP-001',
     title: 'Schedule Document',
-    date_created: new Date().toISOString(),
-    date_modified: new Date().toISOString(),
+    date_created: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
+    date_modified: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
     dateRangeStart: data.data.visits.edges[0].node.startAt,
-    dateRangeEnd: data.data.visits.edges[data.data.visits.edges.length - 1].node.startAt, 
+    dateRangeEnd: data.data.visits.edges[data.data.visits.edges.length - 1].node.startAt,
     scheduleDays: scheduleDays,
     jobQueue: jobQueue
   };

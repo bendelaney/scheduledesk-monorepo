@@ -1,4 +1,4 @@
-.app-frame.team-member-page {
+.team-member-page {
   .new-event-button {
     color: $primary-blue;
     
@@ -7,7 +7,7 @@
     }
   }
 
-  .content-wrapper {
+  .app-frame__content-wrapper {
     padding: 0 14px;
 
     @media (max-width: 768px) {
@@ -15,7 +15,7 @@
     }
   }
 
-  .main-content {
+  .app-frame__main-content {
     border-top: none !important;
   }
 

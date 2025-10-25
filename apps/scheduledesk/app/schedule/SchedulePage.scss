@@ -1,12 +1,12 @@
-.app-frame.schedule-page {
-  .content-wrapper {
+.schedule-page {
+  .app-frame__content-wrapper {
     padding: 0 1rem;
   }
-  .sidebar {
+  .app-frame__sidebar {
     padding: 0 1rem 0 0;
     &.closed {padding: 0;}
   }
-  .main-content {
+  .app-frame__main-content {
     flex: 1;
     background: #ffffff;
     border: 1px solid #cacac7;

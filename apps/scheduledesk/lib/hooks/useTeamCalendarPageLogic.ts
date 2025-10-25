@@ -33,6 +33,10 @@ interface UseTeamCalendarPageLogicResult {
   activeEvent: AvailabilityEvent | null;
   newEventButtonRef: React.RefObject<HTMLButtonElement | null>;
 
+  // Day view state
+  dayViewOpen: boolean;
+  selectedDates: string[];
+
   // Event handlers
   handleNewEventPopoverOpen: () => void;
   handleNewEventDataChange: (data: Partial<AvailabilityEvent>) => void;
@@ -56,6 +60,8 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
   // Team member selection state
   const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>([]);
   const hasInitialized = useRef(false);
+  const [dayViewOpen, setDayViewOpen] = useState<boolean>(false);
+  const [selectedDates, setSelectedDates] = useState<string[]>([]);
 
   // Initialize selected team members when data loads (only once)
   useEffect(() => {
@@ -80,14 +86,14 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
   const activeEvent = activeEventId ? availabilityEvents.find(e => e.id === activeEventId) || null : null;
 
   // Debug logging
-  useEffect(() => {
-    console.log('TEAM CALENDAR: Popover state changed:', {
-      showNewEventPopover,
-      activeEventId,
-      activeEventFound: !!activeEvent,
-      availabilityEventsCount: availabilityEvents.length
-    });
-  }, [showNewEventPopover, activeEventId, activeEvent, availabilityEvents.length]);
+  // useEffect(() => {
+  //   console.log('TEAM CALENDAR: Popover state changed:', {
+  //     showNewEventPopover,
+  //     activeEventId,
+  //     activeEventFound: !!activeEvent,
+  //     availabilityEventsCount: availabilityEvents.length
+  //   });
+  // }, [showNewEventPopover, activeEventId, activeEvent, availabilityEvents.length]);
 
   // Sync newEventData with activeEvent when data refreshes
   useEffect(() => {
@@ -203,6 +209,16 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
 
   const handleDayClick = useCallback((date: string) => {
     console.log('Day clicked:', date);
+    setSelectedDates(prev => {
+      if (prev.includes(date)) {
+        setDayViewOpen(false);
+        return prev.filter(d => d !== date);
+      } else {
+        setDayViewOpen(true);
+        // return [...prev, date];
+        return [date];
+      }
+    });
   }, []);
 
   const handleNewEventClick = useCallback((date: string, targetEl: HTMLElement) => {
@@ -346,6 +362,10 @@ export const useTeamCalendarPageLogic = (): UseTeamCalendarPageLogicResult => {
     popoverTarget,
     activeEvent,
     newEventButtonRef,
+
+    // Day view state
+    dayViewOpen,
+    selectedDates,
 
     // Event handlers
     handleNewEventPopoverOpen,

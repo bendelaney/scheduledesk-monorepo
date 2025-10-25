@@ -1,17 +1,12 @@
 // filepath: /Users/ben/Code/scheduledesk-monorepo/apps/web/utils/dateUtils.ts
+import { format, addDays, getDay } from 'date-fns';
+
 export const getTodayInLocalTimezone = (): string => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return format(new Date(), 'yyyy-MM-dd');
 };
 
 export const formatDateToLocalString = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return format(date, 'yyyy-MM-dd');
 };
 
 /**
@@ -43,14 +38,14 @@ export const getSmartDefaultDate = (templateDay: string, selectedDate?: string):
 
   // Calculate next occurrence of target weekday
   const today = new Date();
-  const currentDay = today.getDay();
+  const currentDay = getDay(today);
 
   // Days to add: if target day is today, add 7 days (next week)
   // Otherwise, add days to reach next occurrence
   let daysToAdd = (targetDay - currentDay + 7) % 7;
   if (daysToAdd === 0) daysToAdd = 7; // If today is target day, go to next week
 
-  const nextOccurrence = new Date(today.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+  const nextOccurrence = addDays(today, daysToAdd);
   return formatDateToLocalString(nextOccurrence);
 };
 

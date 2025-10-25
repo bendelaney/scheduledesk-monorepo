@@ -1,24 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { addDays, getDay, startOfDay, endOfDay, format } from 'date-fns';
 import { transformJobberToScheduleDocument } from '@/utils/jobberTransform';
 import { ScheduleDocument } from '@/types';
 
 // Helper functions for date handling
 const getNextSunday = (): Date => {
   const now = new Date();
-  const day = now.getDay();
+  const day = getDay(now);
   let daysUntilSunday = (7 - day) % 7;
   if (daysUntilSunday === 0) daysUntilSunday = 7;
-  const nextSunday = new Date(now);
-  nextSunday.setDate(now.getDate() + daysUntilSunday);
-  nextSunday.setHours(0, 0, 0, 0);
-  return nextSunday;
+  return startOfDay(addDays(now, daysUntilSunday));
 };
 
 const getFollowingFriday = (fromSunday: Date): Date => {
-  const friday = new Date(fromSunday);
-  friday.setDate(fromSunday.getDate() + 5);
-  friday.setHours(23, 59, 59, 999);
-  return friday;
+  return endOfDay(addDays(fromSunday, 5));
 };
 
 interface UseSchedulePageLogicResult {
@@ -59,16 +54,11 @@ export const useSchedulePageLogic = (): UseSchedulePageLogicResult => {
 
     // Format dates for API call using UTC
     const formatUTCDate = (date: Date): string => {
-      const year = date.getUTCFullYear();
-      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-      const day = String(date.getUTCDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      return format(date, 'yyyy-MM-dd');
     };
 
     // Create end date + 1 day for proper range
-    const endDatePlusOne = new Date(end);
-    endDatePlusOne.setDate(endDatePlusOne.getDate() + 1);
-    endDatePlusOne.setHours(0, 0, 0, 0);
+    const endDatePlusOne = startOfDay(addDays(end, 1));
 
     const startDateStr = formatUTCDate(start);
     const extendedEndDate = formatUTCDate(endDatePlusOne);

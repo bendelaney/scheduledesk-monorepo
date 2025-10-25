@@ -77,4 +77,8 @@ $modal-zindex: 10000;
   --menu-zindex: #{$menu-zindex};
   --modal-zindex: #{$modal-zindex};
   --box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.4);
+
+  /////////////////////////////////
+  // Animations
+  --soft-bounce-easing: linear(0, 0.351 9%, 0.626 18.3%, 0.832 28.1%, 0.909 33.2%, 0.971 38.5%, 1.013 43.3%, 1.043 48.4%, 1.062 53.8%, 1.07 59.5%, 1.063 68.8%, 1.011 90.3%, 1);
 }

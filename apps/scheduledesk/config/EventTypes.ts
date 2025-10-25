@@ -30,7 +30,7 @@ export const EventTypes: EventTypeConfig[] = [
     name: "Not Working",
     displayName: "Not Working",
     shortDisplayName: "×",
-    color: "#A87360" //
+    color: "#815646" //
   },
   {
     name: "Vacation",
@@ -42,13 +42,13 @@ export const EventTypes: EventTypeConfig[] = [
     name: "Working",
     displayName: "Working",
     shortDisplayName: "✓",
-    color: "#4babff"
+    color: "#529e4c"
   },
   {
     name: "Custom",
     displayName: "Custom",
     shortDisplayName: "",
-    color: "#8c8e90"
+    color: "#4babff"
   }
 ];
 
@@ -112,6 +112,7 @@ export const getEventTypeCalendarDisplayText = (event: { eventType: EventTypeNam
     }
     return `${hour12}:${minutes}`;
   };
+
   const isAM = (time: string): boolean => {
     if (!time) return false;
     const [hours] = time.split(':');
@@ -123,13 +124,13 @@ export const getEventTypeCalendarDisplayText = (event: { eventType: EventTypeNam
       if (isShort) {
         return startTime ? `>${formatTime(startTime, true)}` : getEventTypeShortDisplayName(eventType);
       }
-      return startTime ? `start: ${formatTime(startTime)}` : getEventTypeDisplayName(eventType);
+      return startTime ? `starts @ ${formatTime(startTime)}` : getEventTypeDisplayName(eventType);
 
     case "Ends Early":
       if (isShort) {
         return endTime ? `<${formatTime(endTime, true)}` : getEventTypeShortDisplayName(eventType);
       }
-      return endTime ? `end: ${formatTime(endTime)}` : getEventTypeDisplayName(eventType);
+      return endTime ? `ends @ ${formatTime(endTime)}` : getEventTypeDisplayName(eventType);
 
     case "Personal Appointment":
       if (startTime && endTime) {

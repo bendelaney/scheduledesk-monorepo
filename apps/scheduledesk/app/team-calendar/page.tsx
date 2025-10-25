@@ -2,6 +2,7 @@
 
 import React, {useEffect} from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { format, parseISO } from 'date-fns';
 import AppFrame from '@/components/AppFrame';
 import JobberReauthModal from '@/components/JobberReauthModal';
 import TeamCalendar from '@/components/TeamCalendar';
@@ -20,6 +21,11 @@ function TeamCalendarPageContent() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useSidebarState('sidebar:team-calendar', false);
 
+  // Format date from 'YYYY-MM-DD' to 'Month Day'
+  const formatDate = (dateStr: string): string => {
+    return format(parseISO(dateStr), 'MMMM d');
+  };
+
   // Use custom hook to get all data and handlers (now inside the provider)
   const {
     teamMembers,
@@ -29,14 +35,14 @@ function TeamCalendarPageContent() {
     needsJobberReauth,
     refetch,
     selectedTeamMembers,
-    handleSelectionChange,
-    handleTeamMemberFilter,
     showNewEventPopover,
     popoverIsSaveable,
     newEventData,
     popoverTarget,
     activeEvent,
     newEventButtonRef,
+    handleSelectionChange,
+    handleTeamMemberFilter,
     handleNewEventPopoverOpen,
     handleNewEventDataChange,
     handleEventClickFromGrid,
@@ -46,6 +52,8 @@ function TeamCalendarPageContent() {
     handleSaveEvent,
     handleDeleteEvent,
     setPopoverIsSaveable,
+    dayViewOpen,
+    selectedDates
   } = useTeamCalendarPageLogic();
 
   const handleNavigation = (path: string) => {
@@ -55,9 +63,7 @@ function TeamCalendarPageContent() {
   // 'n' key to create new event (Priority 20)
   useKeyboardShortcut(
     'n',
-    () => {
-      handleNewEventPopoverOpen();
-    },
+    () => { handleNewEventPopoverOpen(); },
     20,
     [handleNewEventPopoverOpen],
     { id: 'team-calendar-new-event' }
@@ -109,10 +115,9 @@ function TeamCalendarPageContent() {
           selectionMode="filter"
         />
       }
-      // sidebarOpen={false}
-      // sidebarWidth="240px"
     >
       <TeamCalendar
+        className={`${sidebarOpen ? 'with-sidebar' : 'full-width'} team-calendar-component ${dayViewOpen ? 'day-view-open' : ''}`}
         selectedTeamMembers={selectedTeamMembers}
         onSelectionChange={handleSelectionChange}
         onEventClick={handleEventClickFromGrid}
@@ -122,7 +127,15 @@ function TeamCalendarPageContent() {
         events={availabilityEvents}
         loading={loading}
         error={error || null}
+        selectedDates={selectedDates}
       />
+
+      {/* Day View */}
+      {dayViewOpen && (
+        <div className="day-view-panel">
+          <h2>{selectedDates[0] ? format(parseISO(selectedDates[0]), 'MMMM d') : ''}</h2>
+        </div>
+      )}
 
       {/* New Event Popover */}
       <CalendarPopover

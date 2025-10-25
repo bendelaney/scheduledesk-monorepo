@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { format, isSameDay as isSameDayFns, startOfDay, getMonth, getYear, getDaysInMonth as getDaysInMonthFns, getDay, getDate, addDays, subDays } from 'date-fns';
 import { AvailabilityEvent, TeamMember } from '@/types';
 import { getEventTypeColor, getEventTypeCalendarDisplayText } from '@/config/EventTypes';
 import AvailabilityEventsData from '@/data/availabilityEventsData';
@@ -8,7 +9,7 @@ import { AngleUp, AngleDown, CirclePlus } from '../Icons';
 import TeamMembersData from '@/data/teamMembersData';
 import './CalendarGrid.scss';
 
-// Calendar-specific types
+// Calendar-spfdecific types
 interface CalendarDay {
   date: string;
   day: number;
@@ -34,37 +35,33 @@ export interface CalendarGridProps {
   activeEvent?: AvailabilityEvent | null;
   showWeekends?: boolean;
   showTeamMemberName?: boolean;
+  selectedDates?: string[];
 }
 
 // Helper functions
 const formatDate = (date: Date): string => {
-  return date.toISOString().split('T')[0];
+  return format(date, 'yyyy-MM-dd');
 };
 
 const isSameDay = (date1: Date, date2: Date): boolean => {
-  return formatDate(date1) === formatDate(date2);
+  return isSameDayFns(date1, date2);
 };
 
 const getTodayInLocalTimezone = (): Date => {
-  const now = new Date();
-  // Create a new date using local date components to avoid timezone issues
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return startOfDay(new Date());
 };
 
 const getMonthName = (month: number): string => {
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-  return months[month];
+  const date = new Date(2000, month, 1);
+  return format(date, 'MMMM');
 };
 
 const getDaysInMonth = (year: number, month: number): number => {
-  return new Date(year, month + 1, 0).getDate();
+  return getDaysInMonthFns(new Date(year, month));
 };
 
 const getFirstDayOfMonth = (year: number, month: number): number => {
-  return new Date(year, month, 1).getDay();
+  return getDay(new Date(year, month, 1));
 };
 
 
@@ -74,25 +71,18 @@ class CalendarUtils {
     const today = getTodayInLocalTimezone();
     const daysInMonth = getDaysInMonth(year, month);
     const firstDayOfMonth = getFirstDayOfMonth(year, month);
-    
+
     const days: CalendarDay[] = [];
-    
-    // Add empty cells for days from previous month
-    let adjustedFirstDay = firstDayOfMonth;
-    if (!showWeekends) {
-      // Adjust for weekdays only (Mon=0, Tue=1, Wed=2, Thu=3, Fri=4)
-      // Sunday (0) becomes -1, Saturday (6) becomes 4
-      adjustedFirstDay = firstDayOfMonth === 0 ? -1 : firstDayOfMonth === 6 ? 4 : firstDayOfMonth - 1;
-    }
-    
+
     if (showWeekends) {
+      // Add empty cells for days from previous month
       for (let i = 0; i < firstDayOfMonth; i++) {
         const prevMonth = month === 0 ? 11 : month - 1;
         const prevYear = month === 0 ? year - 1 : year;
         const prevMonthDays = getDaysInMonth(prevYear, prevMonth);
         const day = prevMonthDays - firstDayOfMonth + i + 1;
         const date = new Date(prevYear, prevMonth, day);
-        
+
         days.push({
           date: formatDate(date),
           day,
@@ -101,61 +91,29 @@ class CalendarUtils {
           events: this.getEventsForDay(date, events)
         });
       }
-    } else {
-      // For weekdays only, add padding days from previous month if needed
-      if (adjustedFirstDay > 0) {
-        const prevMonth = month === 0 ? 11 : month - 1;
-        const prevYear = month === 0 ? year - 1 : year;
-        const prevMonthDays = getDaysInMonth(prevYear, prevMonth);
-        
-        for (let i = 0; i < adjustedFirstDay; i++) {
-          const day = prevMonthDays - adjustedFirstDay + i + 1;
-          const date = new Date(prevYear, prevMonth, day);
-          const dayOfWeek = date.getDay();
-          
-          // Only add weekdays
-          if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-            days.push({
-              date: formatDate(date),
-              day,
-              isCurrentMonth: false,
-              isToday: isSameDay(date, today),
-              events: this.getEventsForDay(date, events)
-            });
-          }
-        }
+
+      // Add days for current month
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+
+        days.push({
+          date: formatDate(date),
+          day,
+          isCurrentMonth: true,
+          isToday: isSameDay(date, today),
+          events: this.getEventsForDay(date, events)
+        });
       }
-    }
-    
-    // Add days for current month
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      const dayOfWeek = date.getDay();
-      
-      // Skip weekends if showWeekends is false
-      if (!showWeekends && (dayOfWeek === 0 || dayOfWeek === 6)) {
-        continue;
-      }
-      
-      days.push({
-        date: formatDate(date),
-        day,
-        isCurrentMonth: true,
-        isToday: isSameDay(date, today),
-        events: this.getEventsForDay(date, events)
-      });
-    }
-    
-    // Add days from next month to complete the last week
-    if (showWeekends) {
+
+      // Add days from next month to complete the last week
       const totalCells = Math.ceil(days.length / 7) * 7;
       const remainingCells = totalCells - days.length;
-      
+
       for (let day = 1; day <= remainingCells; day++) {
         const nextMonth = month === 11 ? 0 : month + 1;
         const nextYear = month === 11 ? year + 1 : year;
         const date = new Date(nextYear, nextMonth, day);
-        
+
         days.push({
           date: formatDate(date),
           day,
@@ -165,33 +123,53 @@ class CalendarUtils {
         });
       }
     } else {
-      // For weekdays only, complete to fill a 5-day week if needed
-      const totalCells = Math.ceil(days.length / 5) * 5;
-      const remainingCells = totalCells - days.length;
-      
-      let day = 1;
-      let addedCells = 0;
-      while (addedCells < remainingCells) {
-        const nextMonth = month === 11 ? 0 : month + 1;
-        const nextYear = month === 11 ? year + 1 : year;
-        const date = new Date(nextYear, nextMonth, day);
-        const dayOfWeek = date.getDay();
-        
-        // Only add weekdays
+      // For weekdays only, we need to ensure dates appear in correct columns
+      // and skip weeks that have no current-month weekdays
+
+      // Find the first weekday of the current month
+      let firstWeekdayOfMonth = new Date(year, month, 1);
+      while (getDay(firstWeekdayOfMonth) === 0 || getDay(firstWeekdayOfMonth) === 6) {
+        firstWeekdayOfMonth = addDays(firstWeekdayOfMonth, 1);
+      }
+
+      // Find the Monday of the week containing the first weekday
+      const firstWeekdayDayOfWeek = getDay(firstWeekdayOfMonth); // 1-5 (Mon-Fri)
+      const daysToMonday = firstWeekdayDayOfWeek - 1; // Mon=0 days back, Tue=1 day back, etc.
+      let currentDate = subDays(firstWeekdayOfMonth, daysToMonday);
+
+      // Find the last weekday of the current month
+      let lastWeekdayOfMonth = new Date(year, month, daysInMonth);
+      while (getDay(lastWeekdayOfMonth) === 0 || getDay(lastWeekdayOfMonth) === 6) {
+        lastWeekdayOfMonth = subDays(lastWeekdayOfMonth, 1);
+      }
+
+      // Find the Friday of the week containing the last weekday
+      const lastWeekdayDayOfWeek = getDay(lastWeekdayOfMonth); // 1-5 (Mon-Fri)
+      const daysToFriday = 5 - lastWeekdayDayOfWeek; // Mon=4 days forward, Tue=3, ..., Fri=0
+      const endDate = addDays(lastWeekdayOfMonth, daysToFriday);
+
+      // Iterate through dates, adding only weekdays
+      while (currentDate <= endDate) {
+        const dayOfWeek = getDay(currentDate);
+
+        // Only add weekdays (Mon-Fri)
         if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+          const isCurrentMonth = getMonth(currentDate) === month && getYear(currentDate) === year;
+
           days.push({
-            date: formatDate(date),
-            day,
-            isCurrentMonth: false,
-            isToday: isSameDay(date, today),
-            events: this.getEventsForDay(date, events)
+            date: formatDate(currentDate),
+            day: getDate(currentDate),
+            isCurrentMonth: isCurrentMonth,
+            isToday: isSameDay(currentDate, today),
+            events: this.getEventsForDay(currentDate, events)
           });
-          addedCells++;
         }
-        day++;
+
+        // Move to next day
+        currentDate = addDays(currentDate, 1);
       }
     }
-    
+
     return { year, month, days };
   }
   
@@ -217,7 +195,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   infiniteScroll = true,
   activeEvent = null,
   showWeekends = true,
-  showTeamMemberName = true
+  showTeamMemberName = true,
+  selectedDates = []
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [months, setMonths] = useState<CalendarMonth[]>([]);
@@ -231,8 +210,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   // Generate initial months with buffer for both directions
   const generateInitialMonths = useCallback(() => {
     const initialMonths: CalendarMonth[] = [];
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
+    const currentMonth = getMonth(currentDate);
+    const currentYear = getYear(currentDate);
     
     if (!infiniteScroll) {
       // For single month mode, only generate current month
@@ -492,8 +471,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
   // Function to scroll to current month for external use
   const scrollToCurrentMonth = useCallback(() => {
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
+    const currentMonth = getMonth(currentDate);
+    const currentYear = getYear(currentDate);
     scrollToMonth(currentYear, currentMonth);
   }, [currentDate, scrollToMonth]);
   
@@ -529,9 +508,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   // Scroll to current month only on initial load for infinite scroll mode
   useEffect(() => {
     if (infiniteScroll && months.length === 7 && containerRef.current) {
-      const currentMonth = currentDate.getMonth();
-      const currentYear = currentDate.getFullYear();
-      
+      const currentMonth = getMonth(currentDate);
+      const currentYear = getYear(currentDate);
+
       // Find the current month element and scroll to it smoothly (only on first load)
       setTimeout(() => {
         scrollToMonth(currentYear, currentMonth);
@@ -597,9 +576,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         key={event.id}
         className={`calendar-event calendar-event--${event.eventType.toLowerCase().replace(/\s+/g, '-')} ${isActive ? 'calendar-event--active' : ''} ${eventClasses.join(' ')}`}
         onClick={(e) => handleEventClick(event, e)}
-        title={`${event.teamMember.firstName} ${event.teamMember.lastName || ''}: ${event.eventType}${event.allDay ? '' : ` (${event.startTime} - ${event.endTime})`}${event.isInstance ? ' (recurring)' : ''}${event.isNormalSchedule ? ' (normal schedule)' : ''}`}
+        title={`${event.teamMember.firstName} ${event.teamMember.lastName || ''}: ${event.eventType} ${(event.startTime || event.endTime) ? `(${event.startTime} - ${event.endTime})` : ''}${event.isInstance ? '(recurring)' : ''}${event.isNormalSchedule ? '(normal schedule)' : ''}`}
         style={{
           color: eventColors.dark,
+          // this is a nice way to create a semi-transparent background based on the event type color
           background: `linear-gradient(rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.45)), ${eventColors.base}`,
         }}
       >
@@ -614,27 +594,33 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     );
   };
   
-  const renderDay = (day: CalendarDay) => (
-    <div
-      key={day.date}
-      className={`calendar-day ${day.isCurrentMonth ? 'calendar-day--current-month' : 'calendar-day--other-month'} ${day.isToday ? 'calendar-day--today' : ''}`}
-      onClick={() => handleDayClick(day)}
-    >
-      <div className="calendar-day__number"><span>{day.day}</span></div>
-      <div className="calendar-day__events">
-        {day.events.map(renderEvent)}
+  const renderDay = (day: CalendarDay) => {
+    const isSelected = selectedDates.includes(day.date);
+
+    return (
+      <div
+        key={day.date}
+        className={`calendar-day ${day.isCurrentMonth ? 'calendar-day--current-month' : 'calendar-day--other-month'} ${day.isToday ? 'calendar-day--today' : ''} ${isSelected ? 'calendar-day--selected' : ''}`}
+      >
+        <div className="calendar-day__header" onClick={() => handleDayClick(day)}>
+          <div className="calendar-day__number"><span>{day.day}</span></div>
+        </div>
+        <div className="calendar-day__events">
+          {day.isCurrentMonth && day.events.map(renderEvent)}
+        </div>
+
+        {onNewEventClick && day.isCurrentMonth && (
+          <button
+            className="calendar-day__new-event-button"
+            onClick={(e) => handleNewEventClick(day.date, e)}
+            title={`Add new event for ${day.date}`}
+          >
+            <CirclePlus />
+          </button>
+        )}
       </div>
-      {onNewEventClick && (
-        <button
-          className="calendar-day__new-event-button"
-          onClick={(e) => handleNewEventClick(day.date, e)}
-          title={`Add new event for ${day.date}`}
-        >
-          <CirclePlus />
-        </button>
-      )}
-    </div>
-  );
+    );
+  };
   
   const renderWeek = (days: CalendarDay[], weekIndex: number) => (
     <div key={weekIndex} className="calendar-week">

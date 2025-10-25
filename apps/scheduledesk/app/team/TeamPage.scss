@@ -1,5 +1,5 @@
 .team-page {
-  .main-content {
+  .app-frame__main-content {
     border-top: none !important;
   }
 
@@ -14,18 +14,17 @@
   }
 
   .team-member-id {
-
     &__avatar {
       width:  88px;
       height: 88px;
       border: 2px solid $medium-gray;
-
 
       &-image {
         width:  88px;
         height: 88px;
       }
     }
+
     &__name {
       font-size: 1.3rem;
       font-weight: 700;
@@ -39,15 +38,11 @@
 
   @media (max-width: 767px) {
     .team-grid {
-      // grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
       padding: 1.5rem;
       max-width: 90%;
-      // margin: 0 auto;
-
+ 
       .team-member-id {
-        // border: 1px solid red;
-
         &__avatar {
           width:  72px;
           height: 72px;

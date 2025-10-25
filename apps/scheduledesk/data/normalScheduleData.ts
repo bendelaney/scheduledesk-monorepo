@@ -1,4 +1,5 @@
 import { NormalSchedule, AvailabilityEvent, TeamMember } from '@/types';
+import { format } from 'date-fns';
 
 // Persistent storage for normal schedules using localStorage
 const STORAGE_KEY = 'normalSchedules';
@@ -70,7 +71,7 @@ export const getNormalSchedule = (teamMemberId: string): NormalSchedule | null =
 export const saveNormalSchedule = (schedule: NormalSchedule): void => {
   normalSchedulesStorage.set(schedule.teamMemberId, {
     ...schedule,
-    lastUpdated: new Date().toISOString()
+    lastUpdated: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx")
   });
   // Persist to localStorage after every save
   saveToStorage(normalSchedulesStorage);

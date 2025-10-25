@@ -1,4 +1,5 @@
 import { AvailabilityEvent } from '@/types';
+import { format, addWeeks, addMonths, addYears, differenceInMilliseconds, addMilliseconds, getYear, getMonth, startOfMonth, endOfMonth, subMonths, addMonths as addMonthsFns } from 'date-fns';
 
 /**
  * Simple recurrence expansion service
@@ -131,40 +132,30 @@ function getNextOccurrence(
   recurrence: string,
   monthlyRecurrence?: any
 ): Date {
-  const next = new Date(currentDate);
-
   switch (recurrence) {
     case 'Every Week':
-      // Use setTime() instead of setDate() to avoid month boundary issues
-      next.setTime(next.getTime() + (7 * 24 * 60 * 60 * 1000));
-      break;
+      return addWeeks(currentDate, 1);
 
     case 'Every Other Week':
-      // Use setTime() instead of setDate() to avoid month boundary issues
-      next.setTime(next.getTime() + (14 * 24 * 60 * 60 * 1000));
-      break;
+      return addWeeks(currentDate, 2);
 
     case 'Every Month':
       if (monthlyRecurrence?.type === 'Exact Date') {
         // Move to same date next month
-        next.setMonth(next.getMonth() + 1);
+        return addMonths(currentDate, 1);
       } else if (monthlyRecurrence?.type === 'Week & Day') {
         // Move to same week & day of next month (e.g., "2nd Tuesday")
-        next.setMonth(next.getMonth() + 1);
+        return addMonths(currentDate, 1);
         // This is simplified - real implementation would calculate nth weekday
       } else {
         // Default: same date next month
-        next.setMonth(next.getMonth() + 1);
+        return addMonths(currentDate, 1);
       }
-      break;
 
     default:
       // Unknown recurrence pattern, stop recurring
-      next.setFullYear(next.getFullYear() + 100); // Far future to break loop
-      break;
+      return addYears(currentDate, 100); // Far future to break loop
   }
-
-  return next;
 }
 
 /**
@@ -173,10 +164,10 @@ function getNextOccurrence(
 function calculateEndDate(newStartDate: string, originalStartDate: string, originalEndDate: string): string {
   const start = new Date(originalStartDate);
   const end = new Date(originalEndDate);
-  const duration = end.getTime() - start.getTime();
+  const duration = differenceInMilliseconds(end, start);
 
   const newStart = new Date(newStartDate);
-  const newEnd = new Date(newStart.getTime() + duration);
+  const newEnd = addMilliseconds(newStart, duration);
 
   return formatDate(newEnd);
 }
@@ -185,7 +176,7 @@ function calculateEndDate(newStartDate: string, originalStartDate: string, origi
  * Format date as YYYY-MM-DD
  */
 function formatDate(date: Date): string {
-  return date.toISOString().split('T')[0];
+  return format(date, 'yyyy-MM-dd');
 }
 
 /**
@@ -193,8 +184,8 @@ function formatDate(date: Date): string {
  */
 export const getDefaultExpansionRange = (): { startDate: string; endDate: string } => {
   const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 3, 0); // Last day of month +2
+  const start = startOfMonth(subMonths(now, 2));
+  const end = endOfMonth(addMonthsFns(now, 2));
 
   return {
     startDate: formatDate(start),

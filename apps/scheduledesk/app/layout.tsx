@@ -1,18 +1,8 @@
 import type { Metadata } from "next";
 import "./styles/fonts.scss";
 import "./styles/baseStyles.scss";
+import "./styles/scheduleDeskGlobal.scss";
 import { KeyboardShortcutProvider } from "@/contexts/KeyboardShortcutContext";
-
-////////////////////////////
-// How to do a local font:
-// const geistSans = localFont({
-//   src: "./fonts/GeistVF.woff",
-//   variable: "--font-geist-sans",
-// });
-// const geistMono = localFont({
-//   src: "./fonts/GeistMonoVF.woff",
-//   variable: "--font-geist-mono",
-// });
 
 export const metadata: Metadata = {
   title: "ScheduleDesk",

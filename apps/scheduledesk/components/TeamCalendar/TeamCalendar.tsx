@@ -15,6 +15,7 @@ interface TeamCalendarProps {
   onDayClick?: (date: string) => void;
   onNewEventClick?: (date: string, targetElement: HTMLElement) => void;
   activeEvent?: AvailabilityEvent | null;
+  selectedDates?: string[];
   // Required: parent must provide events and loading state
   events: AvailabilityEvent[];
   loading: boolean;
@@ -29,6 +30,7 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
   onDayClick,
   onNewEventClick,
   activeEvent,
+  selectedDates = [],
   events,
   loading,
   error
@@ -78,6 +80,7 @@ const TeamCalendar: React.FC<TeamCalendarProps> = ({
         activeEvent={activeEvent}
         className="team-calendar__grid"
         showWeekends={false}
+        selectedDates={selectedDates}
       />
     </div>
   );

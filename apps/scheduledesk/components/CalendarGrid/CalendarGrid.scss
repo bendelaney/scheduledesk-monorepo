@@ -190,7 +190,7 @@
   
   .calendar-day {
     min-height: 120px;
-    padding: 0 0.12rem 1.4rem;
+    padding: 0 0.12rem 1.8rem;
     // border-right: 1px solid #e5e7eb;
     transition: background-color 0.15s ease;
     position: relative;
@@ -203,9 +203,9 @@
       border-right: none;
     }
     
-    &:hover {
-      // background-color: #f9fafb;
-    }
+    // &:hover {
+    //   background-color: #f9fafb;
+    // }
     
     &--current-month {
       background-color: #fff;
@@ -218,6 +218,19 @@
       }
     }
     
+    &__header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-radius: 8px;
+
+      &:hover {
+        background-color: color-mix(in srgb, $primary-blue 10%, #fff 90%);
+      }
+    }
+
     &__number {
       font-size: 1.1rem;
       font-weight: 700;
@@ -247,6 +260,21 @@
       }
     }
 
+    &--selected {
+      background-color: color-mix(in srgb, $primary-blue 15%, #fff 85%);
+      border: 3px solid $primary-blue;
+      border-radius: 8px;
+
+      .calendar-day__header {
+        background-color: transparent;
+      }
+
+      .calendar-day__number {
+        color: $primary-blue;
+        font-weight: 900;
+      }
+    }
+
     &__events {
       display: flex;
       flex-direction: column;
@@ -257,21 +285,21 @@
 
     &__new-event-button {
       position: absolute;
-      bottom: 0rem;
+      bottom: 0.5rem;
       left: 50%;
-      transition: all 0.15s ease;
+      transition: all 0.2s ease-out;
       transform: translateX(-50%);
       background: transparent;
       border: none;
       cursor: pointer;
       padding: 0;
       color: $light-gray;
-      opacity: 1;
-      font-size: 1.7rem;
+      font-size: 1.5rem;
+      line-height: 0;
       
       &:hover {
         color: $medium-dark-gray;
-        transform: translateX(-50%) scale(1.2);
+        transform: translateX(-50%) translateY(-5px) scale(1.3);
       }
     }
 

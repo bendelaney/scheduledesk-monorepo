@@ -8,6 +8,7 @@ import {
   TeamMember,
   JobVisitConfirmationStatus
 } from '@/types';
+import { format, parseISO, addDays } from 'date-fns';
 import APP_SETTINGS from '@/data/appSettings';
 
 interface JobberVisitNode {
@@ -96,29 +97,29 @@ export function transformJobberToScheduleDocument(
   
   // Group visits by date and populate job queue
   visits.forEach(visit => {
-    const visitDate = new Date(visit.startAt);
-    const dateKey = visitDate.toISOString().split('T')[0];
-    const dateName = visitDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
-    
+    const visitDate = parseISO(visit.startAt);
+    const dateKey = format(visitDate, 'yyyy-MM-dd');
+    const dateName = format(visitDate, 'EEEE');
+
     // Add to job queue if it matches the configured job queue day (e.g., Sunday)
     if (dateName === APP_SETTINGS.jobQueueDay) {
       jobQueue.push(transformJobberVisitToJobVisit(visit));
     }
-    
+
     if (!visitsByDate.has(dateKey)) {
       visitsByDate.set(dateKey, []);
     }
     visitsByDate.get(dateKey)!.push(visit);
   });
-  
+
   // Create ScheduleDays for each date in range
   const scheduleDays: ScheduleDay[] = [];
-  const currentDate = new Date(startDate);
-  
+  let currentDate = new Date(startDate);
+
   while (currentDate <= endDate) {
-    const dateKey = currentDate.toISOString().split('T')[0];
+    const dateKey = format(currentDate, 'yyyy-MM-dd');
     const dayVisits = visitsByDate.get(dateKey) || [];
-    
+
     scheduleDays.push({
       id: `day-${dateKey}`,
       name: formatDayName(currentDate),
@@ -126,17 +127,17 @@ export function transformJobberToScheduleDocument(
       shortDate: formatShortDate(currentDate),
       jobVisits: dayVisits.map(transformJobberVisitToJobVisit)
     });
-    
-    currentDate.setDate(currentDate.getDate() + 1);
+
+    currentDate = addDays(currentDate, 1);
   }
-  
+
   return {
-    id: `schedule-${startDate.toISOString()}-${endDate.toISOString()}`,
+    id: `schedule-${format(startDate, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx")}-${format(endDate, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx")}`,
     title: `Schedule ${formatDateRange(startDate, endDate)}`,
-    date_created: new Date().toISOString(),
-    date_modified: new Date().toISOString(),
-    dateRangeStart: startDate.toISOString(),
-    dateRangeEnd: endDate.toISOString(),
+    date_created: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
+    date_modified: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
+    dateRangeStart: format(startDate, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
+    dateRangeEnd: format(endDate, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
     scheduleDays,
     jobQueue
   };
@@ -198,7 +199,7 @@ function transformJobberVisitToJobVisit(visit: JobberVisitNode): JobVisit {
     id: visit.id,
     jobNumber: visit.job?.jobNumber || 0,
     title: visit.title,
-    date: startDate.toISOString().split('T')[0],
+    date: format(startDate, 'yyyy-MM-dd'),
     shortDate: formatShortDate(startDate),
     dayName: formatDayName(startDate),
     startTime: formatTime(startDate),
@@ -223,23 +224,20 @@ function transformJobberVisitToJobVisit(visit: JobberVisitNode): JobVisit {
  * Format helpers
  */
 function formatDayName(date: Date): string {
-  return date.toLocaleDateString('en-US', { weekday: 'long' });
+  return format(date, 'EEEE');
 }
 
 function formatShortDate(date: Date): string {
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return format(date, 'MMM d');
 }
 
 function formatTime(date: Date): string {
   // Return time in HH:mm:ss format (24-hour) for TimeRangeSelectMenu
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const seconds = date.getSeconds().toString().padStart(2, '0');
-  return `${hours}:${minutes}:${seconds}`;
+  return format(date, 'HH:mm:ss');
 }
 
 function formatDateRange(start: Date, end: Date): string {
-  const startStr = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  const endStr = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const startStr = format(start, 'MMM d');
+  const endStr = format(end, 'MMM d, yyyy');
   return `${startStr} - ${endStr}`;
 }
